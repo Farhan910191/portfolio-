@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+export const dynamic = "force-static";
+
 const GITHUB_API = "https://api.github.com";
 
 function githubHeaders() {
