@@ -12,6 +12,7 @@ import {
   ArrowUpRight,
   Terminal,
 } from "lucide-react";
+import { motion, type Variants } from "framer-motion";
 
 import {
   FormEvent,
@@ -26,13 +27,12 @@ import {
 } from "react-icons/fa";
 
 import emailjs from "@emailjs/browser";
-import { motion } from "framer-motion";
 
 // ======================================================
 // ANIMATIONS
 // ======================================================
 
-const leftVariants = {
+const leftVariants: Variants = {
   hidden: {
     opacity: 0,
     x: -45,
@@ -45,12 +45,12 @@ const leftVariants = {
     filter: "blur(0px)",
     transition: {
       duration: 0.7,
-      ease: [0.22, 1, 0.36, 1],
+      ease: "easeOut",
     },
   },
 };
 
-const rightVariants = {
+const rightVariants: Variants = {
   hidden: {
     opacity: 0,
     x: 45,
@@ -64,12 +64,12 @@ const rightVariants = {
     transition: {
       duration: 0.7,
       delay: 0.1,
-      ease: [0.22, 1, 0.36, 1],
+      ease: "easeOut",
     },
   },
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: {
     opacity: 0,
     y: 20,
@@ -80,7 +80,7 @@ const itemVariants = {
     y: 0,
     transition: {
       duration: 0.45,
-      ease: [0.22, 1, 0.36, 1],
+      ease: "easeOut",
     },
   },
 };

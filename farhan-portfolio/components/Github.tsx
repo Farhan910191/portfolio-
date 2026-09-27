@@ -14,7 +14,7 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import { FaGithub } from "react-icons/fa";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 // ======================================================
@@ -93,7 +93,7 @@ interface ActivityDay {
 // ANIMATION
 // ======================================================
 
-const headerVariants = {
+const headerVariants: Variants = {
   hidden: {
     opacity: 0,
     y: 40,
@@ -121,7 +121,7 @@ const containerVariants = {
   },
 };
 
-const cardVariants = {
+const cardVariants: Variants = {
   hidden: {
     opacity: 0,
     y: 40,

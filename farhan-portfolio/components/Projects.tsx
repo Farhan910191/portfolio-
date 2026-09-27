@@ -9,8 +9,7 @@ import {
 
 import { FaGithub } from "react-icons/fa";
 
-import { motion } from "framer-motion";
-
+import { motion, type Variants } from "framer-motion";
 // ======================================================
 // PROJECT DATA
 // ======================================================
@@ -121,7 +120,7 @@ const projects = [
 // ANIMATIONS
 // ======================================================
 
-const headerVariants = {
+const headerVariants: Variants = {
   hidden: {
     opacity: 0,
     y: 30,
@@ -140,7 +139,7 @@ const headerVariants = {
   },
 };
 
-const cardVariants = {
+const cardVariants: Variants = {
   hidden: {
     opacity: 0,
     y: 55,

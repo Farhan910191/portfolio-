@@ -9,7 +9,7 @@ import {
   Workflow,
   ArrowUpRight,
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 
 const services = [
   {
@@ -50,7 +50,7 @@ const services = [
   },
 ];
 
-const headerVariants = {
+const headerVariants: Variants = {
   hidden: {
     opacity: 0,
     y: 40,
@@ -67,7 +67,7 @@ const headerVariants = {
   },
 };
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: {},
   visible: {
     transition: {
@@ -76,7 +76,7 @@ const containerVariants = {
   },
 };
 
-const cardVariants = {
+const cardVariants: Variants = {
   hidden: {
     opacity: 0,
     y: 55,
