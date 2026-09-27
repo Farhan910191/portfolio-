@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import {
   Quote,
   Star,
@@ -33,10 +33,10 @@ const testimonials = [
 // ANIMATIONS
 // ======================================================
 
-const headerVariants = {
+const headerVariants: Variants = {
   hidden: {
     opacity: 0,
-    y: 40,
+    y: 30,
     filter: "blur(8px)",
   },
 
@@ -45,13 +45,13 @@ const headerVariants = {
     y: 0,
     filter: "blur(0px)",
     transition: {
-      duration: 0.7,
+      duration: 0.65,
       ease: [0.22, 1, 0.36, 1],
     },
   },
 };
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: {},
 
   visible: {
@@ -61,11 +61,11 @@ const containerVariants = {
   },
 };
 
-const cardVariants = {
+const cardVariants: Variants = {
   hidden: {
     opacity: 0,
-    y: 55,
-    scale: 0.96,
+    y: 40,
+    scale: 0.97,
   },
 
   visible: {
@@ -74,6 +74,38 @@ const cardVariants = {
     scale: 1,
     transition: {
       duration: 0.65,
+      ease: [0.22, 1, 0.36, 1],
+    },
+  },
+};
+
+const footerVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    y: 20,
+  },
+
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.55,
+      ease: [0.22, 1, 0.36, 1],
+    },
+  },
+};
+
+const starVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    scale: 0.5,
+  },
+
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: {
+      duration: 0.25,
       ease: [0.22, 1, 0.36, 1],
     },
   },
@@ -89,14 +121,29 @@ export default function Testimonials() {
       id="testimonials"
       className="
         relative
+        w-full
+        min-w-0
+        overflow-hidden
         border-t
         border-white/[0.05]
-        py-28
-        sm:py-36
+        py-20
+        sm:py-24
+        lg:py-28
       "
     >
-      <div className="container-custom">
-
+      <div
+        className="
+          mx-auto
+          w-full
+          max-w-7xl
+          min-w-0
+          px-4
+          sm:px-6
+          md:px-8
+          lg:px-10
+          xl:px-12
+        "
+      >
         {/* =================================================
             HEADER
         ================================================== */}
@@ -106,28 +153,56 @@ export default function Testimonials() {
           initial="hidden"
           whileInView="visible"
           viewport={{
-            once: true,
+            once: false,
             amount: 0.25,
           }}
+          className="min-w-0"
         >
-          <div className="flex items-center gap-3">
-            <span className="h-px w-8 bg-[#39ff88]" />
+          {/* Section label */}
 
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[#39ff88]">
+          <div className="flex items-center gap-3">
+            <span className="h-px w-7 shrink-0 bg-[#39ff88] sm:w-8" />
+
+            <p
+              className="
+                text-[10px]
+                font-semibold
+                uppercase
+                tracking-[0.2em]
+                text-[#39ff88]
+                sm:text-xs
+                sm:tracking-[0.3em]
+              "
+            >
               09 — Testimonials
             </p>
           </div>
 
-          <div className="mt-5 flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
+          {/* Heading + developer label */}
 
-            <div>
+          <div
+            className="
+              mt-4
+              flex
+              flex-col
+              justify-between
+              gap-5
+              sm:mt-5
+              lg:flex-row
+              lg:items-end
+            "
+          >
+            <div className="min-w-0">
               <h2
                 className="
-                  text-4xl
+                  max-w-3xl
+                  text-3xl
                   font-bold
-                  leading-tight
+                  leading-[1.08]
+                  tracking-tight
                   text-white
-                  sm:text-5xl
+                  sm:text-4xl
+                  md:text-5xl
                   lg:text-6xl
                 "
               >
@@ -137,7 +212,18 @@ export default function Testimonials() {
                 </span>
               </h2>
 
-              <p className="mt-5 max-w-2xl leading-8 text-gray-500">
+              <p
+                className="
+                  mt-4
+                  max-w-2xl
+                  text-sm
+                  leading-7
+                  text-gray-500
+                  sm:mt-5
+                  sm:text-base
+                  sm:leading-8
+                "
+              >
                 Feedback from people I have worked with,
                 learned from, and collaborated with.
               </p>
@@ -148,10 +234,11 @@ export default function Testimonials() {
             <div
               className="
                 hidden
+                shrink-0
                 items-center
                 gap-2
                 font-mono
-                text-xs
+                text-[10px]
                 text-gray-700
                 lg:flex
               "
@@ -164,7 +251,6 @@ export default function Testimonials() {
                 real experiences
               </span>
             </div>
-
           </div>
         </motion.div>
 
@@ -177,264 +263,314 @@ export default function Testimonials() {
           initial="hidden"
           whileInView="visible"
           viewport={{
-            once: true,
-            amount: 0.15,
+            once: false,
+            amount: 0.12,
           }}
           className="
-            mt-14
+            mt-10
             grid
-            gap-5
+            min-w-0
+            grid-cols-1
+            gap-4
+            sm:mt-12
+            sm:gap-5
+            md:grid-cols-2
             lg:grid-cols-3
           "
         >
+          {testimonials.map((testimonial, index) => (
+            <motion.article
+              key={testimonial.name}
+              variants={cardVariants}
+              whileHover={{
+                y: -6,
+                transition: {
+                  duration: 0.25,
+                },
+              }}
+              className="
+                group
+                relative
+                flex
+                min-w-0
+                w-full
+                flex-col
+                overflow-hidden
+                rounded-2xl
+                border
+                border-white/[0.08]
+                bg-[#111113]/75
+                p-5
+                backdrop-blur-xl
+                transition-all
+                duration-500
+                hover:border-[#39ff88]/30
+                hover:bg-[#151518]/85
+                hover:shadow-[0_15px_50px_rgba(0,0,0,0.35)]
+                sm:rounded-3xl
+                sm:p-6
+                lg:p-7
+              "
+            >
+              {/* =========================================
+                  CARD GLOW
+              ========================================== */}
 
-          {testimonials.map(
-            (testimonial, index) => (
-              <motion.article
-                key={testimonial.name}
-                variants={cardVariants}
-                whileHover={{
-                  y: -8,
-                  transition: {
-                    duration: 0.25,
-                  },
-                }}
+              <div
                 className="
-                  group
-                  relative
-                  overflow-hidden
-                  rounded-3xl
-                  border
-                  border-white/[0.08]
-                  bg-[#111113]/65
-                  p-7
-                  backdrop-blur-xl
+                  pointer-events-none
+                  absolute
+                  -right-20
+                  -top-20
+                  h-40
+                  w-40
+                  rounded-full
+                  bg-[#39ff88]/[0.035]
+                  blur-[70px]
                   transition-all
-                  duration-500
-                  hover:border-[#39ff88]/30
-                  hover:shadow-[0_15px_50px_rgba(0,0,0,0.35)]
+                  duration-700
+                  group-hover:bg-[#39ff88]/[0.09]
                 "
-              >
+              />
 
-                {/* =========================================
-                    CARD GLOW
-                ========================================== */}
+              {/* =========================================
+                  TOP SHINE
+              ========================================== */}
 
-                <div
+              <div
+                className="
+                  pointer-events-none
+                  absolute
+                  left-1/2
+                  top-0
+                  h-px
+                  w-0
+                  -translate-x-1/2
+                  bg-[#39ff88]
+                  shadow-[0_0_15px_rgba(57,255,136,0.8)]
+                  transition-all
+                  duration-700
+                  group-hover:w-2/3
+                "
+              />
+
+              {/* =========================================
+                  CARD TOP
+              ========================================== */}
+
+              <div className="relative flex items-start justify-between">
+                <motion.div
+                  whileHover={{
+                    rotate: 5,
+                    scale: 1.06,
+                  }}
+                  transition={{
+                    duration: 0.25,
+                  }}
                   className="
-                    pointer-events-none
-                    absolute
-                    -right-20
-                    -top-20
-                    h-40
-                    w-40
-                    rounded-full
-                    bg-[#39ff88]/[0.045]
-                    blur-[70px]
+                    flex
+                    h-11
+                    w-11
+                    shrink-0
+                    items-center
+                    justify-center
+                    rounded-xl
+                    border
+                    border-[#39ff88]/15
+                    bg-[#39ff88]/5
+                    text-[#39ff88]
                     transition-all
-                    duration-700
-                    group-hover:bg-[#39ff88]/[0.08]
+                    duration-300
+                    group-hover:border-[#39ff88]/40
+                    group-hover:bg-[#39ff88]/10
+                    group-hover:shadow-[0_0_25px_rgba(57,255,136,0.1)]
+                    sm:h-12
+                    sm:w-12
+                    sm:rounded-2xl
                   "
-                />
+                >
+                  <Quote
+                    size={20}
+                    className="sm:h-[22px] sm:w-[22px]"
+                  />
+                </motion.div>
 
-                {/* =========================================
-                    TOP NUMBER
-                ========================================== */}
+                <span
+                  className="
+                    font-mono
+                    text-[10px]
+                    text-gray-700
+                    transition-colors
+                    duration-300
+                    group-hover:text-[#39ff88]/50
+                    sm:text-xs
+                  "
+                >
+                  0{index + 1}
+                </span>
+              </div>
 
-                <div className="relative flex items-start justify-between">
+              {/* =========================================
+                  STARS
+              ========================================== */}
 
-                  <div
-                    className="
-                      flex
-                      h-12
-                      w-12
-                      items-center
-                      justify-center
-                      rounded-2xl
-                      border
-                      border-[#39ff88]/15
-                      bg-[#39ff88]/5
-                      text-[#39ff88]
-                      transition-all
-                      duration-300
-                      group-hover:border-[#39ff88]/40
-                      group-hover:bg-[#39ff88]/10
-                    "
-                  >
-                    <Quote size={22} />
-                  </div>
-
-                  <span
-                    className="
-                      font-mono
-                      text-xs
-                      text-gray-700
-                      transition-colors
-                      duration-300
-                      group-hover:text-[#39ff88]/50
-                    "
-                  >
-                    0{index + 1}
-                  </span>
-
-                </div>
-
-                {/* =========================================
-                    STARS
-                ========================================== */}
-
-                <div className="relative mt-7 flex gap-1">
-
-                  {Array.from({
-                    length: 5,
-                  }).map((_, starIndex) => (
+              <motion.div
+                variants={containerVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{
+                  once: false,
+                  amount: 0.5,
+                }}
+                className="relative mt-6 flex gap-1"
+              >
+                {Array.from({ length: 5 }).map(
+                  (_, starIndex) => (
                     <motion.div
                       key={starIndex}
-                      initial={{
-                        opacity: 0,
-                        scale: 0.5,
-                      }}
-                      whileInView={{
-                        opacity: 1,
-                        scale: 1,
-                      }}
-                      viewport={{
-                        once: true,
-                      }}
+                      variants={starVariants}
                       transition={{
-                        duration: 0.25,
                         delay:
-                          index * 0.12 +
-                          starIndex * 0.06,
+                          index * 0.1 +
+                          starIndex * 0.05,
                       }}
                     >
                       <Star
-                        size={15}
+                        size={14}
                         fill="currentColor"
                         className="
                           text-[#39ff88]
                           transition-transform
                           duration-300
                           group-hover:scale-110
+                          sm:h-[15px]
+                          sm:w-[15px]
                         "
                       />
                     </motion.div>
-                  ))}
+                  )
+                )}
+              </motion.div>
 
-                </div>
+              {/* =========================================
+                  QUOTE
+              ========================================== */}
 
-                {/* =========================================
-                    TEXT
-                ========================================== */}
+              <p
+                className="
+                  relative
+                  mt-5
+                  min-h-[105px]
+                  text-sm
+                  leading-6
+                  text-gray-500
+                  sm:mt-6
+                  sm:min-h-[115px]
+                  sm:text-base
+                  sm:leading-7
+                "
+              >
+                <span className="text-xl text-[#39ff88]/30">
+                  “
+                </span>
 
-                <p
-                  className="
-                    relative
-                    mt-6
-                    min-h-[120px]
-                    leading-7
-                    text-gray-500
-                  "
-                >
-                  &ldquo;
-                  {testimonial.text}
-                  &rdquo;
-                </p>
+                {testimonial.text}
 
-                {/* =========================================
-                    PERSON
-                ========================================== */}
+                <span className="text-xl text-[#39ff88]/30">
+                  ”
+                </span>
+              </p>
 
-                <div
-                  className="
-                    relative
-                    mt-7
-                    border-t
-                    border-white/[0.06]
-                    pt-5
-                  "
-                >
+              {/* =========================================
+                  PERSON
+              ========================================== */}
 
-                  <div className="flex items-center justify-between gap-4">
+              <div
+                className="
+                  relative
+                  mt-6
+                  border-t
+                  border-white/[0.06]
+                  pt-5
+                "
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex min-w-0 items-center gap-3">
+                    {/* Avatar */}
 
-                    <div className="flex items-center gap-4">
-
-                      {/* Avatar */}
-
-                      <div
-                        className="
-                          flex
-                          h-11
-                          w-11
-                          shrink-0
-                          items-center
-                          justify-center
-                          rounded-full
-                          border
-                          border-[#39ff88]/15
-                          bg-[#39ff88]/10
-                          font-semibold
-                          text-[#39ff88]
-                          transition-all
-                          duration-300
-                          group-hover:border-[#39ff88]/40
-                          group-hover:shadow-[0_0_20px_rgba(57,255,136,0.12)]
-                        "
-                      >
-                        {testimonial.name.charAt(0)}
-                      </div>
-
-                      <div>
-                        <p className="font-semibold text-white">
-                          {testimonial.name}
-                        </p>
-
-                        <p className="mt-1 text-sm text-gray-600">
-                          {testimonial.role}
-                        </p>
-                      </div>
-
-                    </div>
-
-                    <ArrowUpRight
-                      size={18}
+                    <div
                       className="
-                        text-gray-700
+                        flex
+                        h-10
+                        w-10
+                        shrink-0
+                        items-center
+                        justify-center
+                        rounded-full
+                        border
+                        border-[#39ff88]/15
+                        bg-[#39ff88]/10
+                        font-semibold
+                        text-[#39ff88]
                         transition-all
                         duration-300
-                        group-hover:-translate-y-1
-                        group-hover:translate-x-1
-                        group-hover:text-[#39ff88]
+                        group-hover:border-[#39ff88]/40
+                        group-hover:shadow-[0_0_20px_rgba(57,255,136,0.12)]
+                        sm:h-11
+                        sm:w-11
                       "
-                    />
+                    >
+                      {testimonial.name.charAt(0)}
+                    </div>
 
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-white sm:text-base">
+                        {testimonial.name}
+                      </p>
+
+                      <p className="mt-0.5 truncate text-[10px] text-gray-600 sm:mt-1 sm:text-xs">
+                        {testimonial.role}
+                      </p>
+                    </div>
                   </div>
 
+                  <ArrowUpRight
+                    size={16}
+                    className="
+                      shrink-0
+                      text-gray-700
+                      transition-all
+                      duration-300
+                      group-hover:-translate-y-1
+                      group-hover:translate-x-1
+                      group-hover:text-[#39ff88]
+                      sm:h-[18px]
+                      sm:w-[18px]
+                    "
+                  />
                 </div>
+              </div>
 
-                {/* =========================================
-                    BOTTOM GREEN LINE
-                ========================================== */}
+              {/* =========================================
+                  BOTTOM GREEN LINE
+              ========================================== */}
 
-                <div
-                  className="
-                    absolute
-                    bottom-0
-                    left-0
-                    h-px
-                    w-0
-                    bg-[#39ff88]
-                    shadow-[0_0_18px_rgba(57,255,136,0.7)]
-                    transition-all
-                    duration-700
-                    group-hover:w-full
-                  "
-                />
-
-              </motion.article>
-            )
-          )}
-
+              <div
+                className="
+                  absolute
+                  bottom-0
+                  left-0
+                  h-px
+                  w-0
+                  bg-[#39ff88]
+                  shadow-[0_0_18px_rgba(57,255,136,0.7)]
+                  transition-all
+                  duration-700
+                  group-hover:w-full
+                "
+              />
+            </motion.article>
+          ))}
         </motion.div>
 
         {/* =================================================
@@ -442,30 +578,27 @@ export default function Testimonials() {
         ================================================== */}
 
         <motion.div
-          initial={{
-            opacity: 0,
-            y: 25,
-          }}
-          whileInView={{
-            opacity: 1,
-            y: 0,
-          }}
+          variants={footerVariants}
+          initial="hidden"
+          whileInView="visible"
           viewport={{
-            once: true,
+            once: false,
             amount: 0.5,
           }}
-          transition={{
-            duration: 0.6,
-          }}
           className="
-            mt-12
+            mt-9
             flex
+            flex-wrap
             items-center
             justify-center
-            gap-3
+            gap-2
+            text-center
             font-mono
-            text-xs
+            text-[10px]
             text-gray-700
+            sm:mt-10
+            sm:gap-3
+            sm:text-xs
           "
         >
           <span className="text-[#39ff88]/50">
@@ -480,7 +613,6 @@ export default function Testimonials() {
             {"</>"}
           </span>
         </motion.div>
-
       </div>
     </section>
   );

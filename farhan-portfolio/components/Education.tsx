@@ -4,8 +4,9 @@ import {
   GraduationCap,
   ArrowUpRight,
   BookOpen,
+  CalendarDays,
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 
 const education = [
   {
@@ -13,28 +14,29 @@ const education = [
     institution:
       "University of Calicut — PPTM Arts and Science College",
     date: "2022 — 2025",
+    type: "Undergraduate Degree",
   },
   {
     degree: "Higher Secondary — Humanities",
-    institution:
-      "DHSE Kerala — IUHSS Parappur",
+    institution: "DHSE Kerala — IUHSS Parappur",
     date: "2020 — 2022",
+    type: "Higher Secondary",
   },
 ];
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: {},
   visible: {
     transition: {
-      staggerChildren: 0.15,
+      staggerChildren: 0.12,
     },
   },
 };
 
-const headerVariants = {
+const headerVariants: Variants = {
   hidden: {
     opacity: 0,
-    y: 40,
+    y: 35,
     filter: "blur(8px)",
   },
   visible: {
@@ -48,11 +50,11 @@ const headerVariants = {
   },
 };
 
-const cardVariants = {
+const cardVariants: Variants = {
   hidden: {
     opacity: 0,
-    y: 55,
-    scale: 0.96,
+    y: 45,
+    scale: 0.97,
   },
   visible: {
     opacity: 1,
@@ -65,67 +67,153 @@ const cardVariants = {
   },
 };
 
+const footerVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    y: 20,
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.6,
+      ease: [0.22, 1, 0.36, 1],
+    },
+  },
+};
+
 export default function Education() {
   return (
     <section
       id="education"
-      className="relative border-t border-white/[0.05] py-28 sm:py-36"
+      className="
+        relative
+        w-full
+        min-w-0
+        overflow-hidden
+        border-t
+        border-white/[0.05]
+        py-20
+        sm:py-24
+        lg:py-28
+      "
     >
-      <div className="container-custom">
-
-        {/* =================================
+      <div
+        className="
+          mx-auto
+          w-full
+          max-w-7xl
+          min-w-0
+          px-4
+          sm:px-6
+          md:px-8
+          lg:px-10
+          xl:px-12
+        "
+      >
+        {/* =========================================
             SECTION HEADER
-        ================================== */}
+        ========================================== */}
 
         <motion.div
           variants={headerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{
-            once: true,
+            once: false,
             amount: 0.25,
           }}
+          className="min-w-0"
         >
-          <div className="flex items-center gap-3">
-            <span className="h-px w-8 bg-[#39ff88]" />
+          {/* Label */}
 
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[#39ff88]">
+          <div className="flex items-center gap-3">
+            <span className="h-px w-7 shrink-0 bg-[#39ff88] sm:w-8" />
+
+            <p
+              className="
+                text-[10px]
+                font-semibold
+                uppercase
+                tracking-[0.2em]
+                text-[#39ff88]
+                sm:text-xs
+                sm:tracking-[0.3em]
+              "
+            >
               05 — Education
             </p>
           </div>
 
-          <h2 className="mt-5 text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl">
+          {/* Heading */}
+
+          <h2
+            className="
+              mt-4
+              max-w-3xl
+              text-3xl
+              font-bold
+              leading-[1.08]
+              tracking-tight
+              text-white
+              sm:mt-5
+              sm:text-4xl
+              md:text-5xl
+              lg:text-6xl
+            "
+          >
             Academic{" "}
             <span className="text-[#39ff88]">
               background.
             </span>
           </h2>
 
-          <p className="mt-5 max-w-2xl leading-8 text-gray-500">
+          {/* Description */}
+
+          <p
+            className="
+              mt-4
+              max-w-2xl
+              text-sm
+              leading-7
+              text-gray-500
+              sm:mt-5
+              sm:text-base
+              sm:leading-8
+            "
+          >
             My academic journey and educational foundation.
           </p>
         </motion.div>
 
-        {/* =================================
+        {/* =========================================
             EDUCATION CARDS
-        ================================== */}
+        ========================================== */}
 
         <motion.div
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{
-            once: true,
-            amount: 0.15,
+            once: false,
+            amount: 0.12,
           }}
-          className="mt-14 grid gap-5 md:grid-cols-2"
+          className="
+            mt-10
+            grid
+            grid-cols-1
+            gap-4
+            sm:mt-12
+            sm:gap-5
+            lg:grid-cols-2
+          "
         >
           {education.map((item, index) => (
             <motion.article
               key={item.degree}
               variants={cardVariants}
               whileHover={{
-                y: -7,
+                y: -6,
                 transition: {
                   duration: 0.25,
                 },
@@ -133,24 +221,29 @@ export default function Education() {
               className="
                 group
                 relative
+                flex
+                min-w-0
+                w-full
+                flex-col
                 overflow-hidden
-                rounded-3xl
+                rounded-2xl
                 border
                 border-white/[0.08]
-                bg-[#111113]/65
-                p-7
+                bg-[#111113]/75
+                p-5
                 backdrop-blur-xl
                 transition-all
                 duration-500
                 hover:border-[#39ff88]/30
-                hover:bg-[#151518]/75
-                sm:p-8
+                hover:bg-[#151518]/85
+                sm:rounded-3xl
+                sm:p-6
+                lg:p-7
               "
             >
-
-              {/* =================================
-                  CARD GLOW
-              ================================== */}
+              {/* =====================================
+                  BACKGROUND GLOW
+              ====================================== */}
 
               <div
                 className="
@@ -169,43 +262,71 @@ export default function Education() {
                 "
               />
 
-              {/* =================================
+              {/* =====================================
+                  TOP SHINE
+              ====================================== */}
+
+              <div
+                className="
+                  pointer-events-none
+                  absolute
+                  left-1/2
+                  top-0
+                  h-px
+                  w-0
+                  -translate-x-1/2
+                  bg-[#39ff88]
+                  shadow-[0_0_15px_rgba(57,255,136,0.8)]
+                  transition-all
+                  duration-700
+                  group-hover:w-2/3
+                "
+              />
+
+              {/* =====================================
                   CARD NUMBER
-              ================================== */}
+              ====================================== */}
 
               <span
                 className="
                   absolute
-                  right-7
-                  top-7
+                  right-5
+                  top-5
                   font-mono
-                  text-xs
+                  text-[10px]
                   text-gray-700
                   transition-colors
                   duration-300
-                  group-hover:text-[#39ff88]/40
+                  group-hover:text-[#39ff88]/50
+                  sm:right-7
+                  sm:top-7
+                  sm:text-xs
                 "
               >
                 0{index + 1}
               </span>
 
-              {/* =================================
+              {/* =====================================
                   ICON
-              ================================== */}
+              ====================================== */}
 
               <motion.div
                 whileHover={{
                   rotate: 5,
-                  scale: 1.08,
+                  scale: 1.06,
+                }}
+                transition={{
+                  duration: 0.25,
                 }}
                 className="
                   relative
                   flex
-                  h-14
-                  w-14
+                  h-12
+                  w-12
+                  shrink-0
                   items-center
                   justify-center
-                  rounded-2xl
+                  rounded-xl
                   border
                   border-[#39ff88]/10
                   bg-[#39ff88]/[0.07]
@@ -214,84 +335,170 @@ export default function Education() {
                   duration-500
                   group-hover:border-[#39ff88]/30
                   group-hover:bg-[#39ff88]/10
-                  group-hover:shadow-[0_0_30px_rgba(57,255,136,0.12)]
+                  group-hover:shadow-[0_0_30px_rgba(57,255,136,0.13)]
+                  sm:h-14
+                  sm:w-14
+                  sm:rounded-2xl
                 "
               >
-                <GraduationCap size={25} />
+                <GraduationCap
+                  size={23}
+                  strokeWidth={1.8}
+                  className="sm:h-[25px] sm:w-[25px]"
+                />
 
                 <span
                   className="
+                    pointer-events-none
                     absolute
                     -inset-1
-                    rounded-2xl
+                    rounded-xl
                     border
                     border-[#39ff88]/0
                     transition-all
                     duration-500
                     group-hover:border-[#39ff88]/10
+                    sm:rounded-2xl
                   "
                 />
               </motion.div>
 
-              {/* =================================
-                  DATE
-              ================================== */}
-
-              <div className="relative mt-7 flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#39ff88] shadow-[0_0_8px_rgba(57,255,136,0.8)]" />
-
-                <p className="font-mono text-xs tracking-wider text-[#39ff88]">
-                  {item.date}
-                </p>
-              </div>
-
-              {/* =================================
-                  DEGREE
-              ================================== */}
-
-              <h3 className="relative mt-3 text-2xl font-bold text-white">
-                {item.degree}
-              </h3>
-
-              {/* =================================
-                  INSTITUTION
-              ================================== */}
-
-              <p className="relative mt-3 max-w-lg leading-7 text-gray-500">
-                {item.institution}
-              </p>
-
-              {/* =================================
-                  DECORATIVE DIVIDER
-              ================================== */}
-
-              <div className="relative mt-7 h-px bg-white/[0.06]">
-                <div className="h-px w-12 bg-[#39ff88]/40 transition-all duration-500 group-hover:w-24" />
-              </div>
-
-              {/* =================================
-                  BOTTOM CODE LABEL
-              ================================== */}
+              {/* =====================================
+                  DATE + TYPE
+              ====================================== */}
 
               <div
                 className="
                   relative
-                  mt-6
+                  mt-5
                   flex
+                  flex-wrap
                   items-center
-                  justify-between
-                  font-mono
-                  text-[10px]
-                  text-gray-700
+                  gap-x-4
+                  gap-y-2
+                  sm:mt-6
                 "
               >
                 <div className="flex items-center gap-2">
-                  <BookOpen
-                    size={13}
-                    className="text-[#39ff88]/40"
+                  <span
+                    className="
+                      h-1.5
+                      w-1.5
+                      shrink-0
+                      rounded-full
+                      bg-[#39ff88]
+                      shadow-[0_0_8px_rgba(57,255,136,0.8)]
+                    "
                   />
 
-                  <span>
+                  <p
+                    className="
+                      font-mono
+                      text-[10px]
+                      tracking-wider
+                      text-[#39ff88]
+                      sm:text-xs
+                    "
+                  >
+                    {item.date}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-1.5 text-gray-600">
+                  <CalendarDays size={12} />
+
+                  <span className="font-mono text-[9px] uppercase tracking-wider sm:text-[10px]">
+                    {item.type}
+                  </span>
+                </div>
+              </div>
+
+              {/* =====================================
+                  DEGREE
+              ====================================== */}
+
+              <h3
+                className="
+                  relative
+                  mt-3
+                  break-words
+                  text-xl
+                  font-bold
+                  leading-tight
+                  text-white
+                  sm:text-2xl
+                "
+              >
+                {item.degree}
+              </h3>
+
+              {/* =====================================
+                  INSTITUTION
+              ====================================== */}
+
+              <p
+                className="
+                  relative
+                  mt-2.5
+                  max-w-xl
+                  break-words
+                  text-sm
+                  leading-6
+                  text-gray-500
+                  sm:mt-3
+                  sm:text-base
+                  sm:leading-7
+                "
+              >
+                {item.institution}
+              </p>
+
+              {/* =====================================
+                  DIVIDER
+              ====================================== */}
+
+              <div className="relative mt-6 h-px bg-white/[0.06] sm:mt-7">
+                <div
+                  className="
+                    h-px
+                    w-10
+                    bg-[#39ff88]/40
+                    transition-all
+                    duration-500
+                    group-hover:w-20
+                    sm:w-12
+                    sm:group-hover:w-24
+                  "
+                />
+              </div>
+
+              {/* =====================================
+                  BOTTOM CODE INFORMATION
+              ====================================== */}
+
+              <div
+                className="
+                  relative
+                  mt-5
+                  flex
+                  min-w-0
+                  items-center
+                  justify-between
+                  gap-3
+                  font-mono
+                  text-[9px]
+                  text-gray-700
+                  sm:mt-6
+                  sm:text-[10px]
+                "
+              >
+                <div className="flex min-w-0 items-center gap-2">
+                  <BookOpen
+                    size={12}
+                    className="shrink-0 text-[#39ff88]/40 sm:h-[13px] sm:w-[13px]"
+                  />
+
+                  <span className="truncate">
                     education.completed
                   </span>
                 </div>
@@ -299,6 +506,7 @@ export default function Education() {
                 <ArrowUpRight
                   size={14}
                   className="
+                    shrink-0
                     text-gray-700
                     transition-all
                     duration-300
@@ -309,9 +517,9 @@ export default function Education() {
                 />
               </div>
 
-              {/* =================================
+              {/* =====================================
                   BOTTOM GREEN LINE
-              ================================== */}
+              ====================================== */}
 
               <div
                 className="
@@ -327,41 +535,36 @@ export default function Education() {
                   group-hover:w-full
                 "
               />
-
             </motion.article>
           ))}
         </motion.div>
 
-        {/* =================================
+        {/* =========================================
             EDUCATION FOOTER
-        ================================== */}
+        ========================================== */}
 
         <motion.div
-          initial={{
-            opacity: 0,
-            y: 25,
-          }}
-          whileInView={{
-            opacity: 1,
-            y: 0,
-          }}
+          variants={footerVariants}
+          initial="hidden"
+          whileInView="visible"
           viewport={{
-            once: true,
-            amount: 0.5,
-          }}
-          transition={{
-            duration: 0.6,
-            delay: 0.2,
+            once: false,
+            amount: 0.4,
           }}
           className="
-            mt-12
+            mt-9
             flex
+            flex-wrap
             items-center
             justify-center
-            gap-3
+            gap-2
+            text-center
             font-mono
-            text-xs
+            text-[10px]
             text-gray-600
+            sm:mt-10
+            sm:gap-3
+            sm:text-xs
           "
         >
           <span className="text-[#39ff88]/50">
@@ -376,7 +579,6 @@ export default function Education() {
             {"</>"}
           </span>
         </motion.div>
-
       </div>
     </section>
   );

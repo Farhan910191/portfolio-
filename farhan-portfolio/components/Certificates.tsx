@@ -6,8 +6,9 @@ import {
   FileCheck2,
   ShieldCheck,
   ArrowUpRight,
+  Code2,
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 
 const technologies = [
   "HTML",
@@ -27,10 +28,14 @@ const technologies = [
 const certificatePath =
   "/certificates/internship-certificate.pdf";
 
-const headerVariants = {
+/* =========================================
+   ANIMATIONS
+========================================= */
+
+const headerVariants: Variants = {
   hidden: {
     opacity: 0,
-    y: 40,
+    y: 30,
     filter: "blur(8px)",
   },
   visible: {
@@ -38,16 +43,16 @@ const headerVariants = {
     y: 0,
     filter: "blur(0px)",
     transition: {
-      duration: 0.7,
+      duration: 0.65,
       ease: [0.22, 1, 0.36, 1],
     },
   },
 };
 
-const cardVariants = {
+const cardVariants: Variants = {
   hidden: {
     opacity: 0,
-    y: 55,
+    y: 40,
     scale: 0.97,
   },
   visible: {
@@ -55,17 +60,49 @@ const cardVariants = {
     y: 0,
     scale: 1,
     transition: {
-      duration: 0.7,
+      duration: 0.65,
       ease: [0.22, 1, 0.36, 1],
     },
   },
 };
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: {},
   visible: {
     transition: {
-      staggerChildren: 0.05,
+      staggerChildren: 0.045,
+    },
+  },
+};
+
+const techVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    y: 8,
+    scale: 0.92,
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      duration: 0.3,
+      ease: [0.22, 1, 0.36, 1],
+    },
+  },
+};
+
+const footerVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    y: 20,
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.55,
+      ease: [0.22, 1, 0.36, 1],
     },
   },
 };
@@ -74,126 +111,218 @@ export default function Certificates() {
   return (
     <section
       id="certificates"
-      className="relative border-t border-white/[0.05] py-28 sm:py-36"
+      className="
+        relative
+        w-full
+        min-w-0
+        overflow-hidden
+        border-t
+        border-white/[0.05]
+        py-20
+        sm:py-24
+        lg:py-28
+      "
     >
-      <div className="container-custom">
-
-        {/* =====================================
-            SECTION HEADER
-        ====================================== */}
+      <div
+        className="
+          mx-auto
+          w-full
+          max-w-7xl
+          min-w-0
+          px-4
+          sm:px-6
+          md:px-8
+          lg:px-10
+          xl:px-12
+        "
+      >
+        {/* =========================================
+            HEADER
+        ========================================== */}
 
         <motion.div
           variants={headerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{
-            once: true,
+            once: false,
             amount: 0.25,
           }}
+          className="min-w-0"
         >
           <div className="flex items-center gap-3">
-            <span className="h-px w-8 bg-[#39ff88]" />
+            <span className="h-px w-7 shrink-0 bg-[#39ff88] sm:w-8" />
 
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[#39ff88]">
+            <p
+              className="
+                text-[10px]
+                font-semibold
+                uppercase
+                tracking-[0.2em]
+                text-[#39ff88]
+                sm:text-xs
+                sm:tracking-[0.3em]
+              "
+            >
               06 — Certifications
             </p>
           </div>
 
-          <h2 className="mt-5 text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl">
+          <h2
+            className="
+              mt-4
+              max-w-3xl
+              text-3xl
+              font-bold
+              leading-[1.08]
+              tracking-tight
+              text-white
+              sm:mt-5
+              sm:text-4xl
+              md:text-5xl
+              lg:text-6xl
+            "
+          >
             Proof of{" "}
             <span className="text-[#39ff88]">
               experience.
             </span>
           </h2>
 
-          <p className="mt-5 max-w-2xl leading-8 text-gray-500">
+          <p
+            className="
+              mt-4
+              max-w-2xl
+              text-sm
+              leading-7
+              text-gray-500
+              sm:mt-5
+              sm:text-base
+              sm:leading-8
+            "
+          >
             Professional certification and practical experience
             gained through software development.
           </p>
         </motion.div>
 
-        {/* =====================================
-            MAIN GRID
-        ====================================== */}
+        {/* =========================================
+            MAIN CONTENT
+        ========================================== */}
 
-        <div className="mt-16 grid gap-7 lg:grid-cols-[1.15fr_0.85fr]">
-
-          {/* =====================================
+        <div
+          className="
+            mt-10
+            grid
+            min-w-0
+            grid-cols-1
+            gap-5
+            sm:mt-12
+            lg:grid-cols-[1.05fr_0.95fr]
+            lg:gap-6
+            xl:grid-cols-[1.1fr_0.9fr]
+          "
+        >
+          {/* =======================================
               CERTIFICATE PREVIEW
-          ====================================== */}
+          ======================================== */}
 
           <motion.div
             variants={cardVariants}
             initial="hidden"
             whileInView="visible"
             viewport={{
-              once: true,
-              amount: 0.15,
+              once: false,
+              amount: 0.12,
             }}
             whileHover={{
               y: -5,
               transition: {
-                duration: 0.3,
+                duration: 0.25,
               },
             }}
             className="
               group
               relative
+              min-w-0
               overflow-hidden
-              rounded-3xl
+              rounded-2xl
               border
               border-white/[0.08]
-              bg-[#111113]/65
+              bg-[#111113]/75
               backdrop-blur-xl
               transition-all
               duration-500
               hover:border-[#39ff88]/30
-              hover:bg-[#151518]/75
+              hover:bg-[#151518]/85
+              sm:rounded-3xl
             "
           >
-
-            {/* CARD GLOW */}
+            {/* Glow */}
 
             <div
               className="
                 pointer-events-none
                 absolute
-                -right-32
-                -top-32
-                h-72
-                w-72
+                -right-28
+                -top-28
+                h-64
+                w-64
                 rounded-full
                 bg-[#39ff88]/[0.025]
-                blur-[90px]
+                blur-[85px]
                 transition-all
                 duration-700
                 group-hover:bg-[#39ff88]/[0.08]
               "
             />
 
-            {/* =================================
-                CARD HEADER
-            ================================== */}
+            {/* Top shine */}
+
+            <div
+              className="
+                pointer-events-none
+                absolute
+                left-1/2
+                top-0
+                z-10
+                h-px
+                w-0
+                -translate-x-1/2
+                bg-[#39ff88]
+                shadow-[0_0_15px_rgba(57,255,136,0.8)]
+                transition-all
+                duration-700
+                group-hover:w-2/3
+              "
+            />
+
+            {/* =====================================
+                PREVIEW HEADER
+            ====================================== */}
 
             <div
               className="
                 relative
                 flex
+                min-w-0
                 items-center
                 justify-between
+                gap-3
                 border-b
                 border-white/[0.06]
-                p-5
-                sm:p-6
+                p-4
+                sm:p-5
+                lg:p-6
               "
             >
-              <div className="flex items-center gap-3">
-
+              <div className="flex min-w-0 items-center gap-3">
                 <div
                   className="
                     flex
-                    h-11
-                    w-11
+                    h-10
+                    w-10
+                    shrink-0
                     items-center
                     justify-center
                     rounded-xl
@@ -201,46 +330,48 @@ export default function Certificates() {
                     border-[#39ff88]/10
                     bg-[#39ff88]/[0.07]
                     text-[#39ff88]
+                    sm:h-11
+                    sm:w-11
                   "
                 >
-                  <Award size={21} />
+                  <Award size={20} />
                 </div>
 
-                <div>
-                  <p className="font-semibold text-white">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-white sm:text-base">
                     Internship Certificate
                   </p>
 
-                  <p className="mt-1 text-xs text-gray-500">
+                  <p className="mt-0.5 truncate text-[10px] text-gray-500 sm:mt-1 sm:text-xs">
                     Upcode Software Labs L.L.P
                   </p>
                 </div>
               </div>
 
-              <span className="hidden font-mono text-[10px] text-gray-700 sm:block">
+              <span className="hidden shrink-0 font-mono text-[10px] text-gray-700 sm:block">
                 certificate.pdf
               </span>
             </div>
 
-            {/* =================================
+            {/* =====================================
                 PDF PREVIEW
-            ================================== */}
+            ====================================== */}
 
-            <div className="relative bg-[#080808] p-3 sm:p-5">
-
-              {/* PDF FRAME */}
-
+            <div className="relative bg-[#080808] p-3 sm:p-4 lg:p-5">
               <div
                 className="
                   relative
-                  h-[430px]
+                  h-[350px]
                   overflow-hidden
-                  rounded-2xl
+                  rounded-xl
                   border
                   border-white/[0.08]
                   bg-white
-                  sm:h-[520px]
-                  lg:h-[560px]
+                  sm:h-[440px]
+                  sm:rounded-2xl
+                  md:h-[500px]
+                  lg:h-[520px]
+                  xl:h-[540px]
                 "
               >
                 <iframe
@@ -248,8 +379,7 @@ export default function Certificates() {
                   title="Internship Certificate Preview"
                   className="
                     absolute
-                    left-0
-                    top-0
+                    inset-0
                     h-full
                     w-full
                     border-0
@@ -258,36 +388,49 @@ export default function Certificates() {
                 />
               </div>
 
-              {/* PDF LABEL */}
+              {/* Preview badge */}
 
               <div
                 className="
                   pointer-events-none
                   absolute
-                  bottom-8
-                  left-8
+                  bottom-6
+                  left-6
                   rounded-full
                   border
-                  border-black/10
-                  bg-black/70
+                  border-white/10
+                  bg-black/75
                   px-3
                   py-1.5
                   font-mono
-                  text-[10px]
+                  text-[9px]
                   text-[#39ff88]
                   backdrop-blur-md
+                  sm:bottom-7
+                  sm:left-7
                 "
               >
                 PDF PREVIEW
               </div>
             </div>
 
-            {/* =================================
-                ACTION BUTTONS
-            ================================== */}
+            {/* =====================================
+                ACTIONS
+            ====================================== */}
 
-            <div className="relative flex flex-wrap gap-3 p-5 sm:p-6">
-
+            <div
+              className="
+                relative
+                grid
+                grid-cols-1
+                gap-2.5
+                p-4
+                sm:flex
+                sm:flex-wrap
+                sm:p-5
+                lg:p-6
+              "
+            >
               <a
                 href={certificatePath}
                 target="_blank"
@@ -295,30 +438,33 @@ export default function Certificates() {
                 className="
                   group/view
                   inline-flex
+                  min-h-11
                   items-center
+                  justify-center
                   gap-2
-                  rounded-full
+                  rounded-xl
                   bg-[#39ff88]
                   px-5
-                  py-3
+                  py-2.5
                   text-sm
                   font-semibold
                   text-black
                   transition-all
                   duration-300
-                  hover:scale-[1.03]
-                  hover:shadow-[0_0_30px_rgba(57,255,136,0.22)]
+                  hover:scale-[1.02]
+                  hover:shadow-[0_0_30px_rgba(57,255,136,0.2)]
+                  sm:rounded-full
                 "
               >
                 View Certificate
 
                 <ExternalLink
-                  size={16}
+                  size={15}
                   className="
                     transition-transform
                     duration-300
-                    group-hover/view:translate-x-0.5
                     group-hover/view:-translate-y-0.5
+                    group-hover/view:translate-x-0.5
                   "
                 />
               </a>
@@ -328,14 +474,16 @@ export default function Certificates() {
                 download
                 className="
                   inline-flex
+                  min-h-11
                   items-center
+                  justify-center
                   gap-2
-                  rounded-full
+                  rounded-xl
                   border
                   border-white/10
                   bg-black/20
                   px-5
-                  py-3
+                  py-2.5
                   text-sm
                   text-gray-300
                   transition-all
@@ -343,15 +491,15 @@ export default function Certificates() {
                   hover:border-[#39ff88]/40
                   hover:bg-[#39ff88]/5
                   hover:text-[#39ff88]
+                  sm:rounded-full
                 "
               >
                 Download
-
-                <FileCheck2 size={16} />
+                <FileCheck2 size={15} />
               </a>
             </div>
 
-            {/* BOTTOM LINE */}
+            {/* Bottom line */}
 
             <div
               className="
@@ -369,64 +517,87 @@ export default function Certificates() {
             />
           </motion.div>
 
-          {/* =====================================
+          {/* =======================================
               CERTIFICATE DETAILS
-          ====================================== */}
+          ======================================== */}
 
           <motion.div
             variants={cardVariants}
             initial="hidden"
             whileInView="visible"
             viewport={{
-              once: true,
-              amount: 0.15,
+              once: false,
+              amount: 0.12,
             }}
             whileHover={{
               y: -5,
               transition: {
-                duration: 0.3,
+                duration: 0.25,
               },
             }}
             className="
               group
               relative
+              min-w-0
               overflow-hidden
-              rounded-3xl
+              rounded-2xl
               border
               border-white/[0.08]
-              bg-[#111113]/65
-              p-7
+              bg-[#111113]/75
+              p-5
               backdrop-blur-xl
               transition-all
               duration-500
               hover:border-[#39ff88]/30
-              hover:bg-[#151518]/75
-              sm:p-9
+              hover:bg-[#151518]/85
+              sm:rounded-3xl
+              sm:p-6
+              lg:p-7
+              xl:p-8
             "
           >
-
-            {/* GLOW */}
+            {/* Glow */}
 
             <div
               className="
                 pointer-events-none
                 absolute
-                -left-32
-                -top-32
-                h-72
-                w-72
+                -left-28
+                -top-28
+                h-64
+                w-64
                 rounded-full
                 bg-[#39ff88]/[0.025]
-                blur-[90px]
+                blur-[85px]
                 transition-all
                 duration-700
                 group-hover:bg-[#39ff88]/[0.08]
               "
             />
 
-            <div className="relative">
+            {/* Top shine */}
 
-              {/* VERIFIED BADGE */}
+            <div
+              className="
+                pointer-events-none
+                absolute
+                left-1/2
+                top-0
+                h-px
+                w-0
+                -translate-x-1/2
+                bg-[#39ff88]
+                shadow-[0_0_15px_rgba(57,255,136,0.8)]
+                transition-all
+                duration-700
+                group-hover:w-2/3
+              "
+            />
+
+            <div className="relative min-w-0">
+              {/* ===================================
+                  VERIFIED BADGE
+              ==================================== */}
 
               <div
                 className="
@@ -439,76 +610,93 @@ export default function Certificates() {
                   bg-[#39ff88]/5
                   px-3
                   py-1.5
-                  text-xs
+                  text-[10px]
                   text-[#39ff88]
+                  sm:text-xs
                 "
               >
-                <ShieldCheck size={14} />
+                <ShieldCheck size={13} />
 
                 Verified Certificate
               </div>
 
-              {/* TITLE */}
+              {/* ===================================
+                  TITLE
+              ==================================== */}
 
-              <h3 className="mt-7 text-3xl font-bold leading-tight text-white">
+              <h3
+                className="
+                  mt-5
+                  max-w-xl
+                  text-2xl
+                  font-bold
+                  leading-tight
+                  text-white
+                  sm:mt-6
+                  sm:text-3xl
+                "
+              >
                 Software Developer Intern
               </h3>
 
-              {/* COMPANY */}
+              {/* Company */}
 
-              <p className="mt-3 text-gray-400">
+              <p className="mt-2 text-sm text-gray-400 sm:text-base">
                 Upcode Software Labs L.L.P
               </p>
 
-              {/* DATE */}
+              {/* Date */}
 
-              <div className="mt-6 flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#39ff88] shadow-[0_0_8px_rgba(57,255,136,0.8)]" />
+              <div className="mt-5 flex items-center gap-2">
+                <span
+                  className="
+                    h-1.5
+                    w-1.5
+                    shrink-0
+                    rounded-full
+                    bg-[#39ff88]
+                    shadow-[0_0_8px_rgba(57,255,136,0.8)]
+                  "
+                />
 
-                <p className="font-mono text-xs tracking-wider text-[#39ff88]">
+                <p className="font-mono text-[10px] tracking-wider text-[#39ff88] sm:text-xs">
                   05/05/2025 — 31/01/2026
                 </p>
               </div>
 
-              {/* DIVIDER */}
+              {/* Divider */}
 
-              <div className="my-8 h-px bg-white/[0.06]" />
+              <div className="my-6 h-px bg-white/[0.06] sm:my-7" />
 
-              {/* TECHNOLOGIES */}
+              {/* ===================================
+                  TECHNOLOGIES
+              ==================================== */}
 
-              <p className="text-sm font-semibold text-gray-300">
-                Technologies
-              </p>
+              <div className="flex items-center gap-2">
+                <Code2
+                  size={15}
+                  className="text-[#39ff88]/60"
+                />
+
+                <p className="text-sm font-semibold text-gray-300">
+                  Technologies
+                </p>
+              </div>
 
               <motion.div
                 variants={containerVariants}
                 initial="hidden"
                 whileInView="visible"
                 viewport={{
-                  once: true,
+                  once: false,
                   amount: 0.2,
                 }}
-                className="mt-4 flex flex-wrap gap-2"
+                className="mt-4 flex flex-wrap gap-1.5 sm:gap-2"
               >
-                {technologies.map((tech, index) => (
+                {technologies.map((tech) => (
                   <motion.span
                     key={tech}
-                    variants={{
-                      hidden: {
-                        opacity: 0,
-                        scale: 0.8,
-                        y: 8,
-                      },
-                      visible: {
-                        opacity: 1,
-                        scale: 1,
-                        y: 0,
-                        transition: {
-                          duration: 0.3,
-                          delay: index * 0.035,
-                        },
-                      },
-                    }}
+                    variants={techVariants}
                     whileHover={{
                       y: -3,
                       scale: 1.04,
@@ -519,15 +707,17 @@ export default function Certificates() {
                       border
                       border-white/[0.08]
                       bg-black/20
-                      px-3
+                      px-2.5
                       py-1.5
-                      text-xs
+                      text-[10px]
                       text-gray-500
                       transition-all
                       duration-300
                       hover:border-[#39ff88]/40
                       hover:bg-[#39ff88]/10
                       hover:text-[#39ff88]
+                      sm:px-3
+                      sm:text-xs
                     "
                   >
                     {tech}
@@ -535,33 +725,37 @@ export default function Certificates() {
                 ))}
               </motion.div>
 
-              {/* DESCRIPTION */}
+              {/* ===================================
+                  DESCRIPTION
+              ==================================== */}
 
-              <div className="mt-10 border-t border-white/[0.06] pt-7">
-
-                <p className="text-sm leading-7 text-gray-500">
+              <div className="mt-7 border-t border-white/[0.06] pt-6 sm:mt-8 sm:pt-7">
+                <p className="text-sm leading-6 text-gray-500 sm:leading-7">
                   The certificate records successful work as a
                   Software Developer Intern and highlights full
                   stack development technologies and professional
                   project work.
                 </p>
-
               </div>
 
-              {/* CERTIFICATE STATUS */}
+              {/* ===================================
+                  STATUS
+              ==================================== */}
 
               <div
                 className="
-                  mt-8
-                  rounded-2xl
+                  mt-6
+                  rounded-xl
                   border
                   border-[#39ff88]/10
                   bg-[#39ff88]/[0.035]
-                  p-5
+                  p-4
+                  sm:mt-7
+                  sm:rounded-2xl
+                  sm:p-5
                 "
               >
                 <div className="flex items-start gap-3">
-
                   <div
                     className="
                       flex
@@ -575,38 +769,40 @@ export default function Certificates() {
                       text-[#39ff88]
                     "
                   >
-                    <FileCheck2 size={17} />
+                    <FileCheck2 size={16} />
                   </div>
 
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-sm font-medium text-gray-300">
                       Internship Completed
                     </p>
 
                     <p className="mt-1 text-xs leading-5 text-gray-600">
-                      Professional internship certificate available
-                      for verification.
+                      Professional internship certificate
+                      available for verification.
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* CODE SIGNATURE */}
+              {/* ===================================
+                  SIGNATURE
+              ==================================== */}
 
               <div
                 className="
-                  mt-8
+                  mt-7
                   flex
                   items-center
                   justify-between
                   font-mono
-                  text-[10px]
+                  text-[9px]
                   text-gray-700
+                  sm:mt-8
+                  sm:text-[10px]
                 "
               >
-                <span>
-                  {"<certificate />"}
-                </span>
+                <span>{"<certificate />"}</span>
 
                 <ArrowUpRight
                   size={14}
@@ -622,7 +818,7 @@ export default function Certificates() {
               </div>
             </div>
 
-            {/* BOTTOM LINE */}
+            {/* Bottom line */}
 
             <div
               className="
@@ -641,35 +837,32 @@ export default function Certificates() {
           </motion.div>
         </div>
 
-        {/* =====================================
-            FOOTER SIGNATURE
-        ====================================== */}
+        {/* =========================================
+            FOOTER
+        ========================================== */}
 
         <motion.div
-          initial={{
-            opacity: 0,
-            y: 25,
-          }}
-          whileInView={{
-            opacity: 1,
-            y: 0,
-          }}
+          variants={footerVariants}
+          initial="hidden"
+          whileInView="visible"
           viewport={{
-            once: true,
+            once: false,
             amount: 0.5,
           }}
-          transition={{
-            duration: 0.6,
-          }}
           className="
-            mt-12
+            mt-9
             flex
+            flex-wrap
             items-center
             justify-center
-            gap-3
+            gap-2
+            text-center
             font-mono
-            text-xs
+            text-[10px]
             text-gray-600
+            sm:mt-10
+            sm:gap-3
+            sm:text-xs
           "
         >
           <span className="text-[#39ff88]/50">
@@ -684,7 +877,6 @@ export default function Certificates() {
             {"</>"}
           </span>
         </motion.div>
-
       </div>
     </section>
   );

@@ -1,17 +1,8 @@
 "use client";
 
-import {
-  ArrowDown,
-  ArrowRight,
-  Mail,
-} from "lucide-react";
-
-import {
-  FaGithub,
-  FaLinkedinIn,
-} from "react-icons/fa";
-
-import { motion } from "framer-motion";
+import { ArrowDown, ArrowRight, Mail } from "lucide-react";
+import { FaGithub, FaLinkedinIn } from "react-icons/fa";
+import { motion, type Variants } from "framer-motion";
 
 import { developer } from "@/data/portfolio";
 
@@ -19,56 +10,54 @@ import { developer } from "@/data/portfolio";
 // ANIMATIONS
 // ======================================================
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: {},
   visible: {
     transition: {
-      staggerChildren: 0.12,
+      staggerChildren: 0.1,
     },
   },
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: {
     opacity: 0,
-    y: 35,
-    filter: "blur(8px)",
+    y: 25,
+    filter: "blur(6px)",
   },
-
   visible: {
     opacity: 1,
     y: 0,
     filter: "blur(0px)",
     transition: {
-      duration: 0.7,
+      duration: 0.65,
       ease: [0.22, 1, 0.36, 1],
     },
   },
 };
 
-const profileVariants = {
+const profileVariants: Variants = {
   hidden: {
     opacity: 0,
-    scale: 0.9,
-    x: 40,
-    filter: "blur(8px)",
+    x: 30,
+    scale: 0.97,
+    filter: "blur(6px)",
   },
-
   visible: {
     opacity: 1,
-    scale: 1,
     x: 0,
+    scale: 1,
     filter: "blur(0px)",
     transition: {
-      duration: 1,
-      delay: 0.25,
+      duration: 0.8,
+      delay: 0.15,
       ease: [0.16, 1, 0.3, 1],
     },
   },
 };
 
 // ======================================================
-// COMPONENT
+// HERO
 // ======================================================
 
 export default function Hero() {
@@ -77,15 +66,15 @@ export default function Hero() {
       id="home"
       className="
         relative
-        min-h-screen
+        w-full
+        min-w-0
         overflow-hidden
         bg-transparent
-        pt-24
         text-white
       "
     >
       {/* =================================================
-          CONTENT
+          HERO INNER
       ================================================== */}
 
       <div
@@ -94,25 +83,29 @@ export default function Hero() {
           relative
           z-10
           flex
-          min-h-screen
+          w-full
           items-center
           py-20
-          lg:py-24
+          sm:py-24
+          lg:min-h-[calc(100vh-80px)]
+          lg:py-16
+          xl:min-h-[calc(100vh-72px)]
         "
       >
         <div
           className="
             grid
             w-full
+            min-w-0
             items-center
-            gap-16
+            gap-14
             lg:grid-cols-[1.08fr_0.92fr]
-            lg:gap-12
-            xl:gap-20
+            lg:gap-10
+            xl:gap-16
           "
         >
           {/* =================================================
-              LEFT CONTENT
+              LEFT SIDE
           ================================================== */}
 
           <motion.div
@@ -123,34 +116,37 @@ export default function Hero() {
               once: false,
               amount: 0.2,
             }}
-            className="relative"
+            className="
+              min-w-0
+              lg:pr-2
+              xl:pr-4
+            "
           >
-            {/* =================================================
-                AVAILABILITY
-            ================================================== */}
+            {/* STATUS */}
 
             <motion.div
               variants={itemVariants}
               className="
-                mb-7
+                mb-5
                 inline-flex
                 items-center
                 gap-2.5
                 rounded-full
                 border
                 border-[#39ff88]/20
-                bg-[#111113]/60
-                px-4
-                py-2
+                bg-[#111113]/70
+                px-3.5
+                py-1.5
                 font-mono
-                text-[11px]
+                text-[9px]
                 text-gray-400
-                shadow-[0_0_25px_rgba(57,255,136,0.04)]
                 backdrop-blur-xl
+                sm:px-4
+                sm:py-2
+                sm:text-[10px]
               "
             >
               <span
-                aria-hidden="true"
                 className="
                   h-1.5
                   w-1.5
@@ -161,58 +157,54 @@ export default function Hero() {
                 "
               />
 
-              <span>
-                available_for_opportunities
-              </span>
+              available_for_opportunities
             </motion.div>
 
-            {/* =================================================
-                SMALL LABEL
-            ================================================== */}
+            {/* DEVELOPER LABEL */}
 
             <motion.div
               variants={itemVariants}
               className="
-                mb-5
+                mb-4
                 flex
                 items-center
                 gap-3
               "
             >
-              <span className="h-px w-8 bg-[#39ff88]" />
+              <span className="h-px w-7 bg-[#39ff88]" />
 
-              <p
+              <span
                 className="
-                  text-xs
+                  text-[9px]
                   font-semibold
                   uppercase
-                  tracking-[0.3em]
+                  tracking-[0.25em]
                   text-[#39ff88]
+                  sm:text-[10px]
                 "
               >
                 Python Full Stack Developer
-              </p>
+              </span>
             </motion.div>
 
-            {/* =================================================
-                MAIN HEADING
-            ================================================== */}
+            {/* HEADING */}
 
             <motion.h1
               variants={itemVariants}
               className="
-                max-w-5xl
-                text-5xl
+                max-w-4xl
+                text-[2.65rem]
                 font-black
-                leading-[0.98]
+                leading-[0.94]
                 tracking-[-0.055em]
-                sm:text-6xl
-                md:text-7xl
-                lg:text-7xl
-                xl:text-[5.8rem]
+                sm:text-5xl
+                md:text-6xl
+                lg:text-[4.1rem]
+                xl:text-[4.85rem]
               "
             >
               Building Digital
+
               <br />
 
               <span
@@ -233,70 +225,67 @@ export default function Hero() {
               That Make an Impact.
             </motion.h1>
 
-            {/* =================================================
-                DESCRIPTION
-            ================================================== */}
+            {/* DESCRIPTION */}
 
             <motion.p
               variants={itemVariants}
               className="
-                mt-7
-                max-w-2xl
-                text-base
-                leading-8
+                mt-5
+                max-w-xl
+                text-sm
+                leading-6
                 text-gray-400
-                sm:text-lg
+                sm:mt-6
+                sm:text-base
+                sm:leading-7
               "
             >
               {developer.description}
             </motion.p>
 
-            {/* =================================================
-                BUTTONS
-            ================================================== */}
+            {/* BUTTONS */}
 
             <motion.div
               variants={itemVariants}
               className="
-                mt-9
+                mt-7
                 flex
                 flex-wrap
                 gap-3
               "
             >
-              {/* VIEW WORK */}
-
               <motion.a
+                href="#projects"
                 whileHover={{
-                  y: -3,
-                  scale: 1.02,
+                  y: -2,
+                  scale: 1.015,
                 }}
                 whileTap={{
                   scale: 0.98,
                 }}
-                href="#projects"
                 className="
                   group
                   inline-flex
                   items-center
-                  gap-2.5
+                  gap-2
                   rounded-xl
                   bg-[#39ff88]
-                  px-6
-                  py-3.5
-                  text-sm
+                  px-5
+                  py-3
+                  text-xs
                   font-semibold
                   text-black
-                  shadow-[0_0_30px_rgba(57,255,136,0.12)]
+                  shadow-[0_0_25px_rgba(57,255,136,0.12)]
                   transition-all
                   duration-300
-                  hover:shadow-[0_0_40px_rgba(57,255,136,0.25)]
+                  hover:shadow-[0_0_35px_rgba(57,255,136,0.22)]
+                  sm:text-sm
                 "
               >
                 View My Work
 
                 <ArrowRight
-                  size={17}
+                  size={16}
                   className="
                     transition-transform
                     duration-300
@@ -305,16 +294,14 @@ export default function Hero() {
                 />
               </motion.a>
 
-              {/* CONTACT */}
-
               <motion.a
+                href="#contact"
                 whileHover={{
-                  y: -3,
+                  y: -2,
                 }}
                 whileTap={{
                   scale: 0.98,
                 }}
-                href="#contact"
                 className="
                   inline-flex
                   items-center
@@ -322,10 +309,10 @@ export default function Hero() {
                   rounded-xl
                   border
                   border-white/[0.1]
-                  bg-[#111113]/50
-                  px-6
-                  py-3.5
-                  text-sm
+                  bg-[#111113]/60
+                  px-5
+                  py-3
+                  text-xs
                   font-semibold
                   text-white
                   backdrop-blur-xl
@@ -334,20 +321,19 @@ export default function Hero() {
                   hover:border-[#39ff88]/40
                   hover:bg-[#39ff88]/[0.05]
                   hover:text-[#39ff88]
+                  sm:text-sm
                 "
               >
                 Contact Me
               </motion.a>
             </motion.div>
 
-            {/* =================================================
-                SOCIAL LINKS
-            ================================================== */}
+            {/* SOCIAL */}
 
             <motion.div
               variants={itemVariants}
               className="
-                mt-9
+                mt-6
                 flex
                 items-center
                 gap-5
@@ -356,7 +342,7 @@ export default function Hero() {
               <span
                 className="
                   font-mono
-                  text-[10px]
+                  text-[8px]
                   uppercase
                   tracking-[0.2em]
                   text-gray-600
@@ -365,87 +351,76 @@ export default function Hero() {
                 Find me on
               </span>
 
-              {/* GitHub */}
-
               <motion.a
-                whileHover={{
-                  y: -4,
-                  scale: 1.08,
-                }}
-                whileTap={{
-                  scale: 0.95,
-                }}
                 href={developer.github}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="GitHub"
-                className="
-                  text-gray-500
-                  transition-colors
-                  duration-300
-                  hover:text-[#39ff88]
-                "
-              >
-                <FaGithub size={19} />
-              </motion.a>
-
-              {/* LinkedIn */}
-
-              <motion.a
                 whileHover={{
-                  y: -4,
+                  y: -3,
                   scale: 1.08,
                 }}
                 whileTap={{
                   scale: 0.95,
                 }}
-                href="https://www.linkedin.com/in/mohammed-farhan-kk"
+                className="
+                  text-gray-500
+                  transition-colors
+                  hover:text-[#39ff88]
+                "
+              >
+                <FaGithub size={18} />
+              </motion.a>
+
+              <motion.a
+                href="https://www.linkedin.com/in/farhan-kk-66b598371/"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="LinkedIn"
-                className="
-                  text-gray-500
-                  transition-colors
-                  duration-300
-                  hover:text-[#39ff88]
-                "
-              >
-                <FaLinkedinIn size={19} />
-              </motion.a>
-
-              {/* Email */}
-
-              <motion.a
                 whileHover={{
-                  y: -4,
+                  y: -3,
                   scale: 1.08,
                 }}
                 whileTap={{
                   scale: 0.95,
                 }}
-                href={`mailto:${developer.email}`}
-                aria-label="Email"
                 className="
                   text-gray-500
                   transition-colors
-                  duration-300
                   hover:text-[#39ff88]
                 "
               >
-                <Mail size={19} />
+                <FaLinkedinIn size={18} />
+              </motion.a>
+
+              <motion.a
+                href="mailto:farhanmohammedfarhan7@gmail.com"
+                aria-label="Send Email"
+                whileHover={{
+                  y: -3,
+                  scale: 1.08,
+                }}
+                whileTap={{
+                  scale: 0.95,
+                }}
+                className="
+                  text-gray-500
+                  transition-colors
+                  hover:text-[#39ff88]
+                "
+              >
+                <Mail size={18} />
               </motion.a>
             </motion.div>
 
-            {/* =================================================
-                CODE SIGNATURE
-            ================================================== */}
+            {/* DEVELOPER SIGNATURE */}
 
             <motion.div
               variants={itemVariants}
               className="
-                mt-8
+                mt-5
                 font-mono
-                text-[10px]
+                text-[9px]
                 text-gray-700
               "
             >
@@ -453,21 +428,16 @@ export default function Hero() {
                 {"<developer />"}
               </span>
 
-              <span className="mx-2 text-gray-800">
+              <span className="mx-2">
                 •
               </span>
 
-              <span>
-                build.clean · ship.fast
-              </span>
+              build.clean · ship.fast
             </motion.div>
           </motion.div>
 
           {/* =================================================
-              RIGHT PROFILE AREA
-              
-              NO HEROSCENE HERE
-              NO 3D ANIMATION
+              RIGHT PROFILE
           ================================================== */}
 
           <motion.div
@@ -482,52 +452,42 @@ export default function Hero() {
               relative
               mx-auto
               w-full
-              max-w-[470px]
+              max-w-[360px]
+              sm:max-w-[390px]
+              lg:max-w-[370px]
+              xl:max-w-[410px]
             "
           >
-            {/* =================================================
-                STATIC GREEN GLOW
-            ================================================== */}
+            {/* STATIC GLOW */}
 
             <div
-              aria-hidden="true"
               className="
                 pointer-events-none
                 absolute
-                inset-[10%]
+                inset-[12%]
                 rounded-full
-                bg-[#39ff88]/[0.06]
-                blur-[100px]
+                bg-[#39ff88]/[0.05]
+                blur-[80px]
               "
             />
 
-            {/* =================================================
-                PROFILE CARD
-            ================================================== */}
+            {/* PROFILE */}
 
             <div
               className="
-                group
                 relative
                 z-10
-                aspect-[0.9]
+                aspect-[0.88]
+                w-full
                 overflow-hidden
-                rounded-[32px]
+                rounded-[26px]
                 border
                 border-white/[0.1]
-                bg-[#111113]/75
-                shadow-[0_30px_100px_rgba(0,0,0,0.5)]
+                bg-[#111113]/80
+                shadow-[0_25px_80px_rgba(0,0,0,0.5)]
                 backdrop-blur-xl
               "
             >
-              {/* =================================================
-                  STATIC PROFILE IMAGE
-
-                  No zoom animation
-                  No scan line
-                  No moving image
-              ================================================== */}
-
               <img
                 src="/profile.jpg"
                 alt="Mohammed Farhan KK"
@@ -535,15 +495,16 @@ export default function Hero() {
                   h-full
                   w-full
                   object-cover
-                  grayscale-[35%]
+                  object-center
+                  grayscale-[30%]
                 "
               />
 
-              {/* Bottom gradient */}
+              {/* IMAGE GRADIENT */}
 
               <div
-                aria-hidden="true"
                 className="
+                  pointer-events-none
                   absolute
                   inset-0
                   bg-gradient-to-t
@@ -553,10 +514,9 @@ export default function Hero() {
                 "
               />
 
-              {/* Green tint */}
+              {/* GREEN TINT */}
 
               <div
-                aria-hidden="true"
                 className="
                   pointer-events-none
                   absolute
@@ -568,49 +528,62 @@ export default function Hero() {
                 "
               />
 
-              {/* =================================================
-                  IMAGE BOTTOM INFO
-              ================================================== */}
+              {/* PROFILE TEXT */}
 
-              <div className="absolute bottom-0 left-0 right-0 p-6">
-                <div className="flex items-end justify-between gap-4">
-                  <div>
+              <div
+                className="
+                  absolute
+                  bottom-0
+                  left-0
+                  right-0
+                  p-5
+                "
+              >
+                <div
+                  className="
+                    flex
+                    items-end
+                    justify-between
+                    gap-3
+                  "
+                >
+                  <div className="min-w-0">
                     <p
                       className="
                         font-mono
-                        text-[10px]
+                        text-[8px]
                         uppercase
-                        tracking-[0.25em]
+                        tracking-[0.2em]
                         text-[#39ff88]
                       "
                     >
                       Python Full Stack
                     </p>
 
-                    <h3
+                    <h2
                       className="
-                        mt-2
-                        text-xl
+                        mt-1.5
+                        truncate
+                        text-lg
                         font-bold
-                        text-white
                       "
                     >
                       Mohammed Farhan KK
-                    </h3>
+                    </h2>
                   </div>
 
                   <div
                     className="
                       flex
-                      h-10
-                      w-10
+                      h-9
+                      w-9
                       shrink-0
                       items-center
                       justify-center
                       rounded-xl
                       border
                       border-[#39ff88]/20
-                      bg-black/40
+                      bg-black/50
                       font-mono
                       text-xs
                       text-[#39ff88]
@@ -622,17 +595,15 @@ export default function Hero() {
                 </div>
               </div>
 
-              {/* =================================================
-                  CORNER ACCENTS
-              ================================================== */}
+              {/* CORNER ACCENTS */}
 
               <span
                 className="
                   absolute
                   left-4
                   top-4
-                  h-6
-                  w-6
+                  h-5
+                  w-5
                   border-l
                   border-t
                   border-[#39ff88]/40
@@ -644,8 +615,8 @@ export default function Hero() {
                   absolute
                   right-4
                   top-4
-                  h-6
-                  w-6
+                  h-5
+                  w-5
                   border-r
                   border-t
                   border-[#39ff88]/40
@@ -657,8 +628,8 @@ export default function Hero() {
                   absolute
                   bottom-4
                   left-4
-                  h-6
-                  w-6
+                  h-5
+                  w-5
                   border-b
                   border-l
                   border-[#39ff88]/40
@@ -670,8 +641,8 @@ export default function Hero() {
                   absolute
                   bottom-4
                   right-4
-                  h-6
-                  w-6
+                  h-5
+                  w-5
                   border-b
                   border-r
                   border-[#39ff88]/40
@@ -680,12 +651,12 @@ export default function Hero() {
             </div>
 
             {/* =================================================
-                FRONTEND FLOATING CARD
+                FRONTEND
             ================================================== */}
 
             <motion.div
               animate={{
-                y: [0, -8, 0],
+                y: [0, -5, 0],
               }}
               transition={{
                 duration: 4,
@@ -694,24 +665,27 @@ export default function Hero() {
               }}
               className="
                 absolute
-                -left-5
-                top-16
+                -left-2
+                top-10
                 z-20
-                rounded-2xl
+                rounded-xl
                 border
                 border-white/[0.08]
-                bg-[#111113]/80
-                px-4
-                py-3
-                shadow-[0_15px_40px_rgba(0,0,0,0.4)]
+                bg-[#111113]/90
+                px-3
+                py-2
+                shadow-[0_15px_35px_rgba(0,0,0,0.45)]
                 backdrop-blur-xl
-                sm:-left-8
+                sm:-left-7
+                sm:top-14
+                sm:px-4
+                sm:py-3
               "
             >
               <span
                 className="
                   font-mono
-                  text-[9px]
+                  text-[7px]
                   uppercase
                   tracking-wider
                   text-gray-600
@@ -724,8 +698,7 @@ export default function Hero() {
                 className="
                   mt-1
                   font-mono
-                  text-sm
-                  font-medium
+                  text-xs
                   text-[#39ff88]
                 "
               >
@@ -734,39 +707,41 @@ export default function Hero() {
             </motion.div>
 
             {/* =================================================
-                BACKEND FLOATING CARD
+                BACKEND
             ================================================== */}
 
             <motion.div
               animate={{
-                y: [0, 8, 0],
+                y: [0, 5, 0],
               }}
               transition={{
                 duration: 4.5,
-                delay: 0.7,
+                delay: 0.5,
                 repeat: Infinity,
                 ease: "easeInOut",
               }}
               className="
                 absolute
-                -right-5
-                bottom-24
+                -right-2
+                bottom-20
                 z-20
-                rounded-2xl
+                rounded-xl
                 border
                 border-white/[0.08]
-                bg-[#111113]/80
-                px-4
-                py-3
-                shadow-[0_15px_40px_rgba(0,0,0,0.4)]
+                bg-[#111113]/90
+                px-3
+                py-2
+                shadow-[0_15px_35px_rgba(0,0,0,0.45)]
                 backdrop-blur-xl
-                sm:-right-8
+                sm:-right-7
+                sm:px-4
+                sm:py-3
               "
             >
               <span
                 className="
                   font-mono
-                  text-[9px]
+                  text-[7px]
                   uppercase
                   tracking-wider
                   text-gray-600
@@ -779,8 +754,7 @@ export default function Hero() {
                 className="
                   mt-1
                   font-mono
-                  text-sm
-                  font-medium
+                  text-xs
                   text-white
                 "
               >
@@ -789,12 +763,12 @@ export default function Hero() {
             </motion.div>
 
             {/* =================================================
-                STATUS CARD
+                STATUS
             ================================================== */}
 
             <motion.div
               animate={{
-                y: [0, -4, 0],
+                y: [0, -3, 0],
               }}
               transition={{
                 duration: 3.5,
@@ -803,7 +777,7 @@ export default function Hero() {
               }}
               className="
                 absolute
-                -bottom-5
+                -bottom-4
                 left-1/2
                 z-20
                 flex
@@ -814,13 +788,13 @@ export default function Hero() {
                 rounded-full
                 border
                 border-[#39ff88]/20
-                bg-[#080808]/85
-                px-4
-                py-2.5
+                bg-[#080808]/95
+                px-3
+                py-2
                 font-mono
-                text-[10px]
+                text-[8px]
                 text-gray-400
-                shadow-[0_15px_40px_rgba(0,0,0,0.45)]
+                shadow-[0_15px_35px_rgba(0,0,0,0.5)]
                 backdrop-blur-xl
               "
             >
@@ -840,13 +814,13 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* =====================================================
+      {/* =================================================
           SCROLL INDICATOR
-      ====================================================== */}
+      ================================================== */}
 
       <motion.a
         href="#about"
-        aria-label="Scroll to about section"
+        aria-label="Scroll to About section"
         initial={{
           opacity: 0,
         }}
@@ -854,30 +828,29 @@ export default function Hero() {
           opacity: 1,
         }}
         transition={{
-          duration: 1,
-          delay: 1.5,
+          duration: 0.8,
+          delay: 1.3,
         }}
         className="
           absolute
-          bottom-7
+          bottom-5
           left-1/2
           z-20
           hidden
           -translate-x-1/2
           flex-col
           items-center
-          gap-2
+          gap-1
           text-gray-600
           transition-colors
-          duration-300
           hover:text-[#39ff88]
-          sm:flex
+          xl:flex
         "
       >
         <span
           className="
             font-mono
-            text-[8px]
+            text-[7px]
             uppercase
             tracking-[0.4em]
           "
@@ -887,15 +860,16 @@ export default function Hero() {
 
         <motion.span
           animate={{
-            y: [0, 6, 0],
+            y: [0, 4, 0],
           }}
           transition={{
             duration: 1.5,
             repeat: Infinity,
+            ease: "easeInOut",
           }}
         >
           <ArrowDown
-            size={17}
+            size={15}
             aria-hidden="true"
           />
         </motion.span>

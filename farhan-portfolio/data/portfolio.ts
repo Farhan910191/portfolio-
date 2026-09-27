@@ -3,7 +3,7 @@ export const developer = {
     role: "Full Stack Developer",
     tagline: "Building Digital Experiences That Make an Impact.",
     description: "i'm a Full Stack Developer Focused on  Building Scalabel, Modern , and User -freindly Web Application .",
-    email: "farhanmohammedfarhan@gmail.com",
+    email: "farhanmohammedfarhan7@gmail.com",
     phone: "+91 9526910191",
     location: "Malappuram, Kerala, India",
     github: "https://github.com/Farhan910191",

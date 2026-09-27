@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import {
   ArrowUp,
   Mail,
@@ -29,7 +29,7 @@ const links = [
 // ANIMATIONS
 // ======================================================
 
-const footerVariants = {
+const footerVariants: Variants = {
   hidden: {
     opacity: 0,
     y: 35,
@@ -302,7 +302,7 @@ export default function Footer() {
                 {/* LinkedIn */}
 
                 <motion.a
-                  href="https://www.linkedin.com/in/mohammed-farhan-kk"
+                  href="https://www.linkedin.com/in/farhan-kk-66b598371/"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="LinkedIn"
