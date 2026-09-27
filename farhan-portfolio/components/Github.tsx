@@ -1,11 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Activity,
   ExternalLink,
   GitBranch,
-  GitCommit,
   RefreshCw,
   Star,
   Users,
@@ -13,18 +11,21 @@ import {
   Code2,
   CalendarDays,
   BookOpen,
+  ArrowUpRight,
 } from "lucide-react";
-
 import { FaGithub } from "react-icons/fa";
+import { motion } from "framer-motion";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 // ======================================================
-// GITHUB USERNAME
+// CONFIG
 // ======================================================
 
 const GITHUB_USERNAME = "Farhan910191";
 
-// Auto refresh every 5 minutes
-const REFRESH_TIME = 5 * 60 * 1000;
+// 30 minutes instead of 5 minutes.
+// This helps avoid GitHub API rate limits.
+const REFRESH_TIME = 30 * 60 * 1000;
 
 // ======================================================
 // TYPES
@@ -49,9 +50,7 @@ interface GitHubProfile {
 interface GitHubRepo {
   id: number;
   name: string;
-
   html_url: string;
-
   description: string | null;
 
   stargazers_count: number;
@@ -64,18 +63,13 @@ interface GitHubRepo {
   created_at: string;
 
   default_branch: string;
-
-  // FIX #2
   private: boolean;
-
   fork: boolean;
 }
 
 interface GitHubEvent {
   id: string;
-
   type: string;
-
   created_at: string;
 
   repo: {
@@ -94,6 +88,58 @@ interface ActivityDay {
   date: string;
   count: number;
 }
+
+// ======================================================
+// ANIMATION
+// ======================================================
+
+const headerVariants = {
+  hidden: {
+    opacity: 0,
+    y: 40,
+    filter: "blur(8px)",
+  },
+
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: {
+      duration: 0.7,
+      ease: [0.22, 1, 0.36, 1],
+    },
+  },
+};
+
+const containerVariants = {
+  hidden: {},
+
+  visible: {
+    transition: {
+      staggerChildren: 0.08,
+    },
+  },
+};
+
+const cardVariants = {
+  hidden: {
+    opacity: 0,
+    y: 40,
+    scale: 0.97,
+    filter: "blur(5px)",
+  },
+
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    filter: "blur(0px)",
+    transition: {
+      duration: 0.6,
+      ease: [0.22, 1, 0.36, 1],
+    },
+  },
+};
 
 // ======================================================
 // COMPONENT
@@ -121,6 +167,9 @@ export default function Github() {
   const [lastUpdated, setLastUpdated] =
     useState<Date | null>(null);
 
+  const [rateLimitMessage, setRateLimitMessage] =
+    useState("");
+
   // ====================================================
   // FETCH GITHUB DATA
   // ====================================================
@@ -129,25 +178,70 @@ export default function Github() {
     try {
       setLoading(true);
       setError("");
+      setRateLimitMessage("");
 
       // ==================================================
-      // 1. PROFILE
+      // PROFILE
       // ==================================================
 
       const profileResponse = await fetch(
-        `https://api.github.com/users/${encodeURIComponent(GITHUB_USERNAME)}`,
+        `https://api.github.com/users/${encodeURIComponent(
+          GITHUB_USERNAME
+        )}`,
         {
           headers: {
             Accept: "application/vnd.github+json",
           },
-          cache: "no-store",
         }
       );
 
+      // ==================================================
+      // RATE LIMIT HANDLING
+      // ==================================================
+
+      if (profileResponse.status === 403) {
+        const resetHeader =
+          profileResponse.headers.get(
+            "x-ratelimit-reset"
+          );
+
+        let resetMessage =
+          "GitHub API rate limit reached.";
+
+        if (resetHeader) {
+          const resetTime =
+            Number(resetHeader) * 1000;
+
+          const resetDate =
+            new Date(resetTime);
+
+          resetMessage =
+            `GitHub API rate limit reached. Try again after ${resetDate.toLocaleTimeString(
+              [],
+              {
+                hour: "2-digit",
+                minute: "2-digit",
+              }
+            )}.`;
+        }
+
+        setRateLimitMessage(resetMessage);
+
+        // Do NOT throw an error.
+        // Keep the portfolio running.
+        setLoading(false);
+
+        return;
+      }
+
       if (!profileResponse.ok) {
-        const details = await profileResponse.json().catch(() => null);
+        const details =
+          await profileResponse
+            .json()
+            .catch(() => null);
+
         throw new Error(
-          details?.error ||
+          details?.message ||
             `GitHub profile could not be loaded (${profileResponse.status}).`
         );
       }
@@ -156,52 +250,57 @@ export default function Github() {
         await profileResponse.json();
 
       // ==================================================
-      // 2. REPOSITORIES
+      // REPOSITORIES
       // ==================================================
 
       const reposResponse = await fetch(
-        `https://api.github.com/users/${encodeURIComponent(GITHUB_USERNAME)}/repos?per_page=100&sort=updated&direction=desc`,
+        `https://api.github.com/users/${encodeURIComponent(
+          GITHUB_USERNAME
+        )}/repos?per_page=100&sort=updated&direction=desc`,
         {
           headers: {
             Accept: "application/vnd.github+json",
           },
-          cache: "no-store",
         }
       );
 
-      if (!reposResponse.ok) {
-        const details = await reposResponse.json().catch(() => null);
-        throw new Error(
-          details?.error ||
-            `GitHub repositories could not be loaded (${reposResponse.status}).`
+      let reposData: GitHubRepo[] = [];
+
+      if (reposResponse.status === 403) {
+        setRateLimitMessage(
+          "GitHub API rate limit reached while loading repositories."
         );
+      } else if (reposResponse.ok) {
+        reposData =
+          await reposResponse.json();
       }
 
-      const reposData: GitHubRepo[] =
-        await reposResponse.json();
-
       // ==================================================
-      // 3. PUBLIC EVENTS
+      // PUBLIC EVENTS
       // ==================================================
 
       const eventsResponse = await fetch(
-        `https://api.github.com/users/${encodeURIComponent(GITHUB_USERNAME)}/events/public?per_page=100`,
+        `https://api.github.com/users/${encodeURIComponent(
+          GITHUB_USERNAME
+        )}/events/public?per_page=100`,
         {
           headers: {
             Accept: "application/vnd.github+json",
           },
-          cache: "no-store",
         }
       );
 
       let eventsData: GitHubEvent[] = [];
 
-      if (eventsResponse.ok) {
-        eventsData = await eventsResponse.json();
+      if (
+        eventsResponse.ok
+      ) {
+        eventsData =
+          await eventsResponse.json();
       }
 
       // ==================================================
-      // 4. ACTIVITY MAP
+      // ACTIVITY
       // ==================================================
 
       const activityMap: Record<
@@ -211,7 +310,6 @@ export default function Github() {
 
       const today = new Date();
 
-      // Create 365 days
       for (let i = 0; i < 365; i++) {
         const date = new Date(today);
 
@@ -224,10 +322,6 @@ export default function Github() {
 
         activityMap[dateString] = 0;
       }
-
-      // ==================================================
-      // 5. ADD REAL PUBLIC EVENTS
-      // ==================================================
 
       eventsData.forEach((event) => {
         if (!event.created_at) {
@@ -242,7 +336,6 @@ export default function Github() {
         ) {
           let count = 1;
 
-          // PushEvent can contain multiple commits
           if (
             event.type === "PushEvent" &&
             event.payload?.commits
@@ -257,10 +350,6 @@ export default function Github() {
         }
       });
 
-      // ==================================================
-      // 6. CONVERT ACTIVITY TO ARRAY
-      // ==================================================
-
       const activityData =
         Object.entries(activityMap)
           .map(([date, count]) => ({
@@ -272,7 +361,7 @@ export default function Github() {
           );
 
       // ==================================================
-      // 7. UPDATE STATE
+      // UPDATE STATE
       // ==================================================
 
       setProfile(profileData);
@@ -308,16 +397,15 @@ export default function Github() {
       setError(
         err instanceof Error
           ? err.message
-          : "Unable to load GitHub data. Please try again."
+          : "Unable to load GitHub data."
       );
-
     } finally {
       setLoading(false);
     }
   }, []);
 
   // ====================================================
-  // INITIAL FETCH + AUTO REFRESH
+  // INITIAL FETCH
   // ====================================================
 
   useEffect(() => {
@@ -370,7 +458,8 @@ export default function Github() {
     repos.forEach((repo) => {
       if (repo.language) {
         languageMap[repo.language] =
-          (languageMap[repo.language] || 0) + 1;
+          (languageMap[repo.language] || 0) +
+          1;
       }
     });
 
@@ -380,7 +469,7 @@ export default function Github() {
   }, [repos]);
 
   // ====================================================
-  // ACTIVITY COLOR
+  // ACTIVITY COLORS
   // ====================================================
 
   const getActivityClass = (
@@ -403,49 +492,6 @@ export default function Github() {
     }
 
     return "bg-[#39ff88]/90";
-  };
-
-  // ====================================================
-  // EVENT NAME
-  // ====================================================
-
-  const getEventName = (
-    type: string
-  ) => {
-    switch (type) {
-      case "PushEvent":
-        return "Pushed commits";
-
-      case "CreateEvent":
-        return "Created repository";
-
-      case "PullRequestEvent":
-        return "Pull request activity";
-
-      case "IssuesEvent":
-        return "Issue activity";
-
-      case "WatchEvent":
-        return "Starred repository";
-
-      case "ForkEvent":
-        return "Forked repository";
-
-      case "DeleteEvent":
-        return "Deleted repository";
-
-      case "ReleaseEvent":
-        return "Created release";
-
-      default:
-        return type
-          .replace("Event", "")
-          .replace(
-            /([A-Z])/g,
-            " $1"
-          )
-          .trim();
-    }
   };
 
   // ====================================================
@@ -478,27 +524,23 @@ export default function Github() {
       value:
         profile?.public_repos ?? 0,
     },
-
     {
       icon: Star,
       label: "Stars",
       value: totalStars,
     },
-
     {
       icon: Users,
       label: "Followers",
       value:
         profile?.followers ?? 0,
     },
-
     {
       icon: Users,
       label: "Following",
       value:
         profile?.following ?? 0,
     },
-
     {
       icon: GitFork,
       label: "Total Forks",
@@ -507,19 +549,27 @@ export default function Github() {
   ];
 
   // ====================================================
-  // LOADING SCREEN
+  // LOADING
   // ====================================================
 
   if (loading && !profile) {
     return (
       <section
         id="github"
-        className="border-t border-white/[0.05] py-28"
+        className="border-t border-white/[0.05] py-28 sm:py-36"
       >
         <div className="container-custom">
-
-          <div className="rounded-[32px] border border-white/[0.08] bg-[#111113] p-12 text-center">
-
+          <div
+            className="
+              rounded-3xl
+              border
+              border-white/[0.08]
+              bg-[#111113]/65
+              p-12
+              text-center
+              backdrop-blur-xl
+            "
+          >
             <RefreshCw
               size={32}
               className="mx-auto animate-spin text-[#39ff88]"
@@ -529,12 +579,10 @@ export default function Github() {
               Loading GitHub data...
             </p>
 
-            <p className="mt-2 text-xs text-gray-700">
-              Connecting to GitHub
+            <p className="mt-2 font-mono text-xs text-gray-700">
+              github.connect()
             </p>
-
           </div>
-
         </div>
       </section>
     );
@@ -547,121 +595,276 @@ export default function Github() {
   return (
     <section
       id="github"
-      className="border-t border-white/[0.05] py-28"
+      className="relative border-t border-white/[0.05] py-28 sm:py-36"
     >
       <div className="container-custom">
 
-        <div className="overflow-hidden rounded-[32px] border border-white/[0.08] bg-[#111113]">
+        {/* ==================================================
+            HEADER
+        ================================================== */}
 
-          <div className="relative p-7 sm:p-10 lg:p-14">
+        <motion.div
+          variants={headerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{
+            once: false,
+            amount: 0.2,
+          }}
+        >
+          <div className="flex items-center gap-3">
+            <span className="h-px w-8 bg-[#39ff88]" />
 
-            {/* Background glow */}
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[#39ff88]">
+              08 — GitHub
+            </p>
+          </div>
 
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute right-0 top-0 h-96 w-96 rounded-full bg-[#39ff88]/10 blur-[120px]"
-            />
+          <div className="mt-5 flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
 
-            <div className="relative">
+            <div>
+              <h2 className="text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl">
+                Code in{" "}
+                <span className="text-[#39ff88]">
+                  public.
+                </span>
+              </h2>
 
-              {/* ==================================================
-                  HEADER
-              ================================================== */}
+              <p className="mt-5 max-w-2xl leading-8 text-gray-500">
+                Explore my GitHub profile, repositories,
+                technologies and public development activity.
+              </p>
+            </div>
 
-              <div className="flex flex-col justify-between gap-8 lg:flex-row">
+            <div className="flex flex-wrap gap-3">
 
-                <div>
+              {/* REFRESH */}
+              <button
+                type="button"
+                onClick={fetchGitHubData}
+                disabled={loading}
+                className="
+                  inline-flex
+                  items-center
+                  gap-2
+                  rounded-full
+                  border
+                  border-white/[0.08]
+                  bg-[#111113]/60
+                  px-5
+                  py-3
+                  text-sm
+                  text-gray-400
+                  backdrop-blur-md
+                  transition-all
+                  duration-300
+                  hover:border-[#39ff88]/30
+                  hover:bg-[#39ff88]/5
+                  hover:text-[#39ff88]
+                  disabled:cursor-not-allowed
+                  disabled:opacity-50
+                "
+              >
+                <RefreshCw
+                  size={16}
+                  className={
+                    loading
+                      ? "animate-spin"
+                      : ""
+                  }
+                />
 
-                  {/* GitHub icon */}
+                Refresh
+              </button>
 
-                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#39ff88] text-black">
+              {/* GITHUB PROFILE */}
+              <a
+                href={`https://github.com/${GITHUB_USERNAME}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="
+                  inline-flex
+                  items-center
+                  gap-2
+                  rounded-full
+                  border
+                  border-[#39ff88]/30
+                  bg-[#39ff88]/5
+                  px-5
+                  py-3
+                  text-sm
+                  text-[#39ff88]
+                  transition-all
+                  duration-300
+                  hover:bg-[#39ff88]
+                  hover:text-black
+                  hover:shadow-[0_0_25px_rgba(57,255,136,0.15)]
+                "
+              >
+                <FaGithub size={16} />
 
-                    <FaGithub
-                      size={32}
-                    />
+                GitHub Profile
 
-                  </div>
+                <ExternalLink size={16} />
+              </a>
 
-                  <p className="mt-7 text-sm uppercase tracking-[0.3em] text-[#39ff88]">
-                    08 — GitHub
-                  </p>
+            </div>
+          </div>
+        </motion.div>
 
-                  <h2 className="mt-3 text-4xl font-bold text-white sm:text-5xl">
-                    Code in public.
-                  </h2>
+        {/* ==================================================
+            RATE LIMIT MESSAGE
+        ================================================== */}
 
-                  <p className="mt-4 max-w-2xl leading-7 text-gray-500">
-                    Explore my GitHub profile,
-                    repositories, technologies,
-                    projects and development
-                    activity.
-                  </p>
+        {rateLimitMessage && (
+          <motion.div
+            initial={{
+              opacity: 0,
+              y: 20,
+            }}
+            animate={{
+              opacity: 1,
+              y: 0,
+            }}
+            className="
+              mt-8
+              rounded-2xl
+              border
+              border-yellow-500/20
+              bg-yellow-500/5
+              p-5
+              text-sm
+              text-yellow-400
+            "
+          >
+            <div className="flex items-start gap-3">
+              <span className="mt-0.5">⚠️</span>
 
-                </div>
+              <div>
+                <p className="font-semibold">
+                  GitHub API limit
+                </p>
 
-                {/* Buttons */}
-
-                <div className="flex flex-wrap items-start gap-3">
-
-                  <button
-                    type="button"
-                    onClick={fetchGitHubData}
-                    disabled={loading}
-                    className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] px-5 py-3 text-sm text-gray-400 transition hover:border-[#39ff88]/30 hover:text-[#39ff88] disabled:opacity-50"
-                  >
-
-                    <RefreshCw
-                      size={16}
-                      className={
-                        loading
-                          ? "animate-spin"
-                          : ""
-                      }
-                    />
-
-                    Refresh
-
-                  </button>
-
-                  <a
-                    href={`https://github.com/${GITHUB_USERNAME}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 rounded-full border border-[#39ff88]/30 px-5 py-3 text-sm text-[#39ff88] transition hover:bg-[#39ff88] hover:text-black"
-                  >
-
-                    GitHub Profile
-
-                    <ExternalLink
-                      size={16}
-                    />
-
-                  </a>
-
-                </div>
-
+                <p className="mt-1 text-yellow-400/70">
+                  {rateLimitMessage}
+                </p>
               </div>
+            </div>
+          </motion.div>
+        )}
 
-              {/* ==================================================
-                  PROFILE CARD
-              ================================================== */}
+        {/* ==================================================
+            MAIN GLASS CONTAINER
+        ================================================== */}
 
-              {profile && (
-                <div className="mt-12 rounded-3xl border border-white/[0.07] bg-black/30 p-6">
+        <div
+          className="
+            relative
+            mt-14
+            overflow-hidden
+            rounded-[32px]
+            border
+            border-white/[0.08]
+            bg-[#111113]/55
+            backdrop-blur-xl
+          "
+        >
 
-                  <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+          {/* STATIC GLOW */}
+          <div
+            className="
+              pointer-events-none
+              absolute
+              -right-40
+              -top-40
+              h-[500px]
+              w-[500px]
+              rounded-full
+              bg-[#39ff88]/[0.035]
+              blur-[120px]
+            "
+          />
+
+          <div className="relative p-6 sm:p-8 lg:p-12">
+
+            {/* ==================================================
+                PROFILE
+            ================================================== */}
+
+            {profile && (
+              <motion.div
+                variants={cardVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{
+                  once: false,
+                  amount: 0.2,
+                }}
+              >
+                <motion.div
+                  animate={{
+                    y: [0, -4, 0],
+                  }}
+                  transition={{
+                    duration: 4,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                  whileHover={{
+                    y: -8,
+                  }}
+                  className="
+                    group
+                    relative
+                    overflow-hidden
+                    rounded-3xl
+                    border
+                    border-white/[0.07]
+                    bg-black/25
+                    p-6
+                    backdrop-blur-md
+                    transition-all
+                    duration-500
+                    hover:border-[#39ff88]/25
+                  "
+                >
+
+                  <div
+                    className="
+                      pointer-events-none
+                      absolute
+                      -right-20
+                      -top-20
+                      h-40
+                      w-40
+                      rounded-full
+                      bg-[#39ff88]/[0.04]
+                      blur-[60px]
+                    "
+                  />
+
+                  <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
 
                     <div className="flex items-center gap-5">
 
+                      {/* STATIC IMAGE */}
                       <img
-                        src={
-                          profile.avatar_url
-                        }
+                        src={profile.avatar_url}
                         alt={
                           profile.name ||
                           profile.login
                         }
-                        className="h-20 w-20 rounded-full border-2 border-[#39ff88]/20"
+                        className="
+                          h-20
+                          w-20
+                          rounded-2xl
+                          border-2
+                          border-[#39ff88]/20
+                          object-cover
+                          transition-all
+                          duration-300
+                          group-hover:border-[#39ff88]/50
+                        "
                       />
 
                       <div>
@@ -671,7 +874,7 @@ export default function Github() {
                             profile.login}
                         </h3>
 
-                        <p className="mt-1 text-sm text-[#39ff88]">
+                        <p className="mt-1 font-mono text-sm text-[#39ff88]">
                           @{profile.login}
                         </p>
 
@@ -688,68 +891,159 @@ export default function Github() {
                         )}
 
                       </div>
-
                     </div>
 
-                    <div className="flex items-center gap-2 text-xs text-gray-600">
-
+                    <div
+                      className="
+                        flex
+                        items-center
+                        gap-2
+                        self-start
+                        rounded-full
+                        border
+                        border-[#39ff88]/10
+                        bg-[#39ff88]/5
+                        px-3
+                        py-1.5
+                        text-xs
+                        text-gray-500
+                        sm:self-center
+                      "
+                    >
                       <span className="h-2 w-2 animate-pulse rounded-full bg-[#39ff88]" />
 
                       Live GitHub data
-
                     </div>
 
                   </div>
+                </motion.div>
+              </motion.div>
+            )}
 
-                </div>
-              )}
+            {/* ==================================================
+                STATS
+            ================================================== */}
 
-              {/* ==================================================
-                  STATS
-              ================================================== */}
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{
+                once: false,
+                amount: 0.15,
+              }}
+              className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5"
+            >
 
-              <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+              {stats.map((stat) => {
+                const Icon = stat.icon;
 
-                {stats.map(
-                  (stat) => {
+                return (
+                  <motion.div
+                    key={stat.label}
+                    variants={cardVariants}
+                  >
+                    <motion.div
+                      animate={{
+                        y: [0, -3, 0],
+                      }}
+                      transition={{
+                        duration: 4,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                      }}
+                      whileHover={{
+                        y: -8,
+                        scale: 1.015,
+                      }}
+                      className="
+                        group
+                        relative
+                        overflow-hidden
+                        rounded-2xl
+                        border
+                        border-white/[0.07]
+                        bg-black/25
+                        p-5
+                        backdrop-blur-md
+                        transition-all
+                        duration-300
+                        hover:border-[#39ff88]/30
+                      "
+                    >
 
-                    const Icon =
-                      stat.icon;
+                      <Icon
+                        size={19}
+                        className="
+                          text-[#39ff88]
+                          transition-transform
+                          duration-300
+                          group-hover:scale-110
+                        "
+                      />
 
-                    return (
+                      <p className="mt-5 text-2xl font-bold text-white">
+                        {stat.value}
+                      </p>
+
+                      <p className="mt-1 text-xs text-gray-600">
+                        {stat.label}
+                      </p>
+
                       <div
-                        key={
-                          stat.label
-                        }
-                        className="rounded-2xl border border-white/[0.07] bg-black/30 p-5 transition duration-300 hover:-translate-y-1 hover:border-[#39ff88]/30"
-                      >
+                        className="
+                          absolute
+                          bottom-0
+                          left-0
+                          h-px
+                          w-0
+                          bg-[#39ff88]
+                          transition-all
+                          duration-500
+                          group-hover:w-full
+                        "
+                      />
 
-                        <Icon
-                          size={19}
-                          className="text-[#39ff88]"
-                        />
+                    </motion.div>
+                  </motion.div>
+                );
+              })}
 
-                        <p className="mt-5 text-2xl font-bold text-white">
-                          {stat.value}
-                        </p>
+            </motion.div>
 
-                        <p className="mt-1 text-xs text-gray-600">
-                          {stat.label}
-                        </p>
+            {/* ==================================================
+                TECHNOLOGIES
+            ================================================== */}
 
-                      </div>
-                    );
-                  }
-                )}
-
-              </div>
-
-              {/* ==================================================
-                  TECHNOLOGIES
-              ================================================== */}
-
-              {languages.length > 0 && (
-                <div className="mt-8 rounded-2xl border border-white/[0.07] bg-black/30 p-6">
+            {languages.length > 0 && (
+              <motion.div
+                variants={cardVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{
+                  once: false,
+                  amount: 0.15,
+                }}
+              >
+                <motion.div
+                  animate={{
+                    y: [0, -4, 0],
+                  }}
+                  transition={{
+                    duration: 4.5,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                  className="
+                    mt-5
+                    rounded-2xl
+                    border
+                    border-white/[0.07]
+                    bg-black/25
+                    p-6
+                    backdrop-blur-md
+                  "
+                >
 
                   <div className="flex items-center gap-3">
 
@@ -762,45 +1056,89 @@ export default function Github() {
                       Technologies
                     </h3>
 
+                    <span className="font-mono text-[10px] text-gray-700">
+                      detected
+                    </span>
+
                   </div>
 
-                  <div className="mt-5 flex flex-wrap gap-3">
+                  <div className="mt-5 flex flex-wrap gap-2.5">
 
                     {languages.map(
                       ([language, count]) => (
-                        <div
-                          key={
-                            language
-                          }
-                          className="rounded-full border border-white/[0.08] bg-white/[0.03] px-4 py-2 text-sm text-gray-400"
+                        <span
+                          key={language}
+                          className="
+                            cursor-default
+                            rounded-full
+                            border
+                            border-white/[0.08]
+                            bg-white/[0.03]
+                            px-4
+                            py-2
+                            text-sm
+                            text-gray-400
+                            transition-all
+                            duration-300
+                            hover:-translate-y-1
+                            hover:border-[#39ff88]/40
+                            hover:bg-[#39ff88]/10
+                            hover:text-[#39ff88]
+                          "
                         >
-
                           <span className="text-white">
                             {language}
                           </span>
 
                           <span className="ml-2 text-gray-700">
                             {count}{" "}
-                            {count ===
-                            1
+                            {count === 1
                               ? "repo"
                               : "repos"}
                           </span>
-
-                        </div>
+                        </span>
                       )
                     )}
 
                   </div>
 
-                </div>
-              )}
+                </motion.div>
+              </motion.div>
+            )}
 
-              {/* ==================================================
-                  GITHUB ACTIVITY
-              ================================================== */}
+            {/* ==================================================
+                ACTIVITY
+            ================================================== */}
 
-              <div className="mt-8 rounded-2xl border border-white/[0.07] bg-black/30 p-6">
+            <motion.div
+              variants={cardVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{
+                once: false,
+                amount: 0.15,
+              }}
+            >
+              <motion.div
+                animate={{
+                  y: [0, -4, 0],
+                }}
+                transition={{
+                  duration: 5,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+                className="
+                  mt-5
+                  overflow-hidden
+                  rounded-2xl
+                  border
+                  border-white/[0.07]
+                  bg-black/25
+                  p-6
+                  backdrop-blur-md
+                "
+              >
 
                 <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
 
@@ -820,24 +1158,20 @@ export default function Github() {
                     </div>
 
                     <p className="mt-1 text-xs text-gray-600">
-                      Real public GitHub events
+                      Recent public GitHub events
                     </p>
 
                   </div>
 
                   <div className="flex items-center gap-2 text-xs text-gray-700">
-
-                    <CalendarDays
-                      size={14}
-                    />
+                    <CalendarDays size={14} />
 
                     Activity calendar
-
                   </div>
 
                 </div>
 
-                {/* Activity grid */}
+                {/* GRID */}
 
                 <div className="mt-7 overflow-x-auto pb-2">
 
@@ -859,9 +1193,7 @@ export default function Github() {
 
                         return (
                           <div
-                            key={
-                              column
-                            }
+                            key={column}
                             className="flex flex-col gap-1"
                           >
 
@@ -871,27 +1203,31 @@ export default function Github() {
                               (_, row) => {
 
                                 const day =
-                                  week[
-                                    row
-                                  ];
+                                  week[row];
 
                                 return (
                                   <div
-                                    key={
-                                      row
-                                    }
+                                    key={row}
                                     title={
                                       day
                                         ? `${day.count} public activities on ${day.date}`
                                         : ""
                                     }
-                                    className={`h-3 w-3 rounded-[3px] ${
-                                      day
-                                        ? getActivityClass(
-                                            day.count
-                                          )
-                                        : "bg-white/[0.05]"
-                                    }`}
+                                    className={`
+                                      h-3
+                                      w-3
+                                      rounded-[3px]
+                                      transition-transform
+                                      duration-200
+                                      hover:scale-125
+                                      ${
+                                        day
+                                          ? getActivityClass(
+                                              day.count
+                                            )
+                                          : "bg-white/[0.05]"
+                                      }
+                                    `}
                                   />
                                 );
                               }
@@ -903,10 +1239,9 @@ export default function Github() {
                     )}
 
                   </div>
-
                 </div>
 
-                {/* Legend */}
+                {/* LEGEND */}
 
                 <div className="mt-5 flex items-center justify-end gap-2 text-xs text-gray-700">
 
@@ -930,280 +1265,314 @@ export default function Github() {
 
                 </div>
 
+              </motion.div>
+            </motion.div>
+
+            {/* ==================================================
+                REPOSITORIES
+            ================================================== */}
+
+            <motion.div
+              variants={headerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{
+                once: false,
+                amount: 0.15,
+              }}
+              className="mt-10"
+            >
+
+              <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+
+                <div>
+
+                  <h3 className="flex items-center gap-2 font-semibold text-white">
+
+                    <GitBranch
+                      size={18}
+                      className="text-[#39ff88]"
+                    />
+
+                    All Repositories
+
+                  </h3>
+
+                  <p className="mt-1 text-xs text-gray-600">
+                    {repos.length} public repositories
+                  </p>
+
+                </div>
+
+                <a
+                  href={`https://github.com/${GITHUB_USERNAME}?tab=repositories`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="
+                    inline-flex
+                    items-center
+                    gap-1
+                    text-xs
+                    text-[#39ff88]
+                    transition-colors
+                    hover:text-white
+                  "
+                >
+                  View on GitHub
+
+                  <ArrowUpRight size={14} />
+                </a>
+
               </div>
 
-              {/* ==================================================
-                  RECENT ACTIVITY
-              ================================================== */}
+              <motion.div
+                variants={containerVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{
+                  once: false,
+                  amount: 0.1,
+                }}
+                className="grid gap-4 md:grid-cols-2"
+              >
 
-              {events.length > 0 && (
-                <div className="mt-8">
-
-                  <div className="mb-5 flex items-center justify-between">
-
-                    <div>
-
-                      <h3 className="flex items-center gap-2 font-semibold text-white">
-
-                        <GitCommit
-                          size={18}
-                          className="text-[#39ff88]"
-                        />
-
-                        Recent Activity
-
-                      </h3>
-
-                      <p className="mt-1 text-xs text-gray-600">
-                        Latest public GitHub events
-                      </p>
-
-                    </div>
-
-                    <a
-                      href={`https://github.com/${GITHUB_USERNAME}?tab=overview`}
+                {repos.map((repo) => (
+                  <motion.div
+                    key={repo.id}
+                    variants={cardVariants}
+                  >
+                    <motion.a
+                      href={repo.html_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs text-[#39ff88] hover:text-white"
+                      animate={{
+                        y: [0, -3, 0],
+                      }}
+                      transition={{
+                        duration: 4.5,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                      }}
+                      whileHover={{
+                        y: -8,
+                        scale: 1.01,
+                      }}
+                      className="
+                        group
+                        relative
+                        block
+                        overflow-hidden
+                        rounded-2xl
+                        border
+                        border-white/[0.07]
+                        bg-black/25
+                        p-6
+                        backdrop-blur-md
+                        transition-all
+                        duration-300
+                        hover:border-[#39ff88]/30
+                      "
                     >
-                      View all →
-                    </a>
 
-                  </div>
+                      <div className="flex items-start justify-between gap-4">
 
-                  <div className="grid gap-3">
+                        <div className="min-w-0">
 
-                    {events
-                      .slice(0, 8)
-                      .map(
-                        (event) => (
-                          <a
-                            key={
-                              event.id
-                            }
-                            href={`https://github.com/${event.repo.name}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="group rounded-2xl border border-white/[0.07] bg-black/30 p-5 transition duration-300 hover:border-[#39ff88]/30"
+                          <h4 className="truncate text-base font-semibold text-white transition-colors group-hover:text-[#39ff88]">
+                            {repo.name}
+                          </h4>
+
+                          <p className="mt-2 line-clamp-2 text-sm leading-6 text-gray-600">
+                            {repo.description ||
+                              "No description available."}
+                          </p>
+
+                        </div>
+
+                        <ExternalLink
+                          size={16}
+                          className="
+                            shrink-0
+                            text-gray-700
+                            transition-all
+                            duration-300
+                            group-hover:-translate-y-0.5
+                            group-hover:translate-x-0.5
+                            group-hover:text-[#39ff88]
+                          "
+                        />
+
+                      </div>
+
+                      <div className="mt-5 flex flex-wrap items-center gap-4 text-xs text-gray-600">
+
+                        {repo.language && (
+                          <span
+                            className="
+                              rounded-full
+                              border
+                              border-white/[0.06]
+                              bg-white/[0.03]
+                              px-3
+                              py-1
+                            "
                           >
+                            {repo.language}
+                          </span>
+                        )}
 
-                            <div className="flex items-start gap-4">
+                        <span className="flex items-center gap-1">
+                          <Star size={13} />
+                          {repo.stargazers_count}
+                        </span>
 
-                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#39ff88]/10 text-[#39ff88]">
+                        <span className="flex items-center gap-1">
+                          <GitFork size={13} />
+                          {repo.forks_count}
+                        </span>
 
-                                {event.type ===
-                                "PushEvent" ? (
-                                  <GitCommit
-                                    size={18}
-                                  />
-                                ) : (
-                                  <Code2
-                                    size={18}
-                                  />
-                                )}
+                        <span className="ml-auto">
+                          Updated{" "}
+                          {formatDate(
+                            repo.pushed_at
+                          )}
+                        </span>
 
-                              </div>
+                      </div>
 
-                              <div className="min-w-0 flex-1">
-
-                                <p className="font-medium text-white">
-                                  {getEventName(
-                                    event.type
-                                  )}
-                                </p>
-
-                                <p className="mt-1 truncate text-sm text-gray-600">
-                                  {event.repo.name}
-                                </p>
-
-                                <p className="mt-2 text-xs text-gray-700">
-                                  {formatDate(
-                                    event.created_at
-                                  )}
-                                </p>
-
-                              </div>
-
-                              <ExternalLink
-                                size={15}
-                                className="text-gray-700 transition group-hover:text-[#39ff88]"
-                              />
-
-                            </div>
-
-                          </a>
-                        )
-                      )}
-
-                  </div>
-
-                </div>
-              )}
-
-              {/* ==================================================
-                  ALL REPOSITORIES
-              ================================================== */}
-
-              <div className="mt-10">
-
-                <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-
-                  <div>
-
-                    <h3 className="flex items-center gap-2 font-semibold text-white">
-
-                      <GitBranch
-                        size={18}
-                        className="text-[#39ff88]"
+                      <div
+                        className="
+                          absolute
+                          bottom-0
+                          left-0
+                          h-px
+                          w-0
+                          bg-[#39ff88]
+                          shadow-[0_0_15px_rgba(57,255,136,0.6)]
+                          transition-all
+                          duration-500
+                          group-hover:w-full
+                        "
                       />
 
-                      All Repositories
+                    </motion.a>
+                  </motion.div>
+                ))}
 
-                    </h3>
+              </motion.div>
+            </motion.div>
 
-                    <p className="mt-1 text-xs text-gray-600">
-                      {repos.length} public repositories
-                    </p>
+            {/* ==================================================
+                LAST UPDATED
+            ================================================== */}
 
-                  </div>
+            <div
+              className="
+                mt-10
+                flex
+                flex-col
+                justify-between
+                gap-3
+                border-t
+                border-white/[0.06]
+                pt-6
+                sm:flex-row
+                sm:items-center
+              "
+            >
 
-                  <a
-                    href={`https://github.com/${GITHUB_USERNAME}?tab=repositories`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-[#39ff88] hover:text-white"
-                  >
-                    View on GitHub →
-                  </a>
+              <div className="flex items-center gap-2 text-xs text-gray-700">
 
-                </div>
+                <span className="h-2 w-2 animate-pulse rounded-full bg-[#39ff88]" />
 
-                <div className="grid gap-4 md:grid-cols-2">
+                Live GitHub data
 
-                  {repos.map(
-                    (repo) => (
-                      <a
-                        key={
-                          repo.id
-                        }
-                        href={
-                          repo.html_url
-                        }
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="group rounded-2xl border border-white/[0.07] bg-black/30 p-6 transition duration-300 hover:-translate-y-1 hover:border-[#39ff88]/30"
-                      >
+              </div>
 
-                        <div className="flex items-start justify-between gap-4">
-
-                          <div className="min-w-0">
-
-                            <h4 className="truncate text-base font-semibold text-white group-hover:text-[#39ff88]">
-                              {repo.name}
-                            </h4>
-
-                            <p className="mt-2 line-clamp-2 text-sm leading-6 text-gray-600">
-                              {repo.description ||
-                                "No description available."}
-                            </p>
-
-                          </div>
-
-                          <ExternalLink
-                            size={16}
-                            className="shrink-0 text-gray-700 group-hover:text-[#39ff88]"
-                          />
-
-                        </div>
-
-                        <div className="mt-5 flex flex-wrap items-center gap-4 text-xs text-gray-600">
-
-                          {repo.language && (
-                            <span className="rounded-full bg-white/[0.04] px-3 py-1">
-                              {repo.language}
-                            </span>
-                          )}
-
-                          <span className="flex items-center gap-1">
-
-                            <Star
-                              size={13}
-                            />
-
-                            {repo.stargazers_count}
-
-                          </span>
-
-                          <span className="flex items-center gap-1">
-
-                            <GitFork
-                              size={13}
-                            />
-
-                            {repo.forks_count}
-
-                          </span>
-
-                          <span className="ml-auto">
-                            Updated{" "}
-                            {formatDate(
-                              repo.pushed_at
-                            )}
-                          </span>
-
-                        </div>
-
-                      </a>
-                    )
+              {lastUpdated && (
+                <p className="font-mono text-xs text-gray-700">
+                  Last updated:{" "}
+                  {lastUpdated.toLocaleTimeString(
+                    [],
+                    {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      second: "2-digit",
+                    }
                   )}
-
-                </div>
-
-              </div>
-
-              {/* ==================================================
-                  LAST UPDATED
-              ================================================== */}
-
-              <div className="mt-10 flex flex-col justify-between gap-3 border-t border-white/[0.06] pt-6 sm:flex-row sm:items-center">
-
-                <div className="flex items-center gap-2 text-xs text-gray-700">
-
-                  <span className="h-2 w-2 animate-pulse rounded-full bg-[#39ff88]" />
-
-                  Live GitHub data
-
-                </div>
-
-                {lastUpdated && (
-                  <p className="text-xs text-gray-700">
-                    Last updated:{" "}
-                    {lastUpdated.toLocaleTimeString(
-                      [],
-                      {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        second: "2-digit",
-                      }
-                    )}
-                  </p>
-                )}
-
-              </div>
-
-              {/* ==================================================
-                  ERROR
-              ================================================== */}
-
-              {error && (
-                <div className="mt-6 rounded-xl border border-red-500/20 bg-red-500/5 p-4 text-sm text-red-400">
-                  {error}
-                </div>
+                </p>
               )}
 
             </div>
+
+            {/* ==================================================
+                NORMAL ERROR
+            ================================================== */}
+
+            {error && (
+              <div
+                className="
+                  mt-6
+                  rounded-xl
+                  border
+                  border-red-500/20
+                  bg-red-500/5
+                  p-4
+                  text-sm
+                  text-red-400
+                "
+              >
+                {error}
+              </div>
+            )}
+
           </div>
         </div>
+
+        {/* ==================================================
+            FOOTER
+        ================================================== */}
+
+        <motion.div
+          initial={{
+            opacity: 0,
+            y: 25,
+          }}
+          whileInView={{
+            opacity: 1,
+            y: 0,
+          }}
+          viewport={{
+            once: false,
+            amount: 0.5,
+          }}
+          transition={{
+            duration: 0.6,
+          }}
+          className="
+            mt-10
+            flex
+            items-center
+            justify-center
+            gap-3
+            font-mono
+            text-xs
+            text-gray-600
+          "
+        >
+          <span className="text-[#39ff88]/50">
+            {"<github />"}
+          </span>
+
+          <span>
+            Code • Commit • Improve
+          </span>
+
+          <span className="text-[#39ff88]/50">
+            {"</>"}
+          </span>
+        </motion.div>
+
       </div>
     </section>
   );
