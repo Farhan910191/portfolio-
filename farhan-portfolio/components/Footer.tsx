@@ -32,14 +32,14 @@ const links = [
 const footerVariants: Variants = {
   hidden: {
     opacity: 0,
-    y: 35,
+    y: 25,
   },
 
   visible: {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.7,
+      duration: 0.55,
       ease: [0.22, 1, 0.36, 1],
     },
   },
@@ -101,7 +101,7 @@ export default function Footer() {
           whileInView="visible"
           viewport={{
             once: true,
-            amount: 0.2,
+            amount: 0.15,
           }}
           className="relative"
         >

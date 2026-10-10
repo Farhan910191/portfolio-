@@ -2,15 +2,54 @@
 
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Float, Line, OrbitControls } from "@react-three/drei";
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useEffect, useState } from "react";
 import * as THREE from "three";
 
 /* =========================================================
    COLORS
 ========================================================= */
 
-const GREEN = "#39ff88";
-const GREEN_DARK = "#20c968";
+let currentIsDark = true;
+const themeListeners = new Set<() => void>();
+
+if (typeof window !== "undefined") {
+  const check = () => {
+    const dark = document.documentElement.getAttribute("data-theme") !== "light";
+    if (dark !== currentIsDark) {
+      currentIsDark = dark;
+      themeListeners.forEach((fn) => fn());
+    }
+  };
+  const observer = new MutationObserver(check);
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["data-theme"],
+  });
+}
+
+function useThemeColors() {
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof document !== "undefined") {
+      return document.documentElement.getAttribute("data-theme") !== "light";
+    }
+    return true;
+  });
+
+  useEffect(() => {
+    const listener = () => setIsDark(currentIsDark);
+    themeListeners.add(listener);
+    return () => {
+      themeListeners.delete(listener);
+    };
+  }, []);
+
+  return {
+    green: isDark ? "#39ff88" : "#10b981",
+    greenDark: isDark ? "#20c968" : "#059669",
+    coreBg: isDark ? "#07140d" : "#e8f5ee",
+    isDark,
+  };
+}
 
 /* =========================================================
    FLOATING PARTICLES
@@ -18,6 +57,7 @@ const GREEN_DARK = "#20c968";
 
 function ParticleField() {
   const pointsRef = useRef<THREE.Points>(null);
+  const { green } = useThemeColors();
 
   const particles = useMemo(() => {
     const count = 850;
@@ -58,7 +98,7 @@ function ParticleField() {
       </bufferGeometry>
 
       <pointsMaterial
-        color={GREEN}
+        color={green}
         size={0.018}
         transparent
         opacity={0.45}
@@ -75,6 +115,7 @@ function ParticleField() {
 
 function DeveloperCore() {
   const coreRef = useRef<THREE.Group>(null);
+  const { green, greenDark, coreBg } = useThemeColors();
 
   useFrame((_, delta) => {
     if (!coreRef.current) return;
@@ -90,7 +131,7 @@ function DeveloperCore() {
         <icosahedronGeometry args={[1.65, 2]} />
 
         <meshBasicMaterial
-          color={GREEN}
+          color={green}
           wireframe
           transparent
           opacity={0.2}
@@ -102,7 +143,7 @@ function DeveloperCore() {
         <icosahedronGeometry args={[1.2, 1]} />
 
         <meshBasicMaterial
-          color={GREEN_DARK}
+          color={greenDark}
           wireframe
           transparent
           opacity={0.35}
@@ -114,7 +155,7 @@ function DeveloperCore() {
         <sphereGeometry args={[0.7, 32, 32]} />
 
         <meshBasicMaterial
-          color="#07140d"
+          color={coreBg}
           transparent
           opacity={0.95}
         />
@@ -122,7 +163,7 @@ function DeveloperCore() {
 
       {/* Center light */}
       <pointLight
-        color={GREEN}
+        color={green}
         intensity={5}
         distance={5}
       />
@@ -136,6 +177,7 @@ function DeveloperCore() {
 
 function DeveloperOrbits() {
   const groupRef = useRef<THREE.Group>(null);
+  const { green, greenDark } = useThemeColors();
 
   useFrame((_, delta) => {
     if (!groupRef.current) return;
@@ -151,7 +193,7 @@ function DeveloperOrbits() {
         <torusGeometry args={[2.15, 0.012, 12, 160]} />
 
         <meshBasicMaterial
-          color={GREEN}
+          color={green}
           transparent
           opacity={0.55}
         />
@@ -162,7 +204,7 @@ function DeveloperOrbits() {
         <torusGeometry args={[2.65, 0.008, 12, 160]} />
 
         <meshBasicMaterial
-          color={GREEN_DARK}
+          color={greenDark}
           transparent
           opacity={0.3}
         />
@@ -173,7 +215,7 @@ function DeveloperOrbits() {
         <torusGeometry args={[3.1, 0.006, 10, 160]} />
 
         <meshBasicMaterial
-          color={GREEN}
+          color={green}
           transparent
           opacity={0.18}
         />
@@ -187,6 +229,8 @@ function DeveloperOrbits() {
 ========================================================= */
 
 function FloatingNodes() {
+  const { green } = useThemeColors();
+
   const nodes = useMemo(
     () => [
       [-2.8, 1.7, 0],
@@ -212,7 +256,7 @@ function FloatingNodes() {
             <sphereGeometry args={[0.045, 16, 16]} />
 
             <meshBasicMaterial
-              color={GREEN}
+              color={green}
               transparent
               opacity={0.8}
             />
@@ -228,6 +272,8 @@ function FloatingNodes() {
 ========================================================= */
 
 function ConnectionLines() {
+  const { green } = useThemeColors();
+
   const lines = [
     [
       [-2.8, 1.7, 0],
@@ -260,7 +306,7 @@ function ConnectionLines() {
         <Line
           key={index}
           points={points as [number, number, number][]}
-          color={GREEN}
+          color={green}
           transparent
           opacity={0.12}
           lineWidth={0.6}
@@ -303,6 +349,8 @@ function DeveloperScene() {
 ========================================================= */
 
 export default function DeveloperBackground() {
+  const { green, isDark } = useThemeColors();
+
   return (
     <div
       className="
@@ -311,8 +359,10 @@ export default function DeveloperBackground() {
         inset-0
         z-0
         overflow-hidden
-        bg-[#050505]
+        transition-colors
+        duration-500
       "
+      style={{ backgroundColor: isDark ? "#050505" : "#f0f1f3" }}
     >
       {/* Green atmospheric glow */}
       <div
@@ -325,9 +375,11 @@ export default function DeveloperBackground() {
           -translate-x-1/2
           -translate-y-1/2
           rounded-full
-          bg-[#39ff88]/[0.035]
           blur-[140px]
         "
+        style={{
+          backgroundColor: isDark ? `${green}09` : `${green}08`,
+        }}
       />
 
       {/* Top developer code */}
@@ -340,14 +392,14 @@ export default function DeveloperBackground() {
           font-mono
           text-[11px]
           leading-6
-          text-[#39ff88]/10
           lg:block
         "
+        style={{ color: isDark ? `${green}1a` : `${green}15` }}
       >
         <div>const developer = {"{"}</div>
-        <div className="pl-4">name: "Farhan",</div>
-        <div className="pl-4">role: "Full Stack",</div>
-        <div className="pl-4">stack: ["Python", "React"],</div>
+        <div className="pl-4">name: &quot;Farhan&quot;,</div>
+        <div className="pl-4">role: &quot;Full Stack&quot;,</div>
+        <div className="pl-4">stack: [&quot;Python&quot;, &quot;React&quot;],</div>
         <div>{"}"}</div>
       </div>
 
@@ -361,9 +413,9 @@ export default function DeveloperBackground() {
           font-mono
           text-[11px]
           leading-6
-          text-[#39ff88]/10
           lg:block
         "
+        style={{ color: isDark ? `${green}1a` : `${green}15` }}
       >
         <div>function buildProject() {"{"}</div>
         <div className="pl-4">return {"{"}</div>
@@ -399,19 +451,37 @@ export default function DeveloperBackground() {
       </Canvas>
 
       {/* Dark readability overlays */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#050505_75%)]" />
+      <div
+        className="absolute inset-0"
+        style={{
+          background: isDark
+            ? "radial-gradient(circle at center, transparent 0%, #050505 75%)"
+            : "radial-gradient(circle at center, transparent 0%, #f0f1f3 75%)",
+        }}
+      />
 
-      <div className="absolute inset-0 bg-gradient-to-b from-[#050505]/20 via-transparent to-[#050505]" />
+      <div
+        className="absolute inset-0"
+        style={{
+          background: isDark
+            ? "linear-gradient(to bottom, rgba(5,5,5,0.2), transparent, #050505)"
+            : "linear-gradient(to bottom, rgba(240,241,243,0.2), transparent, #f0f1f3)",
+        }}
+      />
 
       {/* Developer grid */}
       <div
         className="
           absolute
           inset-0
-          opacity-[0.035]
-          [background-image:linear-gradient(rgba(57,255,136,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(57,255,136,0.5)_1px,transparent_1px)]
           [background-size:80px_80px]
         "
+        style={{
+          opacity: isDark ? 0.035 : 0.025,
+          backgroundImage: isDark
+            ? "linear-gradient(rgba(57,255,136,0.5) 1px,transparent 1px),linear-gradient(90deg,rgba(57,255,136,0.5) 1px,transparent 1px)"
+            : "linear-gradient(rgba(16,185,129,0.15) 1px,transparent 1px),linear-gradient(90deg,rgba(16,185,129,0.15) 1px,transparent 1px)",
+        }}
       />
     </div>
   );

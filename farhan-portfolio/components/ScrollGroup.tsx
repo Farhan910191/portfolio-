@@ -18,13 +18,13 @@ export default function ScrollGroup({
       whileInView="visible"
       viewport={{
         once: true,
-        amount: 0.1,
+        amount: 0.15,
       }}
       variants={{
         hidden: {},
         visible: {
           transition: {
-            staggerChildren: 0.1,
+            staggerChildren: 0.08,
           },
         },
       }}

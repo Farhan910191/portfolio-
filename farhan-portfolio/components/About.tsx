@@ -16,15 +16,13 @@ import { motion, type Variants } from "framer-motion";
 const fadeUp: Variants = {
   hidden: {
     opacity: 0,
-    y: 30,
-    filter: "blur(8px)",
+    y: 25,
   },
   visible: {
     opacity: 1,
     y: 0,
-    filter: "blur(0px)",
     transition: {
-      duration: 0.7,
+      duration: 0.55,
       ease: [0.22, 1, 0.36, 1],
     },
   },
@@ -65,16 +63,14 @@ const highlights = [
 const headerVariants: Variants = {
   hidden: {
     opacity: 0,
-    y: 35,
-    filter: "blur(8px)",
+    y: 25,
   },
 
   visible: {
     opacity: 1,
     y: 0,
-    filter: "blur(0px)",
     transition: {
-      duration: 0.7,
+      duration: 0.55,
       ease: [0.22, 1, 0.36, 1],
     },
   },
@@ -83,8 +79,8 @@ const headerVariants: Variants = {
 const contentVariants: Variants = {
   hidden: {
     opacity: 0,
-    y: 45,
-    scale: 0.97,
+    y: 30,
+    scale: 0.98,
   },
 
   visible: {
@@ -92,7 +88,7 @@ const contentVariants: Variants = {
     y: 0,
     scale: 1,
     transition: {
-      duration: 0.65,
+      duration: 0.55,
       ease: [0.22, 1, 0.36, 1],
     },
   },
@@ -103,7 +99,7 @@ const containerVariants: Variants = {
 
   visible: {
     transition: {
-      staggerChildren: 0.1,
+      staggerChildren: 0.08,
     },
   },
 };
@@ -174,8 +170,8 @@ export default function About() {
           initial="hidden"
           whileInView="visible"
           viewport={{
-            once: false,
-            amount: 0.2,
+            once: true,
+            amount: 0.15,
           }}
           className="min-w-0"
         >
@@ -273,8 +269,8 @@ export default function About() {
             initial="hidden"
             whileInView="visible"
             viewport={{
-              once: false,
-              amount: 0.12,
+              once: true,
+              amount: 0.15,
             }}
             className="
               group
@@ -290,6 +286,9 @@ export default function About() {
               p-5
               shadow-[0_20px_70px_rgba(0,0,0,0.25)]
               backdrop-blur-2xl
+              transition-all
+              duration-300
+              hover:-translate-y-1.5
               sm:rounded-3xl
               sm:p-7
               md:p-8
@@ -603,8 +602,8 @@ export default function About() {
             initial="hidden"
             whileInView="visible"
             viewport={{
-              once: false,
-              amount: 0.1,
+              once: true,
+              amount: 0.15,
             }}
             className="
               grid
@@ -622,12 +621,6 @@ export default function About() {
                 <motion.div
                   key={item.title}
                   variants={contentVariants}
-                  whileHover={{
-                    y: -5,
-                  }}
-                  transition={{
-                    duration: 0.25,
-                  }}
                   className="
                     group
                     relative
@@ -641,7 +634,8 @@ export default function About() {
                     p-4
                     backdrop-blur-xl
                     transition-all
-                    duration-500
+                    duration-300
+                    hover:-translate-y-1.5
                     hover:border-[#39ff88]/30
                     hover:bg-[#151518]/80
                     sm:p-5
@@ -808,11 +802,12 @@ export default function About() {
             y: 0,
           }}
           viewport={{
-            once: false,
-            amount: 0.4,
+            once: true,
+            amount: 0.15,
           }}
           transition={{
-            duration: 0.7,
+            duration: 0.55,
+            ease: [0.22, 1, 0.36, 1],
           }}
           className="
             mt-10

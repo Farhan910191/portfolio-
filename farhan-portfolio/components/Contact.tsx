@@ -35,17 +35,17 @@ import emailjs from "@emailjs/browser";
 const leftVariants: Variants = {
   hidden: {
     opacity: 0,
-    x: -45,
-    filter: "blur(8px)",
+    y: 30,
+    scale: 0.98,
   },
 
   visible: {
     opacity: 1,
-    x: 0,
-    filter: "blur(0px)",
+    y: 0,
+    scale: 1,
     transition: {
-      duration: 0.7,
-      ease: "easeOut",
+      duration: 0.55,
+      ease: [0.22, 1, 0.36, 1],
     },
   },
 };
@@ -53,18 +53,18 @@ const leftVariants: Variants = {
 const rightVariants: Variants = {
   hidden: {
     opacity: 0,
-    x: 45,
-    filter: "blur(8px)",
+    y: 30,
+    scale: 0.98,
   },
 
   visible: {
     opacity: 1,
-    x: 0,
-    filter: "blur(0px)",
+    y: 0,
+    scale: 1,
     transition: {
-      duration: 0.7,
-      delay: 0.1,
-      ease: "easeOut",
+      duration: 0.55,
+      delay: 0.08,
+      ease: [0.22, 1, 0.36, 1],
     },
   },
 };
@@ -504,7 +504,7 @@ Thank you.
             whileInView="visible"
             viewport={{
               once: true,
-              amount: 0.2,
+              amount: 0.15,
             }}
           >
 
@@ -1453,10 +1453,11 @@ Thank you.
           }}
           viewport={{
             once: true,
-            amount: 0.5,
+            amount: 0.15,
           }}
           transition={{
-            duration: 0.6,
+            duration: 0.55,
+            ease: [0.22, 1, 0.36, 1],
           }}
           className="
             mt-12

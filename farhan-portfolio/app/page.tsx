@@ -16,7 +16,7 @@ import Footer from "@/components/Footer";
 
 export default function Home() {
   return (
-    <main className="relative min-h-screen bg-[#050505] text-white">
+    <main className="relative min-h-screen bg-[var(--background-deep)] text-[var(--foreground)]">
       {/* ONLY PAGE-WIDE BACKGROUND */}
       <DeveloperBackground />
 

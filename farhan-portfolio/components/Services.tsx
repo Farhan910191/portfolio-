@@ -53,15 +53,13 @@ const services = [
 const headerVariants: Variants = {
   hidden: {
     opacity: 0,
-    y: 40,
-    filter: "blur(8px)",
+    y: 25,
   },
   visible: {
     opacity: 1,
     y: 0,
-    filter: "blur(0px)",
     transition: {
-      duration: 0.7,
+      duration: 0.55,
       ease: [0.22, 1, 0.36, 1],
     },
   },
@@ -71,7 +69,7 @@ const containerVariants: Variants = {
   hidden: {},
   visible: {
     transition: {
-      staggerChildren: 0.1,
+      staggerChildren: 0.08,
     },
   },
 };
@@ -79,15 +77,15 @@ const containerVariants: Variants = {
 const cardVariants: Variants = {
   hidden: {
     opacity: 0,
-    y: 55,
-    scale: 0.95,
+    y: 30,
+    scale: 0.98,
   },
   visible: {
     opacity: 1,
     y: 0,
     scale: 1,
     transition: {
-      duration: 0.65,
+      duration: 0.55,
       ease: [0.22, 1, 0.36, 1],
     },
   },
@@ -111,7 +109,7 @@ export default function Services() {
           whileInView="visible"
           viewport={{
             once: true,
-            amount: 0.25,
+            amount: 0.15,
           }}
         >
           <div className="flex items-center gap-3">
@@ -145,7 +143,7 @@ export default function Services() {
           whileInView="visible"
           viewport={{
             once: true,
-            amount: 0.12,
+            amount: 0.15,
           }}
           className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
         >
@@ -156,12 +154,6 @@ export default function Services() {
               <motion.article
                 key={service.title}
                 variants={cardVariants}
-                whileHover={{
-                  y: -8,
-                  transition: {
-                    duration: 0.25,
-                  },
-                }}
                 className="
                   group
                   relative
@@ -173,7 +165,8 @@ export default function Services() {
                   p-7
                   backdrop-blur-xl
                   transition-all
-                  duration-500
+                  duration-300
+                  hover:-translate-y-1.5
                   hover:border-[#39ff88]/30
                   hover:bg-[#151518]/75
                 "
@@ -342,11 +335,12 @@ export default function Services() {
           }}
           viewport={{
             once: true,
-            amount: 0.5,
+            amount: 0.15,
           }}
           transition={{
-            duration: 0.6,
-            delay: 0.2,
+            duration: 0.55,
+            delay: 0.1,
+            ease: [0.22, 1, 0.36, 1],
           }}
           className="
             mt-12

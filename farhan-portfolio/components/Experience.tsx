@@ -49,7 +49,25 @@ const containerVariants: Variants = {
 
   visible: {
     transition: {
-      staggerChildren: 0.1,
+      staggerChildren: 0.08,
+    },
+  },
+};
+
+const cardVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    y: 30,
+    scale: 0.98,
+  },
+
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      duration: 0.55,
+      ease: [0.22, 1, 0.36, 1],
     },
   },
 };
@@ -57,16 +75,14 @@ const containerVariants: Variants = {
 const revealVariants: Variants = {
   hidden: {
     opacity: 0,
-    y: 30,
-    filter: "blur(6px)",
+    y: 25,
   },
 
   visible: {
     opacity: 1,
     y: 0,
-    filter: "blur(0px)",
     transition: {
-      duration: 0.65,
+      duration: 0.55,
       ease: [0.22, 1, 0.36, 1],
     },
   },
@@ -142,8 +158,8 @@ export default function Experience() {
           initial="hidden"
           whileInView="visible"
           viewport={{
-            once: false,
-            amount: 0.2,
+            once: true,
+            amount: 0.15,
           }}
           className="max-w-3xl"
         >
@@ -238,8 +254,8 @@ export default function Experience() {
               scaleY: 1,
             }}
             viewport={{
-              once: false,
-              amount: 0.1,
+              once: true,
+              amount: 0.15,
             }}
             transition={{
               duration: 1,
@@ -288,8 +304,8 @@ export default function Experience() {
                 scale: 1,
               }}
               viewport={{
-                once: false,
-                amount: 0.3,
+                once: true,
+                amount: 0.15,
               }}
               transition={{
                 duration: 0.45,
@@ -338,18 +354,12 @@ export default function Experience() {
             ================================================== */}
 
             <motion.article
-              variants={revealVariants}
+              variants={cardVariants}
               initial="hidden"
               whileInView="visible"
               viewport={{
-                once: false,
-                amount: 0.12,
-              }}
-              whileHover={{
-                y: -5,
-              }}
-              transition={{
-                duration: 0.25,
+                once: true,
+                amount: 0.15,
               }}
               className="
                 group
@@ -362,8 +372,9 @@ export default function Experience() {
                 bg-[#111113]/65
                 p-5
                 backdrop-blur-xl
-                transition-colors
-                duration-500
+                transition-all
+                duration-300
+                hover:-translate-y-1.5
                 hover:border-[#39ff88]/25
                 hover:bg-[#151518]/75
                 sm:rounded-3xl
@@ -594,7 +605,7 @@ export default function Experience() {
                 initial="hidden"
                 whileInView="visible"
                 viewport={{
-                  once: false,
+                  once: true,
                   amount: 0.15,
                 }}
                 className="
@@ -686,7 +697,7 @@ export default function Experience() {
                   initial="hidden"
                   whileInView="visible"
                   viewport={{
-                    once: false,
+                    once: true,
                     amount: 0.15,
                   }}
                   className="
@@ -804,8 +815,8 @@ export default function Experience() {
             y: 0,
           }}
           viewport={{
-            once: false,
-            amount: 0.5,
+            once: true,
+            amount: 0.15,
           }}
           transition={{
             duration: 0.55,
@@ -847,8 +858,8 @@ export default function Experience() {
             opacity: 1,
           }}
           viewport={{
-            once: false,
-            amount: 0.5,
+            once: true,
+            amount: 0.15,
           }}
           transition={{
             duration: 0.5,

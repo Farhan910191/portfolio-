@@ -7,6 +7,8 @@ import {
   X,
   ArrowUpRight,
 } from "lucide-react";
+import { useTheme } from "./ThemeProvider";
+import ThemeToggle from "./ThemeToggle";
 
 // ======================================================
 // NAVIGATION DATA
@@ -32,6 +34,7 @@ export default function Navbar() {
   const [activeSection, setActiveSection] = useState("about");
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const { isDark } = useTheme();
 
   // ====================================================
   // SCROLL / ACTIVE SECTION
@@ -132,6 +135,12 @@ export default function Navbar() {
   };
 
   // ====================================================
+  // THEME-AWARE ACCENT COLOR
+  // ====================================================
+
+  const accent = isDark ? "#39ff88" : "#10b981";
+
+  // ====================================================
   // RENDER
   // ====================================================
 
@@ -185,29 +194,47 @@ export default function Navbar() {
 
             ${
               scrolled
-                ? `
-                  rounded-2xl
-                  border
-                  border-white/[0.08]
-                  bg-[#080808]/80
-                  px-3
-                  py-2.5
-                  shadow-[0_20px_60px_rgba(0,0,0,0.45)]
-                  backdrop-blur-2xl
+                ? isDark
+                  ? `
+                    rounded-2xl
+                    border
+                    border-white/[0.08]
+                    bg-[#080808]/80
+                    px-3
+                    py-2.5
+                    shadow-[0_20px_60px_rgba(0,0,0,0.45)]
+                    backdrop-blur-2xl
 
-                  sm:px-4
-                  sm:py-3
+                    sm:px-4
+                    sm:py-3
 
-                  md:px-5
+                    md:px-5
 
-                  xl:px-6
-                `
+                    xl:px-6
+                  `
+                  : `
+                    rounded-2xl
+                    border
+                    border-black/[0.06]
+                    bg-white/85
+                    px-3
+                    py-2.5
+                    shadow-[0_10px_40px_rgba(0,0,0,0.08)]
+                    backdrop-blur-2xl
+
+                    sm:px-4
+                    sm:py-3
+
+                    md:px-5
+
+                    xl:px-6
+                  `
                 : `
-                  px-1
-                  py-1.5
+                    px-1
+                    py-1.5
 
-                  sm:py-2
-                `
+                    sm:py-2
+                  `
             }
           `}
         >
@@ -233,18 +260,22 @@ export default function Navbar() {
                 {/* F */}
 
                 <span
-                  className="
+                  className={`
                     font-mono
                     text-2xl
                     font-black
                     tracking-[-0.12em]
-                    text-white
                     transition-colors
                     duration-300
-                    group-hover:text-[#39ff88]
 
                     sm:text-3xl
-                  "
+
+                    ${
+                      isDark
+                        ? "text-white group-hover:text-[#39ff88]"
+                        : "text-gray-900 group-hover:text-[#10b981]"
+                    }
+                  `}
                 >
                   F
                 </span>
@@ -252,18 +283,22 @@ export default function Navbar() {
                 {/* K */}
 
                 <span
-                  className="
+                  className={`
                     font-mono
                     text-2xl
                     font-black
                     tracking-[-0.12em]
-                    text-[#39ff88]
                     transition-colors
                     duration-300
-                    group-hover:text-white
 
                     sm:text-3xl
-                  "
+
+                    ${
+                      isDark
+                        ? "text-[#39ff88] group-hover:text-white"
+                        : "text-[#10b981] group-hover:text-gray-900"
+                    }
+                  `}
                 >
                   K
                 </span>
@@ -281,18 +316,22 @@ export default function Navbar() {
                 transition={{
                   duration: 0.3,
                 }}
-                className="
+                className={`
                   absolute
                   -bottom-1.5
                   left-0
                   h-[2px]
                   w-full
                   origin-left
-                  bg-[#39ff88]
-                  shadow-[0_0_10px_rgba(57,255,136,0.8)]
 
                   sm:-bottom-2
-                "
+
+                  ${
+                    isDark
+                      ? "bg-[#39ff88] shadow-[0_0_10px_rgba(57,255,136,0.8)]"
+                      : "bg-[#10b981] shadow-[0_0_10px_rgba(16,185,129,0.5)]"
+                  }
+                `}
               />
             </div>
           </button>
@@ -339,16 +378,17 @@ export default function Navbar() {
                   {/* Hover background */}
 
                   <span
-                    className="
+                    className={`
                       absolute
                       inset-0
                       rounded-lg
-                      bg-white/[0.03]
                       opacity-0
                       transition-opacity
                       duration-300
                       group-hover:opacity-100
-                    "
+
+                      ${isDark ? "bg-white/[0.03]" : "bg-black/[0.03]"}
+                    `}
                   />
 
                   <span
@@ -372,10 +412,13 @@ export default function Navbar() {
 
                         ${
                           active
-                            ? "text-[#39ff88]"
-                            : "text-white/20 group-hover:text-white/40"
+                            ? `text-[${accent}]`
+                            : isDark
+                              ? "text-white/20 group-hover:text-white/40"
+                              : "text-gray-400 group-hover:text-gray-600"
                         }
                       `}
+                      style={active ? { color: accent } : undefined}
                     >
                       {String(index + 1).padStart(
                         2,
@@ -395,8 +438,12 @@ export default function Navbar() {
 
                         ${
                           active
-                            ? "text-white"
-                            : "text-white/50 group-hover:text-white"
+                            ? isDark
+                              ? "text-white"
+                              : "text-gray-900"
+                            : isDark
+                              ? "text-white/50 group-hover:text-white"
+                              : "text-gray-500 group-hover:text-gray-900"
                         }
                       `}
                     >
@@ -423,9 +470,13 @@ export default function Navbar() {
                       left-1/2
                       h-px
                       -translate-x-1/2
-                      bg-[#39ff88]
-                      shadow-[0_0_12px_rgba(57,255,136,0.8)]
                     "
+                    style={{
+                      backgroundColor: accent,
+                      boxShadow: isDark
+                        ? `0 0 12px ${accent}`
+                        : `0 0 8px ${accent}80`,
+                    }}
                   />
                 </button>
               );
@@ -449,18 +500,22 @@ export default function Navbar() {
             {/* Current section */}
 
             <div
-              className="
+              className={`
                 flex
                 max-w-[180px]
                 items-center
                 gap-2
                 rounded-xl
                 border
-                border-white/[0.07]
-                bg-white/[0.025]
                 px-3
                 py-2
-              "
+
+                ${
+                  isDark
+                    ? "border-white/[0.07] bg-white/[0.025]"
+                    : "border-black/[0.06] bg-black/[0.02]"
+                }
+              `}
             >
               <span
                 className="
@@ -468,24 +523,31 @@ export default function Navbar() {
                   w-1.5
                   shrink-0
                   rounded-full
-                  bg-[#39ff88]
-                  shadow-[0_0_8px_#39ff88]
                 "
+                style={{
+                  backgroundColor: accent,
+                  boxShadow: `0 0 8px ${accent}`,
+                }}
               />
 
               <span
-                className="
+                className={`
                   truncate
                   font-mono
                   text-[10px]
                   uppercase
                   tracking-wider
-                  text-white/60
-                "
+
+                  ${isDark ? "text-white/60" : "text-gray-500"}
+                `}
               >
                 {activeSection}
               </span>
             </div>
+
+            {/* Theme toggle (tablet) */}
+
+            <ThemeToggle />
 
             {/* Menu */}
 
@@ -494,7 +556,7 @@ export default function Navbar() {
               onClick={() =>
                 setMenuOpen((prev) => !prev)
               }
-              className="
+              className={`
                 flex
                 h-10
                 w-10
@@ -503,15 +565,29 @@ export default function Navbar() {
                 justify-center
                 rounded-xl
                 border
-                border-white/[0.08]
-                bg-[#111113]/80
-                text-white
                 backdrop-blur-xl
                 transition-all
                 duration-300
-                hover:border-[#39ff88]/40
-                hover:text-[#39ff88]
-              "
+
+                ${
+                  isDark
+                    ? `
+                      border-white/[0.08]
+                      bg-[#111113]/80
+                      text-white
+                      hover:border-[#39ff88]/40
+                      hover:text-[#39ff88]
+                    `
+                    : `
+                      border-gray-300
+                      bg-white/80
+                      text-gray-700
+                      shadow-sm
+                      hover:border-[#10b981]/40
+                      hover:text-[#10b981]
+                    `
+                }
+              `}
               aria-label="Toggle navigation"
               aria-expanded={menuOpen}
             >
@@ -524,145 +600,176 @@ export default function Navbar() {
           </div>
 
           {/* ==================================================
-              DESKTOP CTA
+              DESKTOP CTA + THEME TOGGLE
               XL ONLY
           =================================================== */}
 
-          <motion.button
-            type="button"
-            whileHover={{
-              scale: 1.03,
-            }}
-            whileTap={{
-              scale: 0.97,
-            }}
-            onClick={() =>
-              handleNavigation("#contact")
-            }
-            className="
-              group
-              hidden
-              shrink-0
-              items-center
-              gap-2
-              rounded-xl
-              border
-              border-[#39ff88]/30
-              bg-[#39ff88]/[0.06]
-              px-3
-              py-2.5
-              transition-all
-              duration-300
-              hover:border-[#39ff88]/60
-              hover:bg-[#39ff88]/[0.12]
+          <div className="hidden shrink-0 items-center gap-2 xl:flex">
+            <ThemeToggle />
 
-              xl:flex
-              xl:px-4
-            "
-          >
-            <span
-              className="
-                font-mono
-                text-[10px]
-                font-medium
-                text-[#39ff88]
-                2xl:text-xs
-              "
-            >
-              Let&apos;s Talk
-            </span>
-
-            <ArrowUpRight
-              size={14}
-              className="
-                text-[#39ff88]
-                transition-transform
+            <motion.button
+              type="button"
+              whileHover={{
+                scale: 1.03,
+              }}
+              whileTap={{
+                scale: 0.97,
+              }}
+              onClick={() =>
+                handleNavigation("#contact")
+              }
+              className={`
+                group
+                flex
+                shrink-0
+                items-center
+                gap-2
+                rounded-xl
+                border
+                px-3
+                py-2.5
+                transition-all
                 duration-300
-                group-hover:-translate-y-0.5
-                group-hover:translate-x-0.5
-              "
-            />
-          </motion.button>
+
+                xl:px-4
+
+                ${
+                  isDark
+                    ? `
+                      border-[#39ff88]/30
+                      bg-[#39ff88]/[0.06]
+                      hover:border-[#39ff88]/60
+                      hover:bg-[#39ff88]/[0.12]
+                    `
+                    : `
+                      border-[#10b981]/30
+                      bg-[#10b981]/[0.06]
+                      hover:border-[#10b981]/60
+                      hover:bg-[#10b981]/[0.12]
+                    `
+                }
+              `}
+            >
+              <span
+                className="
+                  font-mono
+                  text-[10px]
+                  font-medium
+                  2xl:text-xs
+                "
+                style={{ color: accent }}
+              >
+                Let&apos;s Talk
+              </span>
+
+              <ArrowUpRight
+                size={14}
+                className="
+                  transition-transform
+                  duration-300
+                  group-hover:-translate-y-0.5
+                  group-hover:translate-x-0.5
+                "
+                style={{ color: accent }}
+              />
+            </motion.button>
+          </div>
 
           {/* ==================================================
-              MOBILE MENU BUTTON
+              MOBILE MENU BUTTON + THEME TOGGLE
               BELOW LG
           =================================================== */}
 
-          <button
-            type="button"
-            onClick={() =>
-              setMenuOpen((prev) => !prev)
-            }
-            className="
-              flex
-              h-9
-              w-9
-              shrink-0
-              items-center
-              justify-center
-              rounded-xl
-              border
-              border-white/[0.08]
-              bg-[#111113]/80
-              text-white
-              backdrop-blur-xl
-              transition-all
-              duration-300
-              hover:border-[#39ff88]/40
-              hover:text-[#39ff88]
+          <div className="flex items-center gap-2 lg:hidden">
+            <ThemeToggle />
 
-              sm:h-10
-              sm:w-10
+            <button
+              type="button"
+              onClick={() =>
+                setMenuOpen((prev) => !prev)
+              }
+              className={`
+                flex
+                h-9
+                w-9
+                shrink-0
+                items-center
+                justify-center
+                rounded-xl
+                border
+                backdrop-blur-xl
+                transition-all
+                duration-300
 
-              lg:hidden
-            "
-            aria-label="Toggle navigation"
-            aria-expanded={menuOpen}
-          >
-            <AnimatePresence
-              mode="wait"
-              initial={false}
+                sm:h-10
+                sm:w-10
+
+                ${
+                  isDark
+                    ? `
+                      border-white/[0.08]
+                      bg-[#111113]/80
+                      text-white
+                      hover:border-[#39ff88]/40
+                      hover:text-[#39ff88]
+                    `
+                    : `
+                      border-gray-300
+                      bg-white/80
+                      text-gray-700
+                      shadow-sm
+                      hover:border-[#10b981]/40
+                      hover:text-[#10b981]
+                    `
+                }
+              `}
+              aria-label="Toggle navigation"
+              aria-expanded={menuOpen}
             >
-              {menuOpen ? (
-                <motion.div
-                  key="close"
-                  initial={{
-                    rotate: -90,
-                    opacity: 0,
-                  }}
-                  animate={{
-                    rotate: 0,
-                    opacity: 1,
-                  }}
-                  exit={{
-                    rotate: 90,
-                    opacity: 0,
-                  }}
-                >
-                  <X size={19} />
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="menu"
-                  initial={{
-                    rotate: 90,
-                    opacity: 0,
-                  }}
-                  animate={{
-                    rotate: 0,
-                    opacity: 1,
-                  }}
-                  exit={{
-                    rotate: -90,
-                    opacity: 0,
-                  }}
-                >
-                  <Menu size={19} />
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </button>
+              <AnimatePresence
+                mode="wait"
+                initial={false}
+              >
+                {menuOpen ? (
+                  <motion.div
+                    key="close"
+                    initial={{
+                      rotate: -90,
+                      opacity: 0,
+                    }}
+                    animate={{
+                      rotate: 0,
+                      opacity: 1,
+                    }}
+                    exit={{
+                      rotate: 90,
+                      opacity: 0,
+                    }}
+                  >
+                    <X size={19} />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="menu"
+                    initial={{
+                      rotate: 90,
+                      opacity: 0,
+                    }}
+                    animate={{
+                      rotate: 0,
+                      opacity: 1,
+                    }}
+                    exit={{
+                      rotate: -90,
+                      opacity: 0,
+                    }}
+                  >
+                    <Menu size={19} />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </button>
+          </div>
         </div>
       </motion.header>
 
@@ -693,13 +800,14 @@ export default function Navbar() {
               onClick={() =>
                 setMenuOpen(false)
               }
-              className="
+              className={`
                 fixed
                 inset-0
                 z-[90]
-                bg-black/70
                 backdrop-blur-md
-              "
+
+                ${isDark ? "bg-black/70" : "bg-black/25"}
+              `}
             />
 
             {/* ==================================================
@@ -726,7 +834,7 @@ export default function Navbar() {
                 duration: 0.3,
                 ease: [0.22, 1, 0.36, 1],
               }}
-              className="
+              className={`
                 fixed
                 left-3
                 right-3
@@ -737,10 +845,7 @@ export default function Navbar() {
                 overscroll-contain
                 rounded-2xl
                 border
-                border-white/[0.08]
-                bg-[#080808]/95
                 p-2.5
-                shadow-[0_25px_80px_rgba(0,0,0,0.7)]
                 backdrop-blur-2xl
 
                 sm:left-4
@@ -748,35 +853,51 @@ export default function Navbar() {
                 sm:top-[76px]
                 sm:rounded-3xl
                 sm:p-3
-              "
+
+                ${
+                  isDark
+                    ? `
+                      border-white/[0.08]
+                      bg-[#080808]/95
+                      shadow-[0_25px_80px_rgba(0,0,0,0.7)]
+                    `
+                    : `
+                      border-black/[0.06]
+                      bg-white/97
+                      shadow-[0_25px_80px_rgba(0,0,0,0.1)]
+                    `
+                }
+              `}
             >
               {/* ==================================================
                   MENU HEADER
               =================================================== */}
 
               <div
-                className="
+                className={`
                   mb-2
                   flex
                   items-center
                   justify-between
                   border-b
-                  border-white/[0.06]
                   px-2
                   py-2.5
 
                   sm:px-3
                   sm:py-3
-                "
+
+                  ${isDark ? "border-white/[0.06]" : "border-black/[0.06]"}
+                `}
               >
                 <div className="min-w-0">
                   <p
-                    className="
+                    className={`
                       text-[11px]
                       font-medium
-                      text-white
                       sm:text-xs
-                    "
+
+                      ${isDark ? "text-white" : "text-gray-900"}
+                    `}
                   >
                     Navigation
                   </p>
@@ -786,36 +907,39 @@ export default function Navbar() {
                       mt-0.5
                       font-mono
                       text-[8px]
-                      text-[#39ff88]
                       sm:mt-1
                       sm:text-[9px]
                     "
+                    style={{ color: accent }}
                   >
                     farhan.dev
                   </p>
                 </div>
 
                 <span
-                  className="
+                  className={`
                     flex
                     shrink-0
                     items-center
                     gap-1.5
                     font-mono
                     text-[7px]
-                    text-white/30
                     sm:gap-2
                     sm:text-[8px]
-                  "
+
+                    ${isDark ? "text-white/30" : "text-gray-400"}
+                  `}
                 >
                   <span
                     className="
                       h-1.5
                       w-1.5
                       rounded-full
-                      bg-[#39ff88]
-                      shadow-[0_0_8px_#39ff88]
                     "
+                    style={{
+                      backgroundColor: accent,
+                      boxShadow: `0 0 8px ${accent}`,
+                    }}
                   />
 
                   ONLINE
@@ -876,8 +1000,12 @@ export default function Navbar() {
 
                         ${
                           active
-                            ? "border border-[#39ff88]/20 bg-[#39ff88]/[0.06]"
-                            : "border border-transparent hover:bg-white/[0.03]"
+                            ? isDark
+                              ? "border border-[#39ff88]/20 bg-[#39ff88]/[0.06]"
+                              : "border border-[#10b981]/20 bg-[#10b981]/[0.06]"
+                            : isDark
+                              ? "border border-transparent hover:bg-white/[0.03]"
+                              : "border border-transparent hover:bg-black/[0.02]"
                         }
                       `}
                     >
@@ -899,10 +1027,13 @@ export default function Navbar() {
 
                             ${
                               active
-                                ? "text-[#39ff88]"
-                                : "text-white/20"
+                                ? ""
+                                : isDark
+                                  ? "text-white/20"
+                                  : "text-gray-400"
                             }
                           `}
+                          style={active ? { color: accent } : undefined}
                         >
                           {String(
                             index + 1
@@ -918,8 +1049,12 @@ export default function Navbar() {
 
                             ${
                               active
-                                ? "text-white"
-                                : "text-white/55 group-hover:text-white"
+                                ? isDark
+                                  ? "text-white"
+                                  : "text-gray-900"
+                                : isDark
+                                  ? "text-white/55 group-hover:text-white"
+                                  : "text-gray-500 group-hover:text-gray-900"
                             }
                           `}
                         >
@@ -933,9 +1068,9 @@ export default function Navbar() {
                             shrink-0
                             font-mono
                             text-[7px]
-                            text-[#39ff88]
                             sm:text-[8px]
                           "
+                          style={{ color: accent }}
                         >
                           ACTIVE
                         </span>
@@ -956,7 +1091,7 @@ export default function Navbar() {
                     "#contact"
                   )
                 }
-                className="
+                className={`
                   group
                   mt-2.5
                   flex
@@ -965,27 +1100,39 @@ export default function Navbar() {
                   justify-between
                   rounded-xl
                   border
-                  border-[#39ff88]/30
-                  bg-[#39ff88]/[0.06]
                   px-3
                   py-2.5
                   transition-all
                   duration-300
-                  hover:border-[#39ff88]/50
-                  hover:bg-[#39ff88]/[0.12]
 
                   sm:mt-3
                   sm:px-4
                   sm:py-3
-                "
+
+                  ${
+                    isDark
+                      ? `
+                        border-[#39ff88]/30
+                        bg-[#39ff88]/[0.06]
+                        hover:border-[#39ff88]/50
+                        hover:bg-[#39ff88]/[0.12]
+                      `
+                      : `
+                        border-[#10b981]/30
+                        bg-[#10b981]/[0.06]
+                        hover:border-[#10b981]/50
+                        hover:bg-[#10b981]/[0.12]
+                      `
+                  }
+                `}
               >
                 <span
                   className="
                     font-mono
                     text-[10px]
-                    text-[#39ff88]
                     sm:text-xs
                   "
+                  style={{ color: accent }}
                 >
                   &gt; Let&apos;s_Talk
                 </span>
@@ -993,12 +1140,12 @@ export default function Navbar() {
                 <ArrowUpRight
                   size={14}
                   className="
-                    text-[#39ff88]
                     transition-transform
                     duration-300
                     group-hover:-translate-y-0.5
                     group-hover:translate-x-0.5
                   "
+                  style={{ color: accent }}
                 />
               </button>
 
@@ -1007,41 +1154,44 @@ export default function Navbar() {
               =================================================== */}
 
               <div
-                className="
+                className={`
                   mt-2.5
                   flex
                   items-center
                   justify-between
                   border-t
-                  border-white/[0.06]
                   px-2
                   pt-2.5
 
                   sm:mt-3
                   sm:px-3
                   sm:pt-3
-                "
+
+                  ${isDark ? "border-white/[0.06]" : "border-black/[0.06]"}
+                `}
               >
                 <span
-                  className="
+                  className={`
                     font-mono
                     text-[7px]
-                    text-white/25
                     sm:text-[8px]
-                  "
+
+                    ${isDark ? "text-white/25" : "text-gray-400"}
+                  `}
                 >
                   FK.DEV
                 </span>
 
                 <div className="flex items-center gap-2">
                   <span
-                    className="
+                    className={`
                       hidden
                       font-mono
                       text-[8px]
-                      text-white/25
                       min-[400px]:block
-                    "
+
+                      ${isDark ? "text-white/25" : "text-gray-400"}
+                    `}
                   >
                     SYSTEM
                   </span>
@@ -1053,18 +1203,20 @@ export default function Navbar() {
                       gap-1.5
                       font-mono
                       text-[7px]
-                      text-[#39ff88]
                       sm:text-[8px]
                     "
+                    style={{ color: accent }}
                   >
                     <span
                       className="
                         h-1.5
                         w-1.5
                         rounded-full
-                        bg-[#39ff88]
-                        shadow-[0_0_8px_#39ff88]
                       "
+                      style={{
+                        backgroundColor: accent,
+                        boxShadow: `0 0 8px ${accent}`,
+                      }}
                     />
 
                     ONLINE

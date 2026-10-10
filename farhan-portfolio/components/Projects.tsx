@@ -6,10 +6,10 @@ import {
   Code2,
   Check,
 } from "lucide-react";
-
 import { FaGithub } from "react-icons/fa";
-
 import { motion, type Variants } from "framer-motion";
+import { useTheme } from "@/components/ThemeProvider";
+
 // ======================================================
 // PROJECT DATA
 // ======================================================
@@ -21,9 +21,7 @@ const projects = [
     subtitle: "Customer Relationship Management",
     description:
       "A full-stack CRM system developed as a team project for managing leads, deals, activities and business workflows.",
-
     image: "/projects/crm.png",
-
     technologies: [
       "React",
       "Vite",
@@ -33,7 +31,6 @@ const projects = [
       "PostgreSQL",
       "JWT",
     ],
-
     features: [
       "Lead tracking",
       "Deal management",
@@ -42,21 +39,16 @@ const projects = [
       "PDF export",
       "RBAC",
     ],
-
     github: "https://github.com/Farhan910191/CRM.git",
-
     live: "#",
   },
-
   {
     number: "02",
     title: "PrimBuy",
     subtitle: "Full-Stack E-Commerce",
     description:
       "A complete e-commerce application with authentication, products, shopping cart, protected routes and order history.",
-
     image: "/projects/primbuy.png",
-
     technologies: [
       "React",
       "Redux Toolkit",
@@ -67,7 +59,6 @@ const projects = [
       "Axios",
       "JWT",
     ],
-
     features: [
       "Authentication",
       "Product management",
@@ -76,21 +67,16 @@ const projects = [
       "Cart CRUD",
       "Order history",
     ],
-
     github: "https://github.com/Farhan910191/primbuy.git",
-
     live: "#",
   },
-
   {
     number: "03",
     title: "Expense Management",
     subtitle: "Personal Expense Tracker",
     description:
       "A full-stack expense management application that helps users track, manage, and monitor income and expenses through a clean responsive interface.",
-
     image: "/projects/expense.png",
-
     technologies: [
       "React",
       "JavaScript",
@@ -100,7 +86,6 @@ const projects = [
       "REST API",
       "SQLite",
     ],
-
     features: [
       "Add and manage expenses",
       "Track income and spending",
@@ -109,31 +94,25 @@ const projects = [
       "Responsive dashboard",
       "Clean user interface",
     ],
-
     github: "https://github.com/Farhan910191/exp.git",
-
     live: "#",
   },
 ];
 
 // ======================================================
-// ANIMATIONS
+// 60 FPS HARDWARE-ACCELERATED ANIMATIONS
 // ======================================================
 
 const headerVariants: Variants = {
   hidden: {
     opacity: 0,
-    y: 30,
-    filter: "blur(8px)",
+    y: 25,
   },
-
   visible: {
     opacity: 1,
     y: 0,
-    filter: "blur(0px)",
-
     transition: {
-      duration: 0.7,
+      duration: 0.55,
       ease: [0.22, 1, 0.36, 1],
     },
   },
@@ -142,17 +121,15 @@ const headerVariants: Variants = {
 const cardVariants: Variants = {
   hidden: {
     opacity: 0,
-    y: 55,
-    scale: 0.97,
+    y: 30,
+    scale: 0.98,
   },
-
   visible: {
     opacity: 1,
     y: 0,
     scale: 1,
-
     transition: {
-      duration: 0.7,
+      duration: 0.55,
       ease: [0.22, 1, 0.36, 1],
     },
   },
@@ -161,21 +138,19 @@ const cardVariants: Variants = {
 const badgeVariants = {
   hidden: {
     opacity: 0,
-    scale: 0.85,
+    scale: 0.9,
   },
-
   visible: {
     opacity: 1,
     scale: 1,
-
     transition: {
-      duration: 0.3,
+      duration: 0.25,
     },
   },
 };
 
 // ======================================================
-// PROJECT CARD
+// PROJECT CARD (MINIMAL TRANSPARENT CARD)
 // ======================================================
 
 function ProjectCard({
@@ -185,16 +160,18 @@ function ProjectCard({
   project: (typeof projects)[number];
   index: number;
 }) {
+  const { isDark } = useTheme();
+
   return (
     <motion.article
       variants={cardVariants}
       initial="hidden"
       whileInView="visible"
       viewport={{
-        once: false,
-        amount: 0.12,
+        once: true,
+        amount: 0.15,
       }}
-      className="
+      className={`
         group
         relative
         flex
@@ -204,127 +181,116 @@ function ProjectCard({
         overflow-hidden
         rounded-2xl
         border
-        border-white/[0.08]
-        bg-[#0d0d0f]/80
-        shadow-[0_20px_60px_rgba(0,0,0,0.3)]
-        backdrop-blur-2xl
+        backdrop-blur-xl
         transition-all
-        duration-500
-        hover:-translate-y-1
-        hover:border-[#39ff88]/30
-        hover:shadow-[0_25px_70px_rgba(0,0,0,0.45)]
+        duration-400
+        hover:-translate-y-1.5
         sm:rounded-3xl
-      "
+        ${
+          isDark
+            ? "border-white/[0.08] bg-[#121216]/40 hover:border-[#39ff88]/30 hover:bg-[#15151c]/60 shadow-[0_15px_40px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.45)]"
+            : "border-black/[0.07] bg-white/65 hover:border-[#10b981]/35 hover:bg-white/85 shadow-[0_12px_35px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_45px_rgba(16,185,129,0.08)]"
+        }
+      `}
+      style={{
+        transform: "translateZ(0)",
+        willChange: "transform",
+      }}
     >
       {/* ==================================================
-          CARD BACKGROUND GLOW
+          CARD BACKGROUND AMBIENT GLOW
       =================================================== */}
-
       <div
         aria-hidden="true"
-        className="
+        className={`
           pointer-events-none
           absolute
-          -right-24
-          -top-24
+          -right-20
+          -top-20
           z-0
-          h-56
-          w-56
+          h-48
+          w-48
           rounded-full
-          bg-[#39ff88]/[0.025]
-          blur-[90px]
+          blur-[50px]
           transition-all
           duration-700
-          group-hover:bg-[#39ff88]/[0.07]
-          sm:-right-32
-          sm:-top-32
-          sm:h-72
-          sm:w-72
-        "
+          ${
+            isDark
+              ? "bg-[#39ff88]/[0.03] group-hover:bg-[#39ff88]/[0.08]"
+              : "bg-[#10b981]/[0.03] group-hover:bg-[#10b981]/[0.07]"
+          }
+        `}
       />
 
       {/* ==================================================
-          IMAGE
+          IMAGE WRAPPER
       =================================================== */}
-
       <div
-        className="
+        className={`
           relative
           z-10
           w-full
           min-w-0
           overflow-hidden
           border-b
-          border-white/[0.07]
-          bg-[#080808]
-        "
+          ${
+            isDark
+              ? "border-white/[0.07] bg-[#0a0a0d]"
+              : "border-black/[0.06] bg-slate-100/80"
+          }
+        `}
       >
-        <div
-          className="
-            relative
-            aspect-[16/10]
-            w-full
-            overflow-hidden
-            bg-[#080808]
-            sm:aspect-video
-          "
-        >
+        <div className="relative aspect-[16/10] w-full overflow-hidden sm:aspect-video">
           <motion.img
             src={project.image}
             alt={`${project.title} project preview`}
             loading="lazy"
-            whileHover={{
-              scale: 1.04,
-            }}
+            whileHover={{ scale: 1.03 }}
             transition={{
-              duration: 0.7,
+              duration: 0.5,
               ease: [0.22, 1, 0.36, 1],
             }}
-            className="
-              absolute
-              inset-0
-              h-full
-              w-full
-              object-cover
-              object-center
-            "
+            className="absolute inset-0 h-full w-full object-cover object-center"
           />
 
-          {/* Dark image overlay */}
-
+          {/* Dark / Light gradient overlay */}
           <div
             aria-hidden="true"
-            className="
+            className={`
               pointer-events-none
               absolute
               inset-0
               bg-gradient-to-t
-              from-black/75
-              via-black/10
-              to-transparent
-            "
+              ${
+                isDark
+                  ? "from-black/70 via-black/15 to-transparent"
+                  : "from-white/70 via-white/10 to-transparent"
+              }
+            `}
           />
 
-          {/* Green image glow */}
-
+          {/* Hover accent glow */}
           <div
             aria-hidden="true"
-            className="
+            className={`
               pointer-events-none
               absolute
               inset-0
-              bg-[radial-gradient(circle_at_center,rgba(57,255,136,0.15),transparent_60%)]
               opacity-0
               transition-opacity
-              duration-700
+              duration-500
               group-hover:opacity-100
-            "
+              ${
+                isDark
+                  ? "bg-[radial-gradient(circle_at_center,rgba(57,255,136,0.12),transparent_65%)]"
+                  : "bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.12),transparent_65%)]"
+              }
+            `}
           />
 
-          {/* Project number */}
-
+          {/* Project number pill */}
           <div
-            className="
+            className={`
               absolute
               left-3
               top-3
@@ -333,68 +299,72 @@ function ProjectCard({
               gap-2
               rounded-full
               border
-              border-[#39ff88]/20
-              bg-black/65
               px-3
               py-1.5
               font-mono
               text-[10px]
               font-medium
-              text-[#39ff88]
-              backdrop-blur-xl
+              backdrop-blur-md
               sm:left-5
               sm:top-5
               sm:px-3.5
               sm:py-2
               sm:text-xs
-            "
+              ${
+                isDark
+                  ? "border-[#39ff88]/20 bg-black/60 text-[#39ff88]"
+                  : "border-[#10b981]/25 bg-white/80 text-[#10b981] shadow-sm"
+              }
+            `}
           >
             <span
-              className="
+              className={`
                 h-1.5
                 w-1.5
                 shrink-0
                 rounded-full
-                bg-[#39ff88]
-                shadow-[0_0_10px_rgba(57,255,136,0.9)]
-              "
+                ${
+                  isDark
+                    ? "bg-[#39ff88] shadow-[0_0_8px_rgba(57,255,136,0.9)]"
+                    : "bg-[#10b981] shadow-[0_0_8px_rgba(16,185,129,0.7)]"
+                }
+              `}
             />
-
             {project.number}
           </div>
 
           {/* Preview label */}
-
           <div
-            className="
+            className={`
               absolute
               bottom-3
               left-3
               hidden
               rounded-lg
               border
-              border-white/10
-              bg-black/50
               px-2.5
               py-1.5
               font-mono
               text-[8px]
-              text-white/45
               backdrop-blur-md
               xs:block
               sm:bottom-5
               sm:left-5
               sm:px-3
               sm:text-[9px]
-            "
+              ${
+                isDark
+                  ? "border-white/10 bg-black/50 text-white/50"
+                  : "border-black/10 bg-white/70 text-slate-600"
+              }
+            `}
           >
             {"<project.preview />"}
           </div>
 
           {/* Top-right icon */}
-
           <div
-            className="
+            className={`
               absolute
               right-3
               top-3
@@ -405,29 +375,24 @@ function ProjectCard({
               justify-center
               rounded-lg
               border
-              border-white/10
-              bg-black/50
-              text-white/60
               backdrop-blur-md
               transition-all
               duration-300
-              group-hover:border-[#39ff88]/30
-              group-hover:text-[#39ff88]
               sm:right-5
               sm:top-5
               sm:h-9
               sm:w-9
               sm:rounded-xl
-            "
+              ${
+                isDark
+                  ? "border-white/10 bg-black/50 text-white/60 group-hover:border-[#39ff88]/30 group-hover:text-[#39ff88]"
+                  : "border-black/10 bg-white/70 text-slate-700 group-hover:border-[#10b981]/30 group-hover:text-[#10b981]"
+              }
+            `}
           >
             <ArrowUpRight
               size={15}
-              className="
-                transition-transform
-                duration-300
-                group-hover:translate-x-0.5
-                group-hover:-translate-y-0.5
-              "
+              className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
             />
           </div>
         </div>
@@ -436,216 +401,154 @@ function ProjectCard({
       {/* ==================================================
           CONTENT
       =================================================== */}
-
-      <div
-        className="
-          relative
-          z-10
-          flex
-          min-w-0
-          flex-1
-          flex-col
-          p-4
-          sm:p-6
-          lg:p-7
-        "
-      >
-        {/* ==================================================
-            TITLE
-        =================================================== */}
-
+      <div className="relative z-10 flex min-w-0 flex-1 flex-col p-4 sm:p-6 lg:p-7">
+        {/* Title */}
         <div className="min-w-0">
           <p
-            className="
+            className={`
               break-words
               font-mono
               text-[9px]
               font-semibold
               uppercase
               tracking-[0.16em]
-              text-[#39ff88]
               sm:text-[10px]
               sm:tracking-[0.2em]
-            "
+              ${isDark ? "text-[#39ff88]" : "text-[#10b981]"}
+            `}
           >
             {project.subtitle}
           </p>
 
           <div className="mt-2.5 flex min-w-0 items-start justify-between gap-3 sm:mt-3">
             <h3
-              className="
+              className={`
                 min-w-0
                 break-words
                 text-xl
                 font-bold
                 leading-tight
                 tracking-tight
-                text-white
                 sm:text-2xl
                 lg:text-[26px]
-              "
+                ${isDark ? "text-white" : "text-slate-900"}
+              `}
             >
               {project.title}
             </h3>
 
             <span
-              className="
+              className={`
                 shrink-0
                 pt-1
                 font-mono
                 text-[9px]
-                text-white/20
                 sm:text-[10px]
-              "
+                ${isDark ? "text-white/30" : "text-slate-400"}
+              `}
             >
               0{index + 1}
             </span>
           </div>
 
           <p
-            className="
+            className={`
               mt-3
               break-words
               text-xs
               leading-6
-              text-gray-500
               sm:mt-4
               sm:text-sm
               sm:leading-7
-            "
+              ${isDark ? "text-gray-400" : "text-slate-600"}
+            `}
           >
             {project.description}
           </p>
         </div>
 
-        {/* ==================================================
-            TECHNOLOGIES
-        =================================================== */}
-
+        {/* Technologies */}
         <div className="mt-5 sm:mt-6">
           <p
-            className="
+            className={`
               mb-2.5
               font-mono
               text-[8px]
               uppercase
               tracking-[0.2em]
-              text-white/25
               sm:mb-3
               sm:text-[9px]
-            "
+              ${isDark ? "text-white/35" : "text-slate-400"}
+            `}
           >
             Technology
           </p>
 
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{
-              once: false,
-              amount: 0.2,
-            }}
-            className="
-              flex
-              min-w-0
-              flex-wrap
-              gap-1.5
-              sm:gap-2
-            "
-          >
+          <div className="flex min-w-0 flex-wrap gap-1.5 sm:gap-2">
             {project.technologies.map((technology) => (
-              <motion.span
+              <span
                 key={technology}
-                variants={badgeVariants}
-                className="
+                className={`
                   max-w-full
                   break-words
                   rounded-full
                   border
-                  border-white/[0.08]
-                  bg-white/[0.02]
                   px-2.5
                   py-1
                   text-[9px]
                   leading-4
-                  text-gray-400
                   transition-all
                   duration-300
-                  hover:border-[#39ff88]/30
-                  hover:bg-[#39ff88]/[0.06]
-                  hover:text-[#39ff88]
                   sm:px-3
                   sm:py-1.5
                   sm:text-[11px]
-                "
+                  ${
+                    isDark
+                      ? "border-white/[0.08] bg-white/[0.03] text-gray-300 hover:border-[#39ff88]/30 hover:bg-[#39ff88]/10 hover:text-[#39ff88]"
+                      : "border-black/[0.07] bg-black/[0.03] text-slate-700 hover:border-[#10b981]/30 hover:bg-[#10b981]/10 hover:text-[#10b981]"
+                  }
+                `}
               >
                 {technology}
-              </motion.span>
+              </span>
             ))}
-          </motion.div>
+          </div>
         </div>
 
-        {/* ==================================================
-            FEATURES
-        =================================================== */}
-
+        {/* Key Features */}
         <div className="mt-5 sm:mt-6">
           <p
-            className="
+            className={`
               mb-2.5
               font-mono
               text-[8px]
               uppercase
               tracking-[0.2em]
-              text-white/25
               sm:mb-3
               sm:text-[9px]
-            "
+              ${isDark ? "text-white/35" : "text-slate-400"}
+            `}
           >
             Key Features
           </p>
 
-          <div
-            className="
-              grid
-              grid-cols-1
-              gap-2
-              sm:grid-cols-2
-              sm:gap-2.5
-            "
-          >
-            {project.features.map((feature, featureIndex) => (
-              <motion.div
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-2.5">
+            {project.features.map((feature) => (
+              <div
                 key={feature}
-                initial={{
-                  opacity: 0,
-                  x: -8,
-                }}
-                whileInView={{
-                  opacity: 1,
-                  x: 0,
-                }}
-                viewport={{
-                  once: false,
-                  amount: 0.25,
-                }}
-                transition={{
-                  duration: 0.3,
-                  delay: featureIndex * 0.035,
-                }}
-                className="
+                className={`
                   flex
                   min-w-0
                   items-start
                   gap-2
                   text-[11px]
                   leading-5
-                  text-gray-500
                   sm:text-xs
-                "
+                  ${isDark ? "text-gray-400" : "text-slate-600"}
+                `}
               >
                 <span
-                  className="
+                  className={`
                     mt-0.5
                     flex
                     h-4
@@ -654,54 +557,48 @@ function ProjectCard({
                     items-center
                     justify-center
                     rounded-full
-                    bg-[#39ff88]/10
-                    text-[#39ff88]
-                  "
+                    ${
+                      isDark
+                        ? "bg-[#39ff88]/10 text-[#39ff88]"
+                        : "bg-[#10b981]/10 text-[#10b981]"
+                    }
+                  `}
                 >
                   <Check size={9} />
                 </span>
 
-                <span className="min-w-0 break-words">
-                  {feature}
-                </span>
-              </motion.div>
+                <span className="min-w-0 break-words">{feature}</span>
+              </div>
             ))}
           </div>
         </div>
 
-        {/* ==================================================
-            SPACER
-        =================================================== */}
-
+        {/* Spacer */}
         <div className="flex-1" />
 
-        {/* ==================================================
-            BUTTONS
-        =================================================== */}
-
+        {/* Buttons */}
         <div
-          className="
+          className={`
             mt-7
             flex
             w-full
             flex-col
             gap-2.5
             border-t
-            border-white/[0.06]
             pt-5
             xs:flex-row
             sm:mt-8
             sm:pt-6
-          "
+            ${isDark ? "border-white/[0.07]" : "border-black/[0.06]"}
+          `}
         >
-          {/* GitHub */}
-
+          {/* GitHub button */}
           <a
             href={project.github}
             target="_blank"
             rel="noopener noreferrer"
             aria-label={`View ${project.title} on GitHub`}
-            className="
+            className={`
               group/github
               inline-flex
               min-h-10
@@ -711,46 +608,37 @@ function ProjectCard({
               gap-2
               rounded-xl
               border
-              border-white/10
-              bg-white/[0.02]
               px-4
               py-2.5
               text-xs
               font-medium
-              text-white/70
               transition-all
               duration-300
-              hover:border-[#39ff88]/30
-              hover:bg-[#39ff88]/[0.05]
-              hover:text-[#39ff88]
               xs:w-auto
               sm:min-h-11
-            "
+              ${
+                isDark
+                  ? "border-white/10 bg-white/[0.03] text-white/80 hover:border-[#39ff88]/30 hover:bg-[#39ff88]/[0.08] hover:text-[#39ff88]"
+                  : "border-black/10 bg-black/[0.03] text-slate-700 hover:border-[#10b981]/30 hover:bg-[#10b981]/[0.08] hover:text-[#10b981]"
+              }
+            `}
           >
             <FaGithub size={15} />
-
             GitHub
-
             <ArrowUpRight
               size={13}
-              className="
-                transition-transform
-                duration-300
-                group-hover/github:translate-x-0.5
-                group-hover/github:-translate-y-0.5
-              "
+              className="transition-transform duration-300 group-hover/github:translate-x-0.5 group-hover/github:-translate-y-0.5"
             />
           </a>
 
           {/* Live Demo */}
-
           {project.live !== "#" && (
             <a
               href={project.live}
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`View live demo of ${project.title}`}
-              className="
+              className={`
                 group/demo
                 inline-flex
                 min-h-10
@@ -759,80 +647,72 @@ function ProjectCard({
                 justify-center
                 gap-2
                 rounded-xl
-                bg-[#39ff88]
                 px-4
                 py-2.5
                 text-xs
                 font-semibold
-                text-black
                 transition-all
                 duration-300
                 hover:-translate-y-0.5
-                hover:shadow-[0_0_30px_rgba(57,255,136,0.2)]
                 xs:w-auto
                 sm:min-h-11
-              "
+                ${
+                  isDark
+                    ? "bg-[#39ff88] text-black hover:shadow-[0_0_25px_rgba(57,255,136,0.3)]"
+                    : "bg-[#10b981] text-white hover:shadow-[0_0_25px_rgba(16,185,129,0.3)]"
+                }
+              `}
             >
               Live Demo
-
               <ExternalLink
                 size={14}
-                className="
-                  transition-transform
-                  duration-300
-                  group-hover/demo:translate-x-0.5
-                  group-hover/demo:-translate-y-0.5
-                "
+                className="transition-transform duration-300 group-hover/demo:translate-x-0.5 group-hover/demo:-translate-y-0.5"
               />
             </a>
           )}
         </div>
 
-        {/* ==================================================
-            FOOTER
-        =================================================== */}
-
+        {/* Footer info */}
         <div
-          className="
+          className={`
             mt-4
             flex
             items-center
             gap-2
             font-mono
             text-[8px]
-            text-white/20
             sm:mt-5
             sm:text-[9px]
-          "
+            ${isDark ? "text-white/25" : "text-slate-400"}
+          `}
         >
           <Code2
             size={11}
-            className="shrink-0 text-[#39ff88]/40"
+            className={`shrink-0 ${isDark ? "text-[#39ff88]/50" : "text-[#10b981]/60"}`}
           />
-
-          <span>
-            build → test → deploy
-          </span>
+          <span>build → test → deploy</span>
         </div>
       </div>
 
       {/* ==================================================
-          BOTTOM GREEN LINE
+          BOTTOM ACCENT LINE
       =================================================== */}
-
       <div
-        className="
+        className={`
           absolute
           bottom-0
           left-0
           h-[2px]
           w-0
-          bg-[#39ff88]
-          shadow-[0_0_18px_rgba(57,255,136,0.8)]
           transition-all
-          duration-700
+          duration-500
           group-hover:w-full
-        "
+          ${
+            isDark
+              ? "bg-[#39ff88] shadow-[0_0_15px_rgba(57,255,136,0.8)]"
+              : "bg-[#10b981] shadow-[0_0_15px_rgba(16,185,129,0.6)]"
+          }
+        `}
       />
     </motion.article>
   );
@@ -843,78 +723,64 @@ function ProjectCard({
 // ======================================================
 
 export default function Projects() {
+  const { isDark } = useTheme();
+
   return (
     <section
       id="projects"
-      className="
+      className={`
         relative
         w-full
         min-w-0
         overflow-hidden
         border-t
-        border-white/[0.05]
         py-20
         sm:py-24
         md:py-28
         lg:py-32
         xl:py-36
-      "
+        ${isDark ? "border-white/[0.05]" : "border-black/[0.05]"}
+      `}
     >
-      {/* ==================================================
-          RESPONSIVE CONTAINER
-      =================================================== */}
-
-      <div
-        className="
-          mx-auto
-          w-full
-          max-w-7xl
-          min-w-0
-          px-4
-          sm:px-6
-          md:px-8
-          lg:px-10
-          xl:px-12
-        "
-      >
+      <div className="mx-auto w-full max-w-7xl min-w-0 px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12">
         {/* ==================================================
             HEADER
         =================================================== */}
-
         <motion.div
           variants={headerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{
-            once: false,
-            amount: 0.2,
+            once: true,
+            amount: 0.15,
           }}
           className="min-w-0"
         >
           {/* Section number */}
-
           <div className="flex items-center gap-3">
-            <span className="h-px w-6 shrink-0 bg-[#39ff88] sm:w-8" />
-
+            <span
+              className={`h-px w-6 shrink-0 sm:w-8 ${
+                isDark ? "bg-[#39ff88]" : "bg-[#10b981]"
+              }`}
+            />
             <p
-              className="
+              className={`
                 font-mono
                 text-[10px]
                 font-semibold
                 uppercase
                 tracking-[0.2em]
-                text-[#39ff88]
                 sm:text-xs
                 sm:tracking-[0.25em]
                 md:text-sm
-              "
+                ${isDark ? "text-[#39ff88]" : "text-[#10b981]"}
+              `}
             >
               03 — Featured Work
             </p>
           </div>
 
           {/* Heading */}
-
           <div
             className="
               mt-5
@@ -931,7 +797,7 @@ export default function Projects() {
             "
           >
             <h2
-              className="
+              className={`
                 min-w-0
                 max-w-3xl
                 break-words
@@ -939,41 +805,39 @@ export default function Projects() {
                 font-bold
                 leading-[1.08]
                 tracking-[-0.03em]
-                text-white
                 sm:text-4xl
                 md:text-5xl
                 lg:text-6xl
-              "
+                ${isDark ? "text-white" : "text-slate-900"}
+              `}
             >
               Projects built with{" "}
-              <span className="text-[#39ff88]">
+              <span className={isDark ? "text-[#39ff88]" : "text-[#10b981]"}>
                 purpose.
               </span>
             </h2>
 
             <p
-              className="
+              className={`
                 w-full
                 max-w-md
                 text-xs
                 leading-6
-                text-gray-500
                 sm:text-sm
                 sm:leading-7
                 lg:shrink-0
-              "
+                ${isDark ? "text-gray-400" : "text-slate-600"}
+              `}
             >
-              A selection of full-stack applications,
-              development projects and real-world
-              problem-solving work.
+              A selection of full-stack applications, development projects and
+              real-world problem-solving work.
             </p>
           </div>
         </motion.div>
 
         {/* ==================================================
-            PROJECT GRID
+            PROJECT GRID (MINIMAL TRANSPARENT CARDS)
         =================================================== */}
-
         <div
           className="
             mt-10
@@ -1004,22 +868,21 @@ export default function Projects() {
         {/* ==================================================
             CTA
         =================================================== */}
-
         <motion.div
           initial={{
             opacity: 0,
-            y: 25,
+            y: 20,
           }}
           whileInView={{
             opacity: 1,
             y: 0,
           }}
           viewport={{
-            once: false,
-            amount: 0.4,
+            once: true,
+            amount: 0.15,
           }}
           transition={{
-            duration: 0.7,
+            duration: 0.5,
           }}
           className="
             mt-10
@@ -1032,7 +895,7 @@ export default function Projects() {
         >
           <a
             href="#contact"
-            className="
+            className={`
               group
               inline-flex
               min-h-10
@@ -1042,37 +905,27 @@ export default function Projects() {
               gap-2
               rounded-full
               border
-              border-white/[0.08]
-              bg-[#111113]/60
               px-4
               py-2.5
               text-center
               text-xs
-              text-gray-400
               backdrop-blur-md
               transition-all
               duration-300
-              hover:border-[#39ff88]/30
-              hover:bg-[#39ff88]/[0.05]
-              hover:text-[#39ff88]
               sm:px-5
               sm:py-3
               sm:text-sm
-            "
+              ${
+                isDark
+                  ? "border-white/[0.08] bg-[#121216]/50 text-gray-300 hover:border-[#39ff88]/30 hover:bg-[#39ff88]/[0.08] hover:text-[#39ff88]"
+                  : "border-black/[0.08] bg-white/70 text-slate-700 hover:border-[#10b981]/30 hover:bg-[#10b981]/[0.08] hover:text-[#10b981]"
+              }
+            `}
           >
-            <span className="break-words">
-              Have a project in mind?
-            </span>
-
+            <span className="break-words">Have a project in mind?</span>
             <ArrowUpRight
               size={16}
-              className="
-                shrink-0
-                transition-transform
-                duration-300
-                group-hover:translate-x-1
-                group-hover:-translate-y-1
-              "
+              className="shrink-0 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
             />
           </a>
         </motion.div>

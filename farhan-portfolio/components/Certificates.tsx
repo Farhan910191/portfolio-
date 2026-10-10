@@ -35,15 +35,13 @@ const certificatePath =
 const headerVariants: Variants = {
   hidden: {
     opacity: 0,
-    y: 30,
-    filter: "blur(8px)",
+    y: 25,
   },
   visible: {
     opacity: 1,
     y: 0,
-    filter: "blur(0px)",
     transition: {
-      duration: 0.65,
+      duration: 0.55,
       ease: [0.22, 1, 0.36, 1],
     },
   },
@@ -52,15 +50,15 @@ const headerVariants: Variants = {
 const cardVariants: Variants = {
   hidden: {
     opacity: 0,
-    y: 40,
-    scale: 0.97,
+    y: 30,
+    scale: 0.98,
   },
   visible: {
     opacity: 1,
     y: 0,
     scale: 1,
     transition: {
-      duration: 0.65,
+      duration: 0.55,
       ease: [0.22, 1, 0.36, 1],
     },
   },
@@ -145,8 +143,8 @@ export default function Certificates() {
           initial="hidden"
           whileInView="visible"
           viewport={{
-            once: false,
-            amount: 0.25,
+            once: true,
+            amount: 0.15,
           }}
           className="min-w-0"
         >
@@ -232,14 +230,8 @@ export default function Certificates() {
             initial="hidden"
             whileInView="visible"
             viewport={{
-              once: false,
-              amount: 0.12,
-            }}
-            whileHover={{
-              y: -5,
-              transition: {
-                duration: 0.25,
-              },
+              once: true,
+              amount: 0.15,
             }}
             className="
               group
@@ -252,7 +244,8 @@ export default function Certificates() {
               bg-[#111113]/75
               backdrop-blur-xl
               transition-all
-              duration-500
+              duration-300
+              hover:-translate-y-1.5
               hover:border-[#39ff88]/30
               hover:bg-[#151518]/85
               sm:rounded-3xl
@@ -526,14 +519,8 @@ export default function Certificates() {
             initial="hidden"
             whileInView="visible"
             viewport={{
-              once: false,
-              amount: 0.12,
-            }}
-            whileHover={{
-              y: -5,
-              transition: {
-                duration: 0.25,
-              },
+              once: true,
+              amount: 0.15,
             }}
             className="
               group
@@ -547,7 +534,8 @@ export default function Certificates() {
               p-5
               backdrop-blur-xl
               transition-all
-              duration-500
+              duration-300
+              hover:-translate-y-1.5
               hover:border-[#39ff88]/30
               hover:bg-[#151518]/85
               sm:rounded-3xl
@@ -688,8 +676,8 @@ export default function Certificates() {
                 initial="hidden"
                 whileInView="visible"
                 viewport={{
-                  once: false,
-                  amount: 0.2,
+                  once: true,
+                  amount: 0.15,
                 }}
                 className="mt-4 flex flex-wrap gap-1.5 sm:gap-2"
               >
@@ -846,8 +834,8 @@ export default function Certificates() {
           initial="hidden"
           whileInView="visible"
           viewport={{
-            once: false,
-            amount: 0.5,
+            once: true,
+            amount: 0.15,
           }}
           className="
             mt-9

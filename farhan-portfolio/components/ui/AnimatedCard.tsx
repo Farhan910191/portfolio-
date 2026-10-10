@@ -18,34 +18,28 @@ export default function AnimatedCard({
     <motion.div
       initial={{
         opacity: 0,
-        y: 60,
-        scale: 0.96,
-        filter: "blur(8px)",
+        y: 30,
+        scale: 0.98,
       }}
       whileInView={{
         opacity: 1,
         y: 0,
         scale: 1,
-        filter: "blur(0px)",
       }}
       viewport={{
-        once: false,
+        once: true,
         amount: 0.15,
       }}
       transition={{
-        duration: 0.7,
+        duration: 0.55,
         delay,
-        ease: "easeOut",
-      }}
-      animate={{
-        y: [0, -5, 0],
+        ease: [0.22, 1, 0.36, 1],
       }}
       whileHover={{
-        y: -10,
-        scale: 1.015,
+        y: -6,
         transition: {
-          duration: 0.25,
-          ease: "easeOut",
+          duration: 0.3,
+          ease: [0.22, 1, 0.36, 1],
         },
       }}
       className={`group relative ${className}`}

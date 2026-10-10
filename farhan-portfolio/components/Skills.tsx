@@ -77,7 +77,7 @@ const containerVariants: Variants = {
   hidden: {},
   visible: {
     transition: {
-      staggerChildren: 0.1,
+      staggerChildren: 0.08,
     },
   },
 };
@@ -85,16 +85,14 @@ const containerVariants: Variants = {
 const revealVariants: Variants = {
   hidden: {
     opacity: 0,
-    y: 30,
-    filter: "blur(6px)",
+    y: 25,
   },
 
   visible: {
     opacity: 1,
     y: 0,
-    filter: "blur(0px)",
     transition: {
-      duration: 0.65,
+      duration: 0.55,
       ease: [0.22, 1, 0.36, 1],
     },
   },
@@ -103,7 +101,7 @@ const revealVariants: Variants = {
 const cardVariants: Variants = {
   hidden: {
     opacity: 0,
-    y: 35,
+    y: 30,
     scale: 0.98,
   },
 
@@ -112,7 +110,7 @@ const cardVariants: Variants = {
     y: 0,
     scale: 1,
     transition: {
-      duration: 0.6,
+      duration: 0.55,
       ease: [0.22, 1, 0.36, 1],
     },
   },
@@ -172,8 +170,8 @@ export default function Skills() {
           initial="hidden"
           whileInView="visible"
           viewport={{
-            once: false,
-            amount: 0.2,
+            once: true,
+            amount: 0.15,
           }}
           className="
             max-w-3xl
@@ -255,8 +253,8 @@ export default function Skills() {
           initial="hidden"
           whileInView="visible"
           viewport={{
-            once: false,
-            amount: 0.08,
+            once: true,
+            amount: 0.15,
           }}
           className="
             mt-10
@@ -274,12 +272,6 @@ export default function Skills() {
               <motion.article
                 key={group.title}
                 variants={cardVariants}
-                whileHover={{
-                  y: -5,
-                  transition: {
-                    duration: 0.25,
-                  },
-                }}
                 className="
                   group
                   relative
@@ -291,8 +283,9 @@ export default function Skills() {
                   bg-[#111113]/65
                   p-5
                   backdrop-blur-xl
-                  transition-colors
-                  duration-500
+                  transition-all
+                  duration-300
+                  hover:-translate-y-1.5
                   hover:border-[#39ff88]/25
                   hover:bg-[#151518]/75
                   sm:rounded-3xl
@@ -545,11 +538,12 @@ export default function Skills() {
             y: 0,
           }}
           viewport={{
-            once: false,
-            amount: 0.5,
+            once: true,
+            amount: 0.15,
           }}
           transition={{
-            duration: 0.6,
+            duration: 0.55,
+            ease: [0.22, 1, 0.36, 1],
           }}
           className="
             mt-10
@@ -618,12 +612,13 @@ export default function Skills() {
             opacity: 1,
           }}
           viewport={{
-            once: false,
-            amount: 0.5,
+            once: true,
+            amount: 0.15,
           }}
           transition={{
-            duration: 0.6,
-            delay: 0.15,
+            duration: 0.55,
+            delay: 0.1,
+            ease: [0.22, 1, 0.36, 1],
           }}
           className="
             mt-8
