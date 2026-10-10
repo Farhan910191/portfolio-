@@ -3,7 +3,6 @@
 import {
   Activity,
   ExternalLink,
-  GitBranch,
   RefreshCw,
   Star,
   Users,
@@ -11,7 +10,6 @@ import {
   Code2,
   CalendarDays,
   BookOpen,
-  ArrowUpRight,
 } from "lucide-react";
 import { FaGithub } from "react-icons/fa";
 import { motion, type Variants } from "framer-motion";
@@ -312,13 +310,7 @@ export default function Github() {
     return isDark ? "bg-[#39ff88]/90" : "bg-[#10b981]";
   };
 
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  };
+
 
   const stats = [
     {
@@ -905,193 +897,7 @@ export default function Github() {
               </div>
             </motion.div>
 
-            {/* ==================================================
-                REPOSITORIES (MINIMAL TRANSPARENT CARDS)
-            ================================================== */}
-            <motion.div
-              variants={headerVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.15 }}
-              className="mt-10"
-            >
-              <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-                <div>
-                  <h3
-                    className={`flex items-center gap-2 font-semibold ${isDark ? "text-white" : "text-slate-900"
-                      }`}
-                  >
-                    <GitBranch
-                      size={18}
-                      className={isDark ? "text-[#39ff88]" : "text-[#10b981]"}
-                    />
-                    Repositories
-                  </h3>
-                  <p
-                    className={`mt-1 text-xs ${isDark ? "text-gray-400" : "text-slate-500"
-                      }`}
-                  >
-                    {repos.length} public repositories
-                  </p>
-                </div>
 
-                <a
-                  href={`https://github.com/${GITHUB_USERNAME}?tab=repositories`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`
-                    inline-flex
-                    items-center
-                    gap-1
-                    text-xs
-                    font-medium
-                    transition-colors
-                    ${isDark
-                      ? "text-[#39ff88] hover:text-white"
-                      : "text-[#10b981] hover:text-slate-900"
-                    }
-                  `}
-                >
-                  View all on GitHub
-                  <ArrowUpRight size={14} />
-                </a>
-              </div>
-
-              <motion.div
-                variants={containerVariants}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, amount: 0.15 }}
-                className="grid gap-4 md:grid-cols-2"
-              >
-                {repos.map((repo) => (
-                  <motion.div key={repo.id} variants={cardVariants}>
-                    <a
-                      href={repo.html_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`
-                        group
-                        relative
-                        block
-                        overflow-hidden
-                        rounded-2xl
-                        border
-                        p-6
-                        backdrop-blur-md
-                        transition-all
-                        duration-300
-                        hover:-translate-y-1
-                        ${isDark
-                          ? "border-white/[0.07] bg-white/[0.03] hover:border-[#39ff88]/30 hover:bg-white/[0.05]"
-                          : "border-black/[0.06] bg-white/70 hover:border-[#10b981]/30 hover:bg-white/90 shadow-sm"
-                        }
-                      `}
-                    >
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="min-w-0">
-                          <h4
-                            className={`
-                              truncate
-                              text-base
-                              font-semibold
-                              transition-colors
-                              ${isDark
-                                ? "text-white group-hover:text-[#39ff88]"
-                                : "text-slate-900 group-hover:text-[#10b981]"
-                              }
-                            `}
-                          >
-                            {repo.name}
-                          </h4>
-
-                          <p
-                            className={`mt-2 line-clamp-2 text-sm leading-6 ${isDark ? "text-gray-400" : "text-slate-600"
-                              }`}
-                          >
-                            {repo.description || "No description provided."}
-                          </p>
-                        </div>
-
-                        <ExternalLink
-                          size={16}
-                          className={`
-                            shrink-0
-                            transition-all
-                            duration-300
-                            group-hover:-translate-y-0.5
-                            group-hover:translate-x-0.5
-                            ${isDark
-                              ? "text-gray-600 group-hover:text-[#39ff88]"
-                              : "text-slate-400 group-hover:text-[#10b981]"
-                            }
-                          `}
-                        />
-                      </div>
-
-                      <div
-                        className={`
-                          mt-5
-                          flex
-                          flex-wrap
-                          items-center
-                          gap-4
-                          text-xs
-                          ${isDark ? "text-gray-400" : "text-slate-500"}
-                        `}
-                      >
-                        {repo.language && (
-                          <span
-                            className={`
-                              rounded-full
-                              border
-                              px-3
-                              py-1
-                              font-medium
-                              ${isDark
-                                ? "border-white/[0.06] bg-white/[0.03] text-gray-300"
-                                : "border-black/[0.06] bg-black/[0.03] text-slate-700"
-                              }
-                            `}
-                          >
-                            {repo.language}
-                          </span>
-                        )}
-
-                        <span className="flex items-center gap-1">
-                          <Star size={13} />
-                          {repo.stargazers_count}
-                        </span>
-
-                        <span className="flex items-center gap-1">
-                          <GitFork size={13} />
-                          {repo.forks_count}
-                        </span>
-
-                        <span className="ml-auto opacity-75">
-                          Updated {formatDate(repo.pushed_at)}
-                        </span>
-                      </div>
-
-                      {/* Hover bottom line */}
-                      <div
-                        className={`
-                          absolute
-                          bottom-0
-                          left-0
-                          h-px
-                          w-0
-                          transition-all
-                          duration-400
-                          group-hover:w-full
-                          ${isDark ? "bg-[#39ff88]" : "bg-[#10b981]"}
-                        `}
-                      />
-                    </a>
-                  </motion.div>
-                ))}
-              </motion.div>
-            </motion.div>
 
             {/* Last updated */}
             <div

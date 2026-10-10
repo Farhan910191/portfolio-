@@ -8,7 +8,7 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
-import ThemeToggle from "./ThemeToggle";
+
 
 // ======================================================
 // NAVIGATION DATA
@@ -545,9 +545,7 @@ export default function Navbar() {
               </span>
             </div>
 
-            {/* Theme toggle (tablet) */}
 
-            <ThemeToggle />
 
             {/* Menu */}
 
@@ -605,7 +603,6 @@ export default function Navbar() {
           =================================================== */}
 
           <div className="hidden shrink-0 items-center gap-2 xl:flex">
-            <ThemeToggle />
 
             <motion.button
               type="button"
@@ -681,7 +678,6 @@ export default function Navbar() {
           =================================================== */}
 
           <div className="flex items-center gap-2 lg:hidden">
-            <ThemeToggle />
 
             <button
               type="button"

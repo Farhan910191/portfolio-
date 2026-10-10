@@ -127,29 +127,31 @@ export default function Hero() {
             <motion.div
               variants={itemVariants}
               className="
-                mb-5
+                mb-6
                 inline-flex
                 items-center
                 gap-2.5
                 rounded-full
                 border
                 border-[#39ff88]/20
-                bg-[#111113]/70
-                px-3.5
-                py-1.5
-                font-mono
-                text-[9px]
-                text-gray-400
+                bg-[#39ff88]/5
+                px-4
+                py-2
+                text-xs
+                font-medium
+                text-gray-300
                 backdrop-blur-xl
-                sm:px-4
-                sm:py-2
-                sm:text-[10px]
+                transition-colors
+                duration-300
+                hover:border-[#39ff88]/40
+                sm:text-sm
               "
             >
               <span
+                aria-hidden="true"
                 className="
-                  h-1.5
-                  w-1.5
+                  h-2
+                  w-2
                   animate-pulse
                   rounded-full
                   bg-[#39ff88]
@@ -157,7 +159,7 @@ export default function Hero() {
                 "
               />
 
-              available_for_opportunities
+              Available for opportunities
             </motion.div>
 
             {/* DEVELOPER LABEL */}

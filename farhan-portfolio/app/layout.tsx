@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import ThemeGestureProvider from "@/components/ThemeGestureProvider";
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
@@ -24,7 +25,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${cormorant.variable} font-sans`}>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <ThemeGestureProvider />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
