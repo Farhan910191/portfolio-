@@ -1,0 +1,10 @@
+{
+  "name": "portfolio-root",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix farhan-portfolio run dev",
+    "build": "npm --prefix farhan-portfolio run build",
+    "start": "npm --prefix farhan-portfolio run start",
+    "deploy": "npm --prefix farhan-portfolio run deploy"
+  }
+}

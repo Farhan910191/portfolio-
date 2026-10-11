@@ -15,6 +15,14 @@ export const metadata: Metadata = {
   title: "Mohammed Farhan KK | Full Stack Developer",
   description:
     "Portfolio of Mohammed Farhan KK — Full Stack Developer specializing in React.js, Next.js, TypeScript, Python, Django, REST APIs and PostgreSQL.",
+  icons: {
+    icon: [
+      { url: "/icon.png", type: "image/png" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: "/apple-icon.png",
+  },
 };
 
 export default function RootLayout({
