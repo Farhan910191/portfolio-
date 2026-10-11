@@ -122,7 +122,7 @@ export default function Contact() {
     "https://github.com/Farhan910191";
 
   const linkedin =
-    "https://www.linkedin.com/in/mohammed-farhan-kk";
+    "https://www.linkedin.com/in/farhan-kk-66b598371/";
 
   // ====================================================
   // EMAILJS
