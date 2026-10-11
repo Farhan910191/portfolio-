@@ -101,6 +101,43 @@ const projects = [
     github: "https://github.com/Farhan910191/exp.git",
     live: "#",
   },
+  {
+    number: "04",
+    title: "Personal Portfolio",
+    subtitle: "Full Stack Developer Portfolio",
+    description: "A modern, responsive developer portfolio built to showcase my professional profile, technical skills, development projects, internship experience, and achievements. Features smooth animations, interactive UI elements, and a premium design with dark and light themes.",
+    image: "/projects/portfolio.png",
+    technologies: [
+      "Next.js",
+      "React",
+      "TypeScript",
+      "Tailwind CSS",
+      "Framer Motion",
+      "Lucide React",
+      "React Icons",
+      "Git",
+      "GitHub",
+      "Firebase Hosting",
+    ],
+    
+    features: [
+      "Modern and responsive portfolio design",
+      "Interactive hero section with animations",
+      "About me and technical skills sections",
+      "Projects showcase with technology tags",
+      "Work experience and education sections",
+      "Dark and light theme support",
+      "Smooth scrolling and reveal animations",
+      "GitHub and social media integration",
+      "Contact section for professional inquiries",
+      "Firebase deployment",
+    ],
+
+    github: "https://github.com/Farhan910191/portfolio-",
+
+    live: "#",
+  },
+
 ];
 
 // ======================================================
@@ -190,10 +227,9 @@ function ProjectCard({
         duration-400
         hover:-translate-y-1.5
         sm:rounded-3xl
-        ${
-          isDark
-            ? "border-white/[0.08] bg-[#121216]/40 hover:border-[#39ff88]/30 hover:bg-[#15151c]/60 shadow-[0_15px_40px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.45)]"
-            : "border-black/[0.07] bg-white/65 hover:border-[#10b981]/35 hover:bg-white/85 shadow-[0_12px_35px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_45px_rgba(16,185,129,0.08)]"
+        ${isDark
+          ? "border-white/[0.08] bg-[#121216]/40 hover:border-[#39ff88]/30 hover:bg-[#15151c]/60 shadow-[0_15px_40px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.45)]"
+          : "border-black/[0.07] bg-white/65 hover:border-[#10b981]/35 hover:bg-white/85 shadow-[0_12px_35px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_45px_rgba(16,185,129,0.08)]"
         }
       `}
       style={{
@@ -218,10 +254,9 @@ function ProjectCard({
           blur-[50px]
           transition-all
           duration-700
-          ${
-            isDark
-              ? "bg-[#39ff88]/[0.03] group-hover:bg-[#39ff88]/[0.08]"
-              : "bg-[#10b981]/[0.03] group-hover:bg-[#10b981]/[0.07]"
+          ${isDark
+            ? "bg-[#39ff88]/[0.03] group-hover:bg-[#39ff88]/[0.08]"
+            : "bg-[#10b981]/[0.03] group-hover:bg-[#10b981]/[0.07]"
           }
         `}
       />
@@ -237,10 +272,9 @@ function ProjectCard({
           min-w-0
           overflow-hidden
           border-b
-          ${
-            isDark
-              ? "border-white/[0.07] bg-[#0a0a0d]"
-              : "border-black/[0.06] bg-slate-100/80"
+          ${isDark
+            ? "border-white/[0.07] bg-[#0a0a0d]"
+            : "border-black/[0.06] bg-slate-100/80"
           }
         `}
       >
@@ -265,10 +299,9 @@ function ProjectCard({
               absolute
               inset-0
               bg-gradient-to-t
-              ${
-                isDark
-                  ? "from-black/70 via-black/15 to-transparent"
-                  : "from-white/70 via-white/10 to-transparent"
+              ${isDark
+                ? "from-black/70 via-black/15 to-transparent"
+                : "from-white/70 via-white/10 to-transparent"
               }
             `}
           />
@@ -284,10 +317,9 @@ function ProjectCard({
               transition-opacity
               duration-500
               group-hover:opacity-100
-              ${
-                isDark
-                  ? "bg-[radial-gradient(circle_at_center,rgba(57,255,136,0.12),transparent_65%)]"
-                  : "bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.12),transparent_65%)]"
+              ${isDark
+                ? "bg-[radial-gradient(circle_at_center,rgba(57,255,136,0.12),transparent_65%)]"
+                : "bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.12),transparent_65%)]"
               }
             `}
           />
@@ -314,10 +346,9 @@ function ProjectCard({
               sm:px-3.5
               sm:py-2
               sm:text-xs
-              ${
-                isDark
-                  ? "border-[#39ff88]/20 bg-black/60 text-[#39ff88]"
-                  : "border-[#10b981]/25 bg-white/80 text-[#10b981] shadow-sm"
+              ${isDark
+                ? "border-[#39ff88]/20 bg-black/60 text-[#39ff88]"
+                : "border-[#10b981]/25 bg-white/80 text-[#10b981] shadow-sm"
               }
             `}
           >
@@ -327,10 +358,9 @@ function ProjectCard({
                 w-1.5
                 shrink-0
                 rounded-full
-                ${
-                  isDark
-                    ? "bg-[#39ff88] shadow-[0_0_8px_rgba(57,255,136,0.9)]"
-                    : "bg-[#10b981] shadow-[0_0_8px_rgba(16,185,129,0.7)]"
+                ${isDark
+                  ? "bg-[#39ff88] shadow-[0_0_8px_rgba(57,255,136,0.9)]"
+                  : "bg-[#10b981] shadow-[0_0_8px_rgba(16,185,129,0.7)]"
                 }
               `}
             />
@@ -356,10 +386,9 @@ function ProjectCard({
               sm:left-5
               sm:px-3
               sm:text-[9px]
-              ${
-                isDark
-                  ? "border-white/10 bg-black/50 text-white/50"
-                  : "border-black/10 bg-white/70 text-slate-600"
+              ${isDark
+                ? "border-white/10 bg-black/50 text-white/50"
+                : "border-black/10 bg-white/70 text-slate-600"
               }
             `}
           >
@@ -387,10 +416,9 @@ function ProjectCard({
               sm:h-9
               sm:w-9
               sm:rounded-xl
-              ${
-                isDark
-                  ? "border-white/10 bg-black/50 text-white/60 group-hover:border-[#39ff88]/30 group-hover:text-[#39ff88]"
-                  : "border-black/10 bg-white/70 text-slate-700 group-hover:border-[#10b981]/30 group-hover:text-[#10b981]"
+              ${isDark
+                ? "border-white/10 bg-black/50 text-white/60 group-hover:border-[#39ff88]/30 group-hover:text-[#39ff88]"
+                : "border-black/10 bg-white/70 text-slate-700 group-hover:border-[#10b981]/30 group-hover:text-[#10b981]"
               }
             `}
           >
@@ -506,10 +534,9 @@ function ProjectCard({
                   sm:px-3
                   sm:py-1.5
                   sm:text-[11px]
-                  ${
-                    isDark
-                      ? "border-white/[0.08] bg-white/[0.03] text-gray-300 hover:border-[#39ff88]/30 hover:bg-[#39ff88]/10 hover:text-[#39ff88]"
-                      : "border-black/[0.07] bg-black/[0.03] text-slate-700 hover:border-[#10b981]/30 hover:bg-[#10b981]/10 hover:text-[#10b981]"
+                  ${isDark
+                    ? "border-white/[0.08] bg-white/[0.03] text-gray-300 hover:border-[#39ff88]/30 hover:bg-[#39ff88]/10 hover:text-[#39ff88]"
+                    : "border-black/[0.07] bg-black/[0.03] text-slate-700 hover:border-[#10b981]/30 hover:bg-[#10b981]/10 hover:text-[#10b981]"
                   }
                 `}
               >
@@ -561,10 +588,9 @@ function ProjectCard({
                     items-center
                     justify-center
                     rounded-full
-                    ${
-                      isDark
-                        ? "bg-[#39ff88]/10 text-[#39ff88]"
-                        : "bg-[#10b981]/10 text-[#10b981]"
+                    ${isDark
+                      ? "bg-[#39ff88]/10 text-[#39ff88]"
+                      : "bg-[#10b981]/10 text-[#10b981]"
                     }
                   `}
                 >
@@ -620,10 +646,9 @@ function ProjectCard({
               duration-300
               xs:w-auto
               sm:min-h-11
-              ${
-                isDark
-                  ? "border-white/10 bg-white/[0.03] text-white/80 hover:border-[#39ff88]/30 hover:bg-[#39ff88]/[0.08] hover:text-[#39ff88]"
-                  : "border-black/10 bg-black/[0.03] text-slate-700 hover:border-[#10b981]/30 hover:bg-[#10b981]/[0.08] hover:text-[#10b981]"
+              ${isDark
+                ? "border-white/10 bg-white/[0.03] text-white/80 hover:border-[#39ff88]/30 hover:bg-[#39ff88]/[0.08] hover:text-[#39ff88]"
+                : "border-black/10 bg-black/[0.03] text-slate-700 hover:border-[#10b981]/30 hover:bg-[#10b981]/[0.08] hover:text-[#10b981]"
               }
             `}
           >
@@ -660,10 +685,9 @@ function ProjectCard({
                 hover:-translate-y-0.5
                 xs:w-auto
                 sm:min-h-11
-                ${
-                  isDark
-                    ? "bg-[#39ff88] text-black hover:shadow-[0_0_25px_rgba(57,255,136,0.3)]"
-                    : "bg-[#10b981] text-white hover:shadow-[0_0_25px_rgba(16,185,129,0.3)]"
+                ${isDark
+                  ? "bg-[#39ff88] text-black hover:shadow-[0_0_25px_rgba(57,255,136,0.3)]"
+                  : "bg-[#10b981] text-white hover:shadow-[0_0_25px_rgba(16,185,129,0.3)]"
                 }
               `}
             >
@@ -711,10 +735,9 @@ function ProjectCard({
           transition-all
           duration-500
           group-hover:w-full
-          ${
-            isDark
-              ? "bg-[#39ff88] shadow-[0_0_15px_rgba(57,255,136,0.8)]"
-              : "bg-[#10b981] shadow-[0_0_15px_rgba(16,185,129,0.6)]"
+          ${isDark
+            ? "bg-[#39ff88] shadow-[0_0_15px_rgba(57,255,136,0.8)]"
+            : "bg-[#10b981] shadow-[0_0_15px_rgba(16,185,129,0.6)]"
           }
         `}
       />
@@ -763,9 +786,8 @@ export default function Projects() {
           {/* Section number */}
           <div className="flex items-center gap-3">
             <span
-              className={`h-px w-6 shrink-0 sm:w-8 ${
-                isDark ? "bg-[#39ff88]" : "bg-[#10b981]"
-              }`}
+              className={`h-px w-6 shrink-0 sm:w-8 ${isDark ? "bg-[#39ff88]" : "bg-[#10b981]"
+                }`}
             />
             <p
               className={`
@@ -919,10 +941,9 @@ export default function Projects() {
               sm:px-5
               sm:py-3
               sm:text-sm
-              ${
-                isDark
-                  ? "border-white/[0.08] bg-[#121216]/50 text-gray-300 hover:border-[#39ff88]/30 hover:bg-[#39ff88]/[0.08] hover:text-[#39ff88]"
-                  : "border-black/[0.08] bg-white/70 text-slate-700 hover:border-[#10b981]/30 hover:bg-[#10b981]/[0.08] hover:text-[#10b981]"
+              ${isDark
+                ? "border-white/[0.08] bg-[#121216]/50 text-gray-300 hover:border-[#39ff88]/30 hover:bg-[#39ff88]/[0.08] hover:text-[#39ff88]"
+                : "border-black/[0.08] bg-white/70 text-slate-700 hover:border-[#10b981]/30 hover:bg-[#10b981]/[0.08] hover:text-[#10b981]"
               }
             `}
           >
