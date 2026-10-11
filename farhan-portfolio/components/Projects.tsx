@@ -71,7 +71,7 @@ const projects = [
     live: "#",
   },
   {
-    number: "03",
+    number: "04",
     title: "Expense Management System",
     subtitle: "Personal Finance & Expense Tracker",
     description:
@@ -451,7 +451,7 @@ function ProjectCard({
                 ${isDark ? "text-white/30" : "text-slate-400"}
               `}
             >
-              0{index + 1}
+              {project.number}
             </span>
           </div>
 
