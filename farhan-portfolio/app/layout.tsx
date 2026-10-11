@@ -24,7 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${cormorant.variable} font-sans`}>
+      <body className={`${cormorant.variable} font-sans`} suppressHydrationWarning>
         <ThemeProvider>
           <ThemeGestureProvider />
           {children}

@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import DeveloperBackground from "@/components/effects/DeveloperBackground";
 
 import Navbar from "@/components/Navbar";
@@ -15,6 +18,20 @@ import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
 
 export default function Home() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <main className="relative min-h-screen bg-[var(--background-deep)] text-[var(--foreground)]">
+        <DeveloperBackground />
+      </main>
+    );
+  }
+
   return (
     <main className="relative min-h-screen bg-[var(--background-deep)] text-[var(--foreground)]">
       {/* ONLY PAGE-WIDE BACKGROUND */}

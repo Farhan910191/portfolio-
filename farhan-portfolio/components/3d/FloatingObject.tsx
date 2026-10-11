@@ -22,9 +22,11 @@ export default function FloatingObject({
     group.current.rotation.x += delta * 0.12;
     group.current.rotation.y += delta * 0.2;
 
+    const elapsedTime = performance.now() * 0.001;
+
     group.current.position.y =
       position[1] +
-      Math.sin(state.clock.elapsedTime * 0.8) * 0.12;
+      Math.sin(elapsedTime * 0.8) * 0.12;
   });
 
   return (

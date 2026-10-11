@@ -66,7 +66,7 @@ export default function ThemeToggle() {
             initial={{
               rotate: -90,
               opacity: 0,
-              scale: 0.5,
+              scale: 0.6,
             }}
             animate={{
               rotate: 0,
@@ -76,14 +76,15 @@ export default function ThemeToggle() {
             exit={{
               rotate: 90,
               opacity: 0,
-              scale: 0.5,
+              scale: 0.6,
             }}
             transition={{
-              duration: 0.3,
-              ease: [0.22, 1, 0.36, 1],
+              type: "spring",
+              stiffness: 280,
+              damping: 20,
             }}
           >
-            <Sun size={17} />
+            <Sun size={18} className="text-amber-400 drop-shadow-[0_0_6px_rgba(251,191,36,0.6)]" />
           </motion.div>
         ) : (
           <motion.div
@@ -91,7 +92,7 @@ export default function ThemeToggle() {
             initial={{
               rotate: 90,
               opacity: 0,
-              scale: 0.5,
+              scale: 0.6,
             }}
             animate={{
               rotate: 0,
@@ -101,14 +102,15 @@ export default function ThemeToggle() {
             exit={{
               rotate: -90,
               opacity: 0,
-              scale: 0.5,
+              scale: 0.6,
             }}
             transition={{
-              duration: 0.3,
-              ease: [0.22, 1, 0.36, 1],
+              type: "spring",
+              stiffness: 280,
+              damping: 20,
             }}
           >
-            <Moon size={17} />
+            <Moon size={18} className="text-emerald-600 drop-shadow-[0_0_6px_rgba(16,185,129,0.4)]" />
           </motion.div>
         )}
       </AnimatePresence>

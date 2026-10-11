@@ -26,31 +26,16 @@ const FLASH_DURATION = 500; // ms
 export default function ThemeGestureProvider() {
   const { toggleTheme, isDark } = useTheme();
 
-  // Flash animation state
-  const [showFlash, setShowFlash] = useState(false);
-  const flashTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   // Hint state
   const [showHint, setShowHint] = useState(false);
   const hintTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   // ====================================================
-  // TOGGLE WITH FLASH
+  // TOGGLE
   // ====================================================
 
   const handleToggle = useCallback(() => {
     toggleTheme();
-
-    // Show visual flash feedback
-    setShowFlash(true);
-
-    if (flashTimeout.current) {
-      clearTimeout(flashTimeout.current);
-    }
-
-    flashTimeout.current = setTimeout(() => {
-      setShowFlash(false);
-    }, FLASH_DURATION);
   }, [toggleTheme]);
 
   // ====================================================
@@ -123,17 +108,7 @@ export default function ThemeGestureProvider() {
     localStorage.setItem(HINT_STORAGE_KEY, "true");
   }, []);
 
-  // ====================================================
-  // CLEANUP
-  // ====================================================
 
-  useEffect(() => {
-    return () => {
-      if (flashTimeout.current) {
-        clearTimeout(flashTimeout.current);
-      }
-    };
-  }, []);
 
   // ====================================================
   // RENDER
@@ -141,39 +116,7 @@ export default function ThemeGestureProvider() {
 
   return (
     <>
-      {/* THEME SWITCH FLASH */}
 
-      <AnimatePresence>
-        {showFlash && (
-          <motion.div
-            key="theme-flash"
-            initial={{
-              opacity: 0.5,
-            }}
-            animate={{
-              opacity: 0,
-            }}
-            exit={{
-              opacity: 0,
-            }}
-            transition={{
-              duration: FLASH_DURATION / 1000,
-              ease: "easeOut",
-            }}
-            className="
-              pointer-events-none
-              fixed
-              inset-0
-              z-[9999]
-            "
-            style={{
-              background: isDark
-                ? "radial-gradient(circle at 50% 50%, rgba(57,255,136,0.08), transparent 70%)"
-                : "radial-gradient(circle at 50% 50%, rgba(16,185,129,0.06), transparent 70%)",
-            }}
-          />
-        )}
-      </AnimatePresence>
 
       {/* FIRST-VISIT HINT */}
 

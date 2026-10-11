@@ -6,26 +6,8 @@ import { useMemo, useRef, useEffect, useState } from "react";
 import * as THREE from "three";
 
 /* =========================================================
-   COLORS
+   THEME HOOK
 ========================================================= */
-
-let currentIsDark = true;
-const themeListeners = new Set<() => void>();
-
-if (typeof window !== "undefined") {
-  const check = () => {
-    const dark = document.documentElement.getAttribute("data-theme") !== "light";
-    if (dark !== currentIsDark) {
-      currentIsDark = dark;
-      themeListeners.forEach((fn) => fn());
-    }
-  };
-  const observer = new MutationObserver(check);
-  observer.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ["data-theme"],
-  });
-}
 
 function useThemeColors() {
   const [isDark, setIsDark] = useState(() => {
@@ -36,17 +18,20 @@ function useThemeColors() {
   });
 
   useEffect(() => {
-    const listener = () => setIsDark(currentIsDark);
-    themeListeners.add(listener);
-    return () => {
-      themeListeners.delete(listener);
+    const check = () => {
+      const dark = document.documentElement.getAttribute("data-theme") !== "light";
+      setIsDark(dark);
     };
+    check();
+    const observer = new MutationObserver(check);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
+    return () => observer.disconnect();
   }, []);
 
   return {
-    green: isDark ? "#39ff88" : "#10b981",
-    greenDark: isDark ? "#20c968" : "#059669",
-    coreBg: isDark ? "#07140d" : "#e8f5ee",
     isDark,
   };
 }
@@ -55,9 +40,17 @@ function useThemeColors() {
    FLOATING PARTICLES
 ========================================================= */
 
-function ParticleField() {
+function ParticleField({ isDark }: { isDark: boolean }) {
   const pointsRef = useRef<THREE.Points>(null);
-  const { green } = useThemeColors();
+  const matRef = useRef<THREE.PointsMaterial>(null);
+
+  const colors = useMemo(
+    () => ({
+      dark: new THREE.Color("#39ff88"),
+      light: new THREE.Color("#059669"),
+    }),
+    []
+  );
 
   const particles = useMemo(() => {
     const count = 850;
@@ -68,14 +61,9 @@ function ParticleField() {
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.acos(2 * Math.random() - 1);
 
-      positions[i * 3] =
-        radius * Math.sin(phi) * Math.cos(theta);
-
-      positions[i * 3 + 1] =
-        radius * Math.sin(phi) * Math.sin(theta);
-
-      positions[i * 3 + 2] =
-        radius * Math.cos(phi);
+      positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
+      positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+      positions[i * 3 + 2] = radius * Math.cos(phi);
     }
 
     return positions;
@@ -83,9 +71,20 @@ function ParticleField() {
 
   useFrame((_, delta) => {
     if (!pointsRef.current) return;
-
     pointsRef.current.rotation.y += delta * 0.015;
     pointsRef.current.rotation.x += delta * 0.004;
+
+    if (matRef.current) {
+      matRef.current.color.lerp(
+        isDark ? colors.dark : colors.light,
+        0.08
+      );
+      matRef.current.opacity = THREE.MathUtils.lerp(
+        matRef.current.opacity,
+        isDark ? 0.45 : 0.7,
+        0.08
+      );
+    }
   });
 
   return (
@@ -98,10 +97,11 @@ function ParticleField() {
       </bufferGeometry>
 
       <pointsMaterial
-        color={green}
-        size={0.018}
+        ref={matRef}
+        color={isDark ? "#39ff88" : "#059669"}
+        size={isDark ? 0.018 : 0.024}
         transparent
-        opacity={0.45}
+        opacity={isDark ? 0.45 : 0.7}
         sizeAttenuation
         depthWrite={false}
       />
@@ -110,62 +110,129 @@ function ParticleField() {
 }
 
 /* =========================================================
-   DEVELOPER CORE
+   DEVELOPER CORE (ROTATING WIREFRAME CHECKS & CENTER LIGHT)
 ========================================================= */
 
-function DeveloperCore() {
+function DeveloperCore({ isDark }: { isDark: boolean }) {
   const coreRef = useRef<THREE.Group>(null);
-  const { green, greenDark, coreBg } = useThemeColors();
+  const outerMatRef = useRef<THREE.MeshBasicMaterial>(null);
+  const innerMatRef = useRef<THREE.MeshBasicMaterial>(null);
+  const coreMatRef = useRef<THREE.MeshBasicMaterial>(null);
+  const lightRef = useRef<THREE.PointLight>(null);
+
+  const colors = useMemo(
+    () => ({
+      darkOuter: new THREE.Color("#39ff88"),
+      lightOuter: new THREE.Color("#10b981"),
+      darkInner: new THREE.Color("#20c968"),
+      lightInner: new THREE.Color("#059669"),
+      darkCore: new THREE.Color("#07140d"),
+      lightCore: new THREE.Color("#34d399"),
+      darkLight: new THREE.Color("#39ff88"),
+      lightLight: new THREE.Color("#10b981"),
+    }),
+    []
+  );
 
   useFrame((_, delta) => {
     if (!coreRef.current) return;
-
     coreRef.current.rotation.y += delta * 0.22;
     coreRef.current.rotation.x += delta * 0.08;
+
+    const lerpSpeed = 0.08;
+
+    if (outerMatRef.current) {
+      outerMatRef.current.color.lerp(
+        isDark ? colors.darkOuter : colors.lightOuter,
+        lerpSpeed
+      );
+      outerMatRef.current.opacity = THREE.MathUtils.lerp(
+        outerMatRef.current.opacity,
+        isDark ? 0.25 : 0.75,
+        lerpSpeed
+      );
+    }
+
+    if (innerMatRef.current) {
+      innerMatRef.current.color.lerp(
+        isDark ? colors.darkInner : colors.lightInner,
+        lerpSpeed
+      );
+      innerMatRef.current.opacity = THREE.MathUtils.lerp(
+        innerMatRef.current.opacity,
+        isDark ? 0.38 : 0.85,
+        lerpSpeed
+      );
+    }
+
+    if (coreMatRef.current) {
+      coreMatRef.current.color.lerp(
+        isDark ? colors.darkCore : colors.lightCore,
+        lerpSpeed
+      );
+      coreMatRef.current.opacity = THREE.MathUtils.lerp(
+        coreMatRef.current.opacity,
+        isDark ? 0.95 : 0.75,
+        lerpSpeed
+      );
+    }
+
+    if (lightRef.current) {
+      lightRef.current.color.lerp(
+        isDark ? colors.darkLight : colors.lightLight,
+        lerpSpeed
+      );
+      lightRef.current.intensity = THREE.MathUtils.lerp(
+        lightRef.current.intensity,
+        isDark ? 6 : 8,
+        lerpSpeed
+      );
+    }
   });
 
   return (
     <group ref={coreRef}>
-      {/* Outer wireframe */}
+      {/* Outer wireframe (checkered geometric facet lattice) */}
       <mesh>
         <icosahedronGeometry args={[1.65, 2]} />
-
         <meshBasicMaterial
-          color={green}
+          ref={outerMatRef}
+          color={isDark ? "#39ff88" : "#10b981"}
           wireframe
           transparent
-          opacity={0.2}
+          opacity={isDark ? 0.25 : 0.75}
         />
       </mesh>
 
       {/* Inner wireframe */}
       <mesh rotation={[0.5, 0.2, 0]}>
         <icosahedronGeometry args={[1.2, 1]} />
-
         <meshBasicMaterial
-          color={greenDark}
+          ref={innerMatRef}
+          color={isDark ? "#20c968" : "#059669"}
           wireframe
           transparent
-          opacity={0.35}
+          opacity={isDark ? 0.38 : 0.85}
         />
       </mesh>
 
-      {/* Glowing core */}
+      {/* Glowing core sphere */}
       <mesh>
         <sphereGeometry args={[0.7, 32, 32]} />
-
         <meshBasicMaterial
-          color={coreBg}
+          ref={coreMatRef}
+          color={isDark ? "#07140d" : "#34d399"}
           transparent
-          opacity={0.95}
+          opacity={isDark ? 0.95 : 0.75}
         />
       </mesh>
 
       {/* Center light */}
       <pointLight
-        color={green}
-        intensity={5}
-        distance={5}
+        ref={lightRef}
+        color={isDark ? "#39ff88" : "#10b981"}
+        intensity={isDark ? 6 : 8}
+        distance={6}
       />
     </group>
   );
@@ -175,15 +242,61 @@ function DeveloperCore() {
    ORBIT RINGS
 ========================================================= */
 
-function DeveloperOrbits() {
+function DeveloperOrbits({ isDark }: { isDark: boolean }) {
   const groupRef = useRef<THREE.Group>(null);
-  const { green, greenDark } = useThemeColors();
+  const ring1Ref = useRef<THREE.MeshBasicMaterial>(null);
+  const ring2Ref = useRef<THREE.MeshBasicMaterial>(null);
+  const ring3Ref = useRef<THREE.MeshBasicMaterial>(null);
+
+  const colors = useMemo(
+    () => ({
+      darkGreen: new THREE.Color("#39ff88"),
+      lightGreen: new THREE.Color("#10b981"),
+      darkGreen2: new THREE.Color("#20c968"),
+      lightGreen2: new THREE.Color("#059669"),
+    }),
+    []
+  );
 
   useFrame((_, delta) => {
     if (!groupRef.current) return;
-
     groupRef.current.rotation.z += delta * 0.08;
     groupRef.current.rotation.y += delta * 0.025;
+
+    const lerpSpeed = 0.08;
+    if (ring1Ref.current) {
+      ring1Ref.current.color.lerp(
+        isDark ? colors.darkGreen : colors.lightGreen,
+        lerpSpeed
+      );
+      ring1Ref.current.opacity = THREE.MathUtils.lerp(
+        ring1Ref.current.opacity,
+        isDark ? 0.55 : 0.75,
+        lerpSpeed
+      );
+    }
+    if (ring2Ref.current) {
+      ring2Ref.current.color.lerp(
+        isDark ? colors.darkGreen2 : colors.lightGreen2,
+        lerpSpeed
+      );
+      ring2Ref.current.opacity = THREE.MathUtils.lerp(
+        ring2Ref.current.opacity,
+        isDark ? 0.3 : 0.6,
+        lerpSpeed
+      );
+    }
+    if (ring3Ref.current) {
+      ring3Ref.current.color.lerp(
+        isDark ? colors.darkGreen : colors.lightGreen,
+        lerpSpeed
+      );
+      ring3Ref.current.opacity = THREE.MathUtils.lerp(
+        ring3Ref.current.opacity,
+        isDark ? 0.18 : 0.45,
+        lerpSpeed
+      );
+    }
   });
 
   return (
@@ -191,33 +304,33 @@ function DeveloperOrbits() {
       {/* Ring 1 */}
       <mesh rotation={[Math.PI / 2.4, 0, 0]}>
         <torusGeometry args={[2.15, 0.012, 12, 160]} />
-
         <meshBasicMaterial
-          color={green}
+          ref={ring1Ref}
+          color={isDark ? "#39ff88" : "#10b981"}
           transparent
-          opacity={0.55}
+          opacity={isDark ? 0.55 : 0.75}
         />
       </mesh>
 
       {/* Ring 2 */}
       <mesh rotation={[0.8, 0.3, 0.5]}>
         <torusGeometry args={[2.65, 0.008, 12, 160]} />
-
         <meshBasicMaterial
-          color={greenDark}
+          ref={ring2Ref}
+          color={isDark ? "#20c968" : "#059669"}
           transparent
-          opacity={0.3}
+          opacity={isDark ? 0.3 : 0.6}
         />
       </mesh>
 
       {/* Ring 3 */}
       <mesh rotation={[1.2, 0.7, 0]}>
         <torusGeometry args={[3.1, 0.006, 10, 160]} />
-
         <meshBasicMaterial
-          color={green}
+          ref={ring3Ref}
+          color={isDark ? "#39ff88" : "#10b981"}
           transparent
-          opacity={0.18}
+          opacity={isDark ? 0.18 : 0.45}
         />
       </mesh>
     </group>
@@ -228,8 +341,30 @@ function DeveloperOrbits() {
    FLOATING NODES
 ========================================================= */
 
-function FloatingNodes() {
-  const { green } = useThemeColors();
+function FloatingNodes({ isDark }: { isDark: boolean }) {
+  const matRef = useRef<THREE.MeshBasicMaterial>(null);
+
+  const colors = useMemo(
+    () => ({
+      dark: new THREE.Color("#39ff88"),
+      light: new THREE.Color("#10b981"),
+    }),
+    []
+  );
+
+  useFrame(() => {
+    if (matRef.current) {
+      matRef.current.color.lerp(
+        isDark ? colors.dark : colors.light,
+        0.08
+      );
+      matRef.current.opacity = THREE.MathUtils.lerp(
+        matRef.current.opacity,
+        isDark ? 0.8 : 0.9,
+        0.08
+      );
+    }
+  });
 
   const nodes = useMemo(
     () => [
@@ -254,11 +389,11 @@ function FloatingNodes() {
         >
           <mesh position={position as [number, number, number]}>
             <sphereGeometry args={[0.045, 16, 16]} />
-
             <meshBasicMaterial
-              color={green}
+              ref={matRef}
+              color={isDark ? "#39ff88" : "#10b981"}
               transparent
-              opacity={0.8}
+              opacity={isDark ? 0.8 : 0.9}
             />
           </mesh>
         </Float>
@@ -271,28 +406,23 @@ function FloatingNodes() {
    CONNECTION LINES
 ========================================================= */
 
-function ConnectionLines() {
-  const { green } = useThemeColors();
-
+function ConnectionLines({ isDark }: { isDark: boolean }) {
   const lines = [
     [
       [-2.8, 1.7, 0],
       [-1.1, 0.7, 0],
       [0, 0, 0],
     ],
-
     [
       [2.7, 1.2, -1],
       [1.2, 0.6, -0.4],
       [0, 0, 0],
     ],
-
     [
       [-2.5, -1.8, -0.5],
       [-1.2, -0.7, -0.2],
       [0, 0, 0],
     ],
-
     [
       [2.6, -1.5, 0],
       [1.2, -0.6, 0],
@@ -306,10 +436,10 @@ function ConnectionLines() {
         <Line
           key={index}
           points={points as [number, number, number][]}
-          color={green}
+          color={isDark ? "#39ff88" : "#10b981"}
           transparent
-          opacity={0.12}
-          lineWidth={0.6}
+          opacity={isDark ? 0.12 : 0.35}
+          lineWidth={0.8}
         />
       ))}
     </>
@@ -320,26 +450,26 @@ function ConnectionLines() {
    SCENE
 ========================================================= */
 
-function DeveloperScene() {
+function DeveloperScene({ isDark }: { isDark: boolean }) {
   return (
     <>
-      <ambientLight intensity={0.25} />
+      <ambientLight intensity={isDark ? 0.25 : 0.65} />
 
-      <ParticleField />
+      <ParticleField isDark={isDark} />
 
       <Float
         speed={0.6}
         rotationIntensity={0.15}
         floatIntensity={0.3}
       >
-        <DeveloperCore />
+        <DeveloperCore isDark={isDark} />
       </Float>
 
-      <DeveloperOrbits />
+      <DeveloperOrbits isDark={isDark} />
 
-      <FloatingNodes />
+      <FloatingNodes isDark={isDark} />
 
-      <ConnectionLines />
+      <ConnectionLines isDark={isDark} />
     </>
   );
 }
@@ -349,7 +479,7 @@ function DeveloperScene() {
 ========================================================= */
 
 export default function DeveloperBackground() {
-  const { green, isDark } = useThemeColors();
+  const { isDark } = useThemeColors();
 
   return (
     <div
@@ -362,7 +492,7 @@ export default function DeveloperBackground() {
         transition-colors
         duration-500
       "
-      style={{ backgroundColor: isDark ? "#050505" : "#f0f1f3" }}
+      style={{ backgroundColor: isDark ? "#050505" : "#f2f7f4" }}
     >
       {/* Green atmospheric glow */}
       <div
@@ -370,15 +500,19 @@ export default function DeveloperBackground() {
           absolute
           left-1/2
           top-1/2
-          h-[700px]
-          w-[700px]
+          h-[750px]
+          w-[750px]
           -translate-x-1/2
           -translate-y-1/2
           rounded-full
           blur-[140px]
+          transition-all
+          duration-500
         "
         style={{
-          backgroundColor: isDark ? `${green}09` : `${green}08`,
+          backgroundColor: isDark
+            ? "rgba(57, 255, 136, 0.05)"
+            : "rgba(16, 185, 129, 0.16)",
         }}
       />
 
@@ -392,9 +526,15 @@ export default function DeveloperBackground() {
           font-mono
           text-[11px]
           leading-6
+          transition-colors
+          duration-500
           lg:block
         "
-        style={{ color: isDark ? `${green}1a` : `${green}15` }}
+        style={{
+          color: isDark
+            ? "rgba(57, 255, 136, 0.12)"
+            : "rgba(16, 185, 129, 0.35)",
+        }}
       >
         <div>const developer = {"{"}</div>
         <div className="pl-4">name: &quot;Farhan&quot;,</div>
@@ -413,9 +553,15 @@ export default function DeveloperBackground() {
           font-mono
           text-[11px]
           leading-6
+          transition-colors
+          duration-500
           lg:block
         "
-        style={{ color: isDark ? `${green}1a` : `${green}15` }}
+        style={{
+          color: isDark
+            ? "rgba(57, 255, 136, 0.12)"
+            : "rgba(16, 185, 129, 0.35)",
+        }}
       >
         <div>function buildProject() {"{"}</div>
         <div className="pl-4">return {"{"}</div>
@@ -426,7 +572,7 @@ export default function DeveloperBackground() {
         <div>{"}"}</div>
       </div>
 
-      {/* Canvas */}
+      {/* Canvas (keeps mounted across theme changes for seamless fluid rotation) */}
       <Canvas
         camera={{
           position: [0, 0, 9],
@@ -439,7 +585,7 @@ export default function DeveloperBackground() {
           powerPreference: "high-performance",
         }}
       >
-        <DeveloperScene />
+        <DeveloperScene isDark={isDark} />
 
         {/* Very subtle camera movement */}
         <OrbitControls
@@ -450,37 +596,40 @@ export default function DeveloperBackground() {
         />
       </Canvas>
 
-      {/* Dark readability overlays */}
+      {/* Dark / Light readability overlays */}
       <div
-        className="absolute inset-0"
+        className="absolute inset-0 transition-all duration-500"
         style={{
           background: isDark
             ? "radial-gradient(circle at center, transparent 0%, #050505 75%)"
-            : "radial-gradient(circle at center, transparent 0%, #f0f1f3 75%)",
+            : "radial-gradient(circle at center, transparent 25%, rgba(242,247,244,0.45) 65%, #f2f7f4 88%)",
         }}
       />
 
       <div
-        className="absolute inset-0"
+        className="absolute inset-0 transition-all duration-500"
         style={{
           background: isDark
             ? "linear-gradient(to bottom, rgba(5,5,5,0.2), transparent, #050505)"
-            : "linear-gradient(to bottom, rgba(240,241,243,0.2), transparent, #f0f1f3)",
+            : "linear-gradient(to bottom, rgba(242,247,244,0.15), transparent 30%, transparent 70%, #f2f7f4)",
         }}
       />
 
-      {/* Developer grid */}
+      {/* Developer checkered grid ("kallikal" / small boxes) */}
       <div
         className="
           absolute
           inset-0
-          [background-size:80px_80px]
+          transition-all
+          duration-500
+          [background-size:60px_60px]
+          sm:[background-size:80px_80px]
         "
         style={{
-          opacity: isDark ? 0.035 : 0.025,
+          opacity: isDark ? 0.09 : 0.28,
           backgroundImage: isDark
-            ? "linear-gradient(rgba(57,255,136,0.5) 1px,transparent 1px),linear-gradient(90deg,rgba(57,255,136,0.5) 1px,transparent 1px)"
-            : "linear-gradient(rgba(16,185,129,0.15) 1px,transparent 1px),linear-gradient(90deg,rgba(16,185,129,0.15) 1px,transparent 1px)",
+            ? "linear-gradient(rgba(57,255,136,0.7) 1px,transparent 1px),linear-gradient(90deg,rgba(57,255,136,0.7) 1px,transparent 1px)"
+            : "linear-gradient(rgba(16,185,129,0.75) 1px,transparent 1px),linear-gradient(90deg,rgba(16,185,129,0.75) 1px,transparent 1px)",
         }}
       />
     </div>

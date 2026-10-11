@@ -1,22 +1,45 @@
 "use client";
 
-import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { motion, type Variants } from "framer-motion";
 import {
-  Quote,
+  useEffect,
+  useState,
+  type FormEvent,
+} from "react";
+
+import { AnimatePresence, motion, type Variants } from "framer-motion";
+
+import {
   Star,
   Send,
   Trash2,
   MessageSquare,
-  TrendingUp,
-  UserRound,
-  CheckCircle2,
+  Quote,
   CalendarDays,
-  Eye,
-  EyeOff,
-  ChevronDown,
-  ChevronUp,
+  Plus,
+  X,
+  AlertTriangle,
 } from "lucide-react";
+
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  orderBy,
+  query,
+  serverTimestamp,
+  Timestamp,
+} from "firebase/firestore";
+
+import {
+  onAuthStateChanged,
+  signInAnonymously,
+  type User,
+} from "firebase/auth";
+
+import { auth, db } from "@/lib/firebase";
+import { useTheme } from "@/components/ThemeProvider";
 
 // ======================================================
 // TYPES
@@ -29,9 +52,7 @@ type Testimonial = {
   text: string;
   rating: number;
   createdAt: string;
-  ownerToken: string;
-  isUserSubmitted: true;
-  isHidden?: boolean;
+  ownerUid: string;
 };
 
 type ReviewForm = {
@@ -41,36 +62,31 @@ type ReviewForm = {
   rating: number;
 };
 
+type FirestoreReview = {
+  name: string;
+  role: string;
+  text: string;
+  rating: number;
+  createdAt?: Timestamp | null;
+  ownerUid: string;
+};
+
 // ======================================================
 // CONFIGURATION
 // ======================================================
 
-const STORAGE_KEY = "farhan-portfolio-testimonials-v3";
-const OWNER_KEY = "farhan-portfolio-review-owner-v1";
-
+const COLLECTION_NAME = "testimonials";
 const INITIAL_VISIBLE_COUNT = 4;
 
 // ======================================================
 // ANIMATIONS
 // ======================================================
 
-const headerVariants: Variants = {
-  hidden: { opacity: 0, y: 12 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.35,
-      ease: [0.22, 1, 0.36, 1],
-    },
-  },
-};
-
 const containerVariants: Variants = {
   hidden: {},
   visible: {
     transition: {
-      staggerChildren: 0.05,
+      staggerChildren: 0.07,
     },
   },
 };
@@ -78,15 +94,26 @@ const containerVariants: Variants = {
 const cardVariants: Variants = {
   hidden: {
     opacity: 0,
-    y: 12,
+    y: 15,
   },
   visible: {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.3,
+      duration: 0.35,
     },
   },
+};
+
+// ======================================================
+// INITIAL FORM
+// ======================================================
+
+const initialForm: ReviewForm = {
+  name: "",
+  role: "",
+  text: "",
+  rating: 0,
 };
 
 // ======================================================
@@ -97,14 +124,10 @@ function StarRating({
   rating,
   interactive = false,
   onChange,
-  size = 13,
-  label = "Rating",
 }: {
   rating: number;
   interactive?: boolean;
   onChange?: (rating: number) => void;
-  size?: number;
-  label?: string;
 }) {
   const [hoverRating, setHoverRating] = useState(0);
 
@@ -112,49 +135,48 @@ function StarRating({
 
   return (
     <div
-      className="flex items-center gap-0.5"
-      role={interactive ? "group" : undefined}
-      aria-label={`${label}: ${rating} out of 5 stars`}
+      className="flex items-center gap-1"
       onMouseLeave={() => setHoverRating(0)}
+      aria-label={`Rating: ${rating} out of 5`}
     >
-      {[1, 2, 3, 4, 5].map((value) => {
-        const active = value <= displayedRating;
-
-        if (interactive) {
-          return (
-            <button
-              key={value}
-              type="button"
-              aria-label={`${value} out of 5 stars`}
-              aria-pressed={rating === value}
-              onMouseEnter={() => setHoverRating(value)}
-              onFocus={() => setHoverRating(value)}
-              onBlur={() => setHoverRating(0)}
-              onClick={() => onChange?.(value)}
-              className="rounded p-1 transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#39ff88]"
-            >
-              <Star
-                size={size}
-                fill={active ? "currentColor" : "none"}
-                className={
-                  active ? "text-[#39ff88]" : "text-gray-600"
-                }
-              />
-            </button>
-          );
-        }
-
-        return (
+      {[1, 2, 3, 4, 5].map((value) => (
+        <button
+          key={value}
+          type="button"
+          disabled={!interactive}
+          aria-label={`${value} out of 5 stars`}
+          aria-pressed={
+            interactive ? rating === value : undefined
+          }
+          onMouseEnter={() => {
+            if (interactive) setHoverRating(value);
+          }}
+          onFocus={() => {
+            if (interactive) setHoverRating(value);
+          }}
+          onBlur={() => setHoverRating(0)}
+          onClick={() => onChange?.(value)}
+          className={
+            interactive
+              ? "rounded p-0.5 transition hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#39ff88]"
+              : "cursor-default p-0.5"
+          }
+        >
           <Star
-            key={value}
-            size={size}
-            fill={active ? "currentColor" : "none"}
+            size={interactive ? 20 : 13}
+            fill={
+              value <= displayedRating
+                ? "currentColor"
+                : "none"
+            }
             className={
-              active ? "text-[#39ff88]" : "text-gray-700"
+              value <= displayedRating
+                ? "text-[#39ff88]"
+                : "text-gray-600"
             }
           />
-        );
-      })}
+        </button>
+      ))}
     </div>
   );
 }
@@ -184,127 +206,105 @@ function formatReviewDate(dateString: string): string {
 function TestimonialCard({
   testimonial,
   isOwner,
-  onToggleHidden,
   onDelete,
 }: {
   testimonial: Testimonial;
   isOwner: boolean;
-  onToggleHidden: (id: string) => void;
   onDelete: (id: string) => void;
 }) {
   return (
     <motion.article
+      layout
       variants={cardVariants}
+      initial="hidden"
+      animate="visible"
+      exit={{
+        opacity: 0,
+        scale: 0.82,
+        y: -18,
+        transition: { duration: 0.32, ease: [0.22, 1, 0.36, 1] },
+      }}
       className="
         group relative flex min-w-0 flex-col
-        overflow-hidden rounded-xl
+        overflow-hidden rounded-2xl
         border border-white/[0.08]
-        bg-[#111113]/80 p-3
+        bg-[#111113]/80 p-4
         transition-all duration-300
-        hover:-translate-y-0.5
+        hover:-translate-y-1
         hover:border-[#39ff88]/30
         hover:bg-[#151518]
-        sm:p-3.5
+        sm:p-5
       "
     >
-      {/* Subtle accent */}
-      <div className="pointer-events-none absolute right-0 top-0 h-16 w-16 rounded-full bg-[#39ff88]/[0.04] blur-2xl" />
+      <div className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-[#39ff88]/[0.05] blur-2xl" />
 
-      {/* Author and owner controls */}
-      <div className="relative flex items-center gap-2">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#39ff88]/15 bg-[#39ff88]/[0.06] text-[#39ff88]">
-          <Quote size={15} />
+      {/* Author */}
+
+      <div className="relative flex items-center gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#39ff88]/20 bg-[#39ff88]/[0.08] text-[#39ff88]">
+          <Quote size={18} />
         </div>
 
         <div className="min-w-0 flex-1">
-          <h3 className="truncate text-xs font-semibold text-white sm:text-sm">
+          <h3 className="truncate text-sm font-semibold text-white">
             {testimonial.name}
           </h3>
 
-          <p className="truncate text-[10px] text-gray-500">
+          <p className="truncate text-xs text-gray-500">
             {testimonial.role}
           </p>
         </div>
 
-        {/* Only the owner sees these controls */}
         {isOwner && (
-          <div className="flex shrink-0 items-center gap-1">
-            <button
-              type="button"
-              onClick={() => onToggleHidden(testimonial.id)}
-              title={
-                testimonial.isHidden
-                  ? "Show your review"
-                  : "Hide your review"
-              }
-              aria-label={
-                testimonial.isHidden
-                  ? "Show your review"
-                  : "Hide your review"
-              }
-              className="
-                rounded-md p-1.5 text-gray-500
-                transition hover:bg-[#39ff88]/10
-                hover:text-[#39ff88]
-                focus-visible:outline-none
-                focus-visible:ring-2
-                focus-visible:ring-[#39ff88]
-              "
-            >
-              {testimonial.isHidden ? (
-                <Eye size={14} />
-              ) : (
-                <EyeOff size={14} />
-              )}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => onDelete(testimonial.id)}
-              title="Delete your review"
-              aria-label="Delete your review"
-              className="
-                rounded-md p-1.5 text-gray-500
-                transition hover:bg-red-500/10
-                hover:text-red-400
-                focus-visible:outline-none
-                focus-visible:ring-2
-                focus-visible:ring-red-400
-              "
-            >
-              <Trash2 size={14} />
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => onDelete(testimonial.id)}
+            title="Delete your review"
+            aria-label="Delete your review"
+            className="
+              rounded-lg p-2 text-gray-500
+              transition hover:bg-red-500/10
+              hover:text-red-400
+              focus-visible:outline-none
+              focus-visible:ring-2
+              focus-visible:ring-red-400
+            "
+          >
+            <Trash2 size={15} />
+          </button>
         )}
       </div>
 
       {/* Rating */}
-      <div className="relative mt-2.5 flex items-center justify-between gap-2">
+
+      <div className="relative mt-4 flex items-center justify-between">
         <StarRating rating={testimonial.rating} />
 
-        <span className="text-[10px] text-gray-500">
+        <span className="text-xs text-gray-500">
           {testimonial.rating}/5
         </span>
       </div>
 
       {/* Review */}
-      <p className="relative mt-2.5 break-words text-xs leading-5 text-gray-400">
+
+      <p className="relative mt-4 flex-1 whitespace-pre-wrap break-words text-sm leading-6 text-gray-400">
         {testimonial.text}
       </p>
 
-      {/* Date and owner status */}
-      <div className="relative mt-3 flex items-center gap-1.5 border-t border-white/[0.06] pt-2.5">
+      {/* Date */}
+
+      <div className="relative mt-4 flex items-center gap-2 border-t border-white/[0.06] pt-3">
         <CalendarDays
-          size={11}
-          className="shrink-0 text-gray-600"
+          size={13}
+          className="text-gray-600"
         />
 
-        <span className="text-[9px] text-gray-600">
+        <span className="text-[11px] text-gray-500">
           {formatReviewDate(testimonial.createdAt)}
         </span>
 
         {isOwner && (
-          <span className="ml-auto rounded-full border border-[#39ff88]/15 px-1.5 py-0.5 text-[9px] text-[#39ff88]">
+          <span className="ml-auto rounded-full border border-[#39ff88]/20 bg-[#39ff88]/[0.05] px-2 py-1 text-[10px] text-[#39ff88]">
             Your review
           </span>
         )}
@@ -320,182 +320,167 @@ function TestimonialCard({
 // ======================================================
 
 export default function Testimonials() {
-  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const { isDark } = useTheme();
 
-  const [form, setForm] = useState<ReviewForm>({
-    name: "",
-    role: "",
-    text: "",
-    rating: 0,
-  });
+  const [testimonials, setTestimonials] = useState<
+    Testimonial[]
+  >([]);
 
-  const [ownerToken, setOwnerToken] = useState("");
-  const [hydrated, setHydrated] = useState(false);
-  const [message, setMessage] = useState("");
+  const [form, setForm] = useState<ReviewForm>(initialForm);
+
+  const [user, setUser] = useState<User | null>(null);
+
+  const [authReady, setAuthReady] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+
   const [showForm, setShowForm] = useState(false);
   const [showAll, setShowAll] = useState(false);
-  const [showMyHiddenReviews, setShowMyHiddenReviews] =
-    useState(false);
 
-  // ====================================================
-  // LOAD REVIEWS AND OWNER ID
-  // ====================================================
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState<
+    "success" | "error"
+  >("success");
+
+  const [visitorUid, setVisitorUid] = useState<string>("");
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    try {
-      let token = localStorage.getItem(OWNER_KEY);
-
-      if (!token) {
-        token =
-          typeof crypto !== "undefined" &&
-          typeof crypto.randomUUID === "function"
-            ? crypto.randomUUID()
-            : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-
-        localStorage.setItem(OWNER_KEY, token);
+    if (typeof window !== "undefined") {
+      let stored = localStorage.getItem("portfolio_visitor_uid");
+      if (!stored) {
+        stored =
+          "anon_" +
+          Math.random().toString(36).slice(2, 11) +
+          "_" +
+          Date.now().toString(36);
+        localStorage.setItem("portfolio_visitor_uid", stored);
       }
-
-      setOwnerToken(token);
-
-      const saved = localStorage.getItem(STORAGE_KEY);
-
-      if (saved) {
-        const parsed: unknown = JSON.parse(saved);
-
-        if (Array.isArray(parsed)) {
-          const validReviews: Testimonial[] = parsed.filter(
-            (item: unknown): item is Testimonial => {
-              if (
-                typeof item !== "object" ||
-                item === null
-              ) {
-                return false;
-              }
-
-              const review = item as Partial<Testimonial>;
-
-              return (
-                typeof review.id === "string" &&
-                typeof review.name === "string" &&
-                typeof review.role === "string" &&
-                typeof review.text === "string" &&
-                typeof review.rating === "number" &&
-                Number.isInteger(review.rating) &&
-                review.rating >= 1 &&
-                review.rating <= 5 &&
-                typeof review.createdAt === "string" &&
-                review.isUserSubmitted === true &&
-                typeof review.ownerToken === "string"
-              );
-            }
-          );
-
-          setTestimonials(validReviews);
-        }
-      }
-    } catch {
-      setMessage(
-        "Unable to load saved reviews. Browser storage may be unavailable."
-      );
-    } finally {
-      setHydrated(true);
+      setVisitorUid(stored);
     }
   }, []);
 
   // ====================================================
-  // SAVE REVIEWS
+  // AUTHENTICATION
   // ====================================================
 
   useEffect(() => {
-    if (!hydrated) return;
+    let active = true;
 
-    try {
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(testimonials)
-      );
-    } catch {
-      setMessage("Unable to save reviews in browser storage.");
-    }
-  }, [testimonials, hydrated]);
+    const unsubscribe = onAuthStateChanged(
+      auth,
+      async (currentUser) => {
+        if (!active) return;
 
-  // ====================================================
-  // DERIVED DATA
-  // ====================================================
+        if (currentUser) {
+          setUser(currentUser);
+          setAuthReady(true);
+          return;
+        }
 
-  const publicReviews = useMemo(
-    () =>
-      testimonials.filter(
-        (review) =>
-          !review.isHidden ||
-          (review.ownerToken === ownerToken &&
-            showMyHiddenReviews)
-      ),
-    [testimonials, ownerToken, showMyHiddenReviews]
-  );
+        try {
+          const credential = await signInAnonymously(auth);
 
-  const myReviews = useMemo(
-    () =>
-      testimonials.filter(
-        (review) =>
-          review.ownerToken === ownerToken &&
-          Boolean(ownerToken)
-      ),
-    [testimonials, ownerToken]
-  );
+          if (!active) return;
 
-  const myHiddenReviews = myReviews.filter(
-    (review) => review.isHidden
-  );
-
-  const averageRating = useMemo(() => {
-    if (publicReviews.length === 0) return 0;
-
-    return (
-      publicReviews.reduce(
-        (total, review) => total + review.rating,
-        0
-      ) / publicReviews.length
+          setUser(credential.user);
+        } catch {
+          // Anonymous Auth provider not yet enabled in Firebase Console;
+          // visitor UID is active as transparent fallback.
+        } finally {
+          if (active) {
+            setAuthReady(true);
+          }
+        }
+      }
     );
-  }, [publicReviews]);
 
-  const ratingDistribution = useMemo(
-    () =>
-      [5, 4, 3, 2, 1].map((rating) => {
-        const count = publicReviews.filter(
-          (review) => review.rating === rating
-        ).length;
+    return () => {
+      active = false;
+      unsubscribe();
+    };
+  }, []);
 
-        return {
-          rating,
-          count,
-          percentage:
-            publicReviews.length > 0
-              ? (count / publicReviews.length) * 100
-              : 0,
-        };
-      }),
-    [publicReviews]
-  );
+  // ====================================================
+  // REAL-TIME FIRESTORE LISTENER
+  // ====================================================
 
-  const visibleReviews = showAll
-    ? publicReviews
-    : publicReviews.slice(0, INITIAL_VISIBLE_COUNT);
+  useEffect(() => {
+    setLoading(true);
 
-  const hasMoreReviews =
-    publicReviews.length > INITIAL_VISIBLE_COUNT;
+    const reviewsQuery = query(
+      collection(db, COLLECTION_NAME),
+      orderBy("createdAt", "desc")
+    );
+
+    const unsubscribe = onSnapshot(
+      reviewsQuery,
+      (snapshot) => {
+        const reviews: Testimonial[] = snapshot.docs.map(
+          (document) => {
+            const data =
+              document.data() as FirestoreReview;
+
+            return {
+              id: document.id,
+              name: data.name,
+              role: data.role,
+              text: data.text,
+              rating: data.rating,
+              ownerUid: data.ownerUid,
+              createdAt:
+                data.createdAt instanceof Timestamp
+                  ? data.createdAt.toDate().toISOString()
+                  : new Date().toISOString(),
+            };
+          }
+        );
+
+        setTestimonials(reviews);
+        setLoading(false);
+      },
+      (error) => {
+        console.warn("Firestore listener notice:", error);
+
+        setMessage(
+          "Unable to load reviews. Check your Firestore connection."
+        );
+
+        setMessageType("error");
+        setLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, []);
 
   // ====================================================
   // SUBMIT REVIEW
   // ====================================================
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(
+    event: FormEvent<HTMLFormElement>
+  ) {
     event.preventDefault();
+
     setMessage("");
 
-    if (!ownerToken) {
-      setMessage("Unable to identify this browser. Refresh and try again.");
-      return;
+    let activeUid = user?.uid;
+
+    if (!activeUid) {
+      try {
+        const credential = await signInAnonymously(auth);
+        setUser(credential.user);
+        activeUid = credential.user.uid;
+      } catch {
+        activeUid =
+          visitorUid ||
+          "anon_" +
+            Math.random().toString(36).slice(2, 11) +
+            "_" +
+            Date.now().toString(36);
+      }
     }
 
     const name = form.name.trim();
@@ -506,16 +491,20 @@ export default function Testimonials() {
       setMessage(
         "Enter your name, write a review, and select a rating."
       );
+
+      setMessageType("error");
       return;
     }
 
     if (name.length > 60) {
       setMessage("Your name must be 60 characters or fewer.");
+      setMessageType("error");
       return;
     }
 
     if (role.length > 80) {
       setMessage("Your role must be 80 characters or fewer.");
+      setMessageType("error");
       return;
     }
 
@@ -523,82 +512,40 @@ export default function Testimonials() {
       setMessage(
         "Your review must contain between 10 and 500 characters."
       );
+
+      setMessageType("error");
       return;
     }
 
-    const newReview: Testimonial = {
-      id:
-        typeof crypto !== "undefined" &&
-        typeof crypto.randomUUID === "function"
-          ? crypto.randomUUID()
-          : `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-      name,
-      role,
-      text,
-      rating: form.rating,
-      createdAt: new Date().toISOString(),
-      ownerToken,
-      isUserSubmitted: true,
-      isHidden: false,
-    };
+    setSubmitting(true);
 
-    setTestimonials((current) => [
-      ...current,
-      newReview,
-    ]);
+    try {
+      await addDoc(collection(db, COLLECTION_NAME), {
+        name,
+        role,
+        text,
+        rating: form.rating,
+        ownerUid: activeUid,
+        createdAt: serverTimestamp(),
+      });
 
-    setForm({
-      name: "",
-      role: "",
-      text: "",
-      rating: 0,
-    });
+      setForm(initialForm);
+      setShowForm(false);
+      setShowAll(true);
 
-    setShowForm(false);
-    setShowAll(true);
-    setShowMyHiddenReviews(false);
+      setMessage("Your review has been saved successfully!");
+      setMessageType("success");
+    } catch (error) {
+      console.warn("Review publication notice:", error);
 
-    setMessage("Your review was published successfully.");
-  }
+      setMessage(
+        "Unable to publish your review. Check your Firebase settings."
+      );
 
-  // ====================================================
-  // TOGGLE OWN REVIEW VISIBILITY
-  // ====================================================
-
-  function handleToggleHidden(id: string) {
-    const review = testimonials.find(
-      (item) => item.id === id
-    );
-
-    if (!review || !ownerToken) {
-      setMessage("Unable to find your review.");
-      return;
+      setMessageType("error");
+    } finally {
+      setSubmitting(false);
     }
-
-    if (review.ownerToken !== ownerToken) {
-      setMessage("You can only hide or show your own reviews.");
-      return;
-    }
-
-    const willHide = !review.isHidden;
-
-    setTestimonials((current) =>
-      current.map((item) =>
-        item.id === id &&
-        item.ownerToken === ownerToken
-          ? {
-              ...item,
-              isHidden: !item.isHidden,
-            }
-          : item
-      )
-    );
-
-    setMessage(
-      willHide
-        ? "Your review is now hidden from the public list."
-        : "Your review is now visible."
-    );
   }
 
   // ====================================================
@@ -606,36 +553,95 @@ export default function Testimonials() {
   // ====================================================
 
   function handleDelete(id: string) {
-    const review = testimonials.find(
-      (item) => item.id === id
-    );
+    const activeUid = user?.uid || visitorUid;
 
-    if (!review || !ownerToken) {
-      setMessage("Unable to find your review.");
+    if (!activeUid) {
+      setMessage("Authentication is not ready.");
+      setMessageType("error");
       return;
     }
 
-    if (review.ownerToken !== ownerToken) {
+    const review = testimonials.find((item) => item.id === id);
+
+    if (!review) {
+      setMessage("Review not found.");
+      setMessageType("error");
+      return;
+    }
+
+    if (review.ownerUid !== activeUid) {
       setMessage("You can only delete your own reviews.");
+      setMessageType("error");
       return;
     }
 
-    const confirmed = window.confirm(
-      "Are you sure you want to permanently delete your review?"
-    );
-
-    if (!confirmed) return;
-
-    setTestimonials((current) =>
-      current.filter(
-        (item) =>
-          item.id !== id ||
-          item.ownerToken !== ownerToken
-      )
-    );
-
-    setMessage("Your review was deleted successfully.");
+    setDeletingId(id);
   }
+
+  async function confirmDelete() {
+    if (!deletingId) return;
+
+    const activeUid = user?.uid || visitorUid;
+
+    if (!activeUid) {
+      setMessage("Authentication is not ready.");
+      setMessageType("error");
+      setDeletingId(null);
+      return;
+    }
+
+    const review = testimonials.find((item) => item.id === deletingId);
+
+    if (!review) {
+      setMessage("Review not found.");
+      setMessageType("error");
+      setDeletingId(null);
+      return;
+    }
+
+    if (review.ownerUid !== activeUid) {
+      setMessage("You can only delete your own reviews.");
+      setMessageType("error");
+      setDeletingId(null);
+      return;
+    }
+
+    const targetId = deletingId;
+    const backupTestimonials = [...testimonials];
+
+    // 1. Immediately close modal with zero delay
+    setDeletingId(null);
+
+    // 2. Optimistically remove review from state with instant exit animation
+    setTestimonials((prev) => prev.filter((item) => item.id !== targetId));
+
+    setMessage("Your review has been deleted.");
+    setMessageType("success");
+
+    // 3. Background delete in Firestore
+    try {
+      await deleteDoc(doc(db, COLLECTION_NAME, targetId));
+    } catch (error) {
+      console.warn("Delete review notice:", error);
+      // Revert if network error occurs
+      setTestimonials(backupTestimonials);
+      setMessage(
+        "Unable to delete your review. Please try again."
+      );
+      setMessageType("error");
+    }
+  }
+
+  // ====================================================
+  // VISIBLE REVIEWS
+  // ====================================================
+
+  const visibleReviews = showAll
+    ? testimonials
+    : testimonials.slice(0, INITIAL_VISIBLE_COUNT);
+
+  const hasMoreReviews =
+    testimonials.length > INITIAL_VISIBLE_COUNT;
 
   // ====================================================
   // RENDER
@@ -644,121 +650,103 @@ export default function Testimonials() {
   return (
     <section
       id="testimonials"
-      className="relative w-full min-w-0 overflow-hidden border-t border-white/[0.05] py-8 sm:py-10"
+      className="
+        relative w-full min-w-0 overflow-hidden
+        border-t border-white/[0.05]
+        py-12 sm:py-16 lg:py-20
+      "
     >
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
 
         {/* HEADER */}
 
-        <motion.div
-          variants={headerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.1 }}
-        >
-          <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <div>
             <div className="flex items-center gap-2">
-              <span className="h-px w-6 bg-[#39ff88]" />
+              <span className="h-px w-7 bg-[#39ff88]" />
 
-              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#39ff88]">
-                09 — Testimonials
+              <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-[#39ff88]">
+                Testimonials
               </p>
             </div>
 
-            <button
-              type="button"
-              onClick={() => setShowForm((current) => !current)}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-[#39ff88]/25 bg-[#39ff88]/10 px-3 py-2 text-[11px] font-semibold text-[#39ff88] transition hover:bg-[#39ff88]/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#39ff88]"
-            >
-              <Star size={13} />
-              {showForm ? "Close Form" : "Write a Review"}
-            </button>
-          </div>
-
-          <div className="mt-3">
-            <h2 className="text-2xl font-bold tracking-tight text-white sm:text-3xl md:text-4xl">
+            <h2 className="mt-3 text-3xl font-bold tracking-tight text-white sm:text-4xl md:text-5xl">
               What people{" "}
               <span className="text-[#39ff88]">say.</span>
             </h2>
 
-            <p className="mt-1.5 max-w-xl text-xs leading-5 text-gray-500 sm:text-sm">
-              Share your experience and help improve my portfolio.
-            </p>
-          </div>
-        </motion.div>
-
-        {/* STATISTICS */}
-
-        <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-3">
-          <div className="rounded-lg border border-white/[0.08] bg-[#111113]/75 p-3">
-            <div className="flex items-center gap-1.5 text-gray-500">
-              <TrendingUp size={13} className="text-[#39ff88]" />
-              <span className="text-[9px] uppercase tracking-wider">
-                Average Rating
-              </span>
-            </div>
-
-            <div className="mt-2 flex items-center gap-2">
-              <span className="text-2xl font-bold text-white">
-                {averageRating.toFixed(1)}
-              </span>
-
-              <StarRating
-                rating={Math.round(averageRating)}
-                size={10}
-              />
-            </div>
-          </div>
-
-          <div className="rounded-lg border border-white/[0.08] bg-[#111113]/75 p-3">
-            <div className="flex items-center gap-1.5 text-gray-500">
-              <MessageSquare size={13} className="text-[#39ff88]" />
-              <span className="text-[9px] uppercase tracking-wider">
-                Public Reviews
-              </span>
-            </div>
-
-            <p className="mt-2 text-2xl font-bold text-white">
-              {publicReviews.filter((review) => !review.isHidden).length}
+            <p className="mt-3 max-w-xl text-sm leading-6 text-gray-500">
+              Your feedback matters. Share your experience and
+              help others discover my work.
             </p>
           </div>
 
-          <div className="rounded-lg border border-white/[0.08] bg-[#111113]/75 p-3">
-            <div className="flex items-center gap-1.5 text-gray-500">
-              <UserRound size={13} className="text-[#39ff88]" />
-              <span className="text-[9px] uppercase tracking-wider">
-                Your Reviews
-              </span>
-            </div>
-
-            <p className="mt-2 text-2xl font-bold text-white">
-              {myReviews.length}
-            </p>
-
-            <p className="mt-1 text-[9px] text-gray-500">
-              {myHiddenReviews.length} hidden
-            </p>
-          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setShowForm((current) => !current);
+              setMessage("");
+            }}
+            className="
+              inline-flex shrink-0 items-center justify-center gap-2
+              rounded-xl border border-[#39ff88]/30
+              bg-[#39ff88]/10 px-4 py-3
+              text-xs font-semibold text-[#39ff88]
+              transition hover:bg-[#39ff88]/20
+              focus-visible:outline-none
+              focus-visible:ring-2 focus-visible:ring-[#39ff88]
+            "
+          >
+            {showForm ? <X size={15} /> : <Plus size={15} />}
+            {showForm ? "Close Form" : "Write a Review"}
+          </button>
         </div>
 
-        {/* REVIEW FORM */}
+        {/* FORM */}
 
-        {showForm && (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-3 rounded-lg border border-[#39ff88]/20 bg-[#111113]/90 p-3 sm:p-4"
-          >
-            <h3 className="text-sm font-bold text-white">
-              Write your review
-            </h3>
+        <AnimatePresence>
+          {showForm && (
+            <motion.div
+              initial={{ opacity: 0, y: -16, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{
+                opacity: 0,
+                y: -18,
+                scale: 0.97,
+                transition: { duration: 0.28, ease: "easeInOut" },
+              }}
+              transition={{ duration: 0.35, ease: "easeOut" }}
+              className="
+                mt-8 rounded-2xl
+                border border-[#39ff88]/20
+                bg-[#111113]/90 p-5 sm:p-7
+              "
+            >
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#39ff88]/10 text-[#39ff88]">
+                <MessageSquare size={19} />
+              </div>
 
-            <form onSubmit={handleSubmit} className="mt-3 space-y-3">
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <h3 className="text-lg font-semibold text-white">
+                  Write your review
+                </h3>
+
+                <p className="mt-1 text-xs text-gray-500">
+                  Tell me about your experience.
+                </p>
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+
+              {/* NAME AND ROLE */}
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <label
                     htmlFor="review-name"
-                    className="mb-1 block text-[11px] text-gray-300"
+                    className="mb-2 block text-xs font-medium text-gray-300"
                   >
                     Your name *
                   </label>
@@ -771,20 +759,26 @@ export default function Testimonials() {
                     autoComplete="name"
                     value={form.name}
                     onChange={(event) =>
-                      setForm({
-                        ...form,
+                      setForm((current) => ({
+                        ...current,
                         name: event.target.value,
-                      })
+                      }))
                     }
                     placeholder="Enter your name"
-                    className="w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-xs text-white outline-none placeholder:text-gray-600 focus:border-[#39ff88]/50"
+                    className="
+                      w-full rounded-xl border border-white/10
+                      bg-black/30 px-4 py-3 text-sm text-white
+                      outline-none transition
+                      placeholder:text-gray-600
+                      focus:border-[#39ff88]/50
+                    "
                   />
                 </div>
 
                 <div>
                   <label
                     htmlFor="review-role"
-                    className="mb-1 block text-[11px] text-gray-300"
+                    className="mb-2 block text-xs font-medium text-gray-300"
                   >
                     Your role
                   </label>
@@ -795,289 +789,367 @@ export default function Testimonials() {
                     maxLength={80}
                     value={form.role}
                     onChange={(event) =>
-                      setForm({
-                        ...form,
+                      setForm((current) => ({
+                        ...current,
                         role: event.target.value,
-                      })
+                      }))
                     }
                     placeholder="Developer, Student, Client..."
-                    className="w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-xs text-white outline-none placeholder:text-gray-600 focus:border-[#39ff88]/50"
+                    className="
+                      w-full rounded-xl border border-white/10
+                      bg-black/30 px-4 py-3 text-sm text-white
+                      outline-none transition
+                      placeholder:text-gray-600
+                      focus:border-[#39ff88]/50
+                    "
                   />
                 </div>
               </div>
 
+              {/* RATING */}
+
               <div>
-                <label className="mb-1.5 block text-[11px] text-gray-300">
+                <label className="mb-2 block text-xs font-medium text-gray-300">
                   Your rating *
                 </label>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-3">
                   <StarRating
                     rating={form.rating}
                     interactive
                     onChange={(rating) =>
-                      setForm({ ...form, rating })
+                      setForm((current) => ({
+                        ...current,
+                        rating,
+                      }))
                     }
-                    size={18}
-                    label="Choose your rating"
                   />
 
-                  <span className="text-[10px] text-gray-500">
-                    {form.rating ? `${form.rating}/5` : "Choose stars"}
+                  <span className="text-xs text-gray-500">
+                    {form.rating > 0
+                      ? `${form.rating} out of 5`
+                      : "Select your rating"}
                   </span>
                 </div>
+
+                <input
+                  type="number"
+                  value={form.rating || ""}
+                  required
+                  min={1}
+                  max={5}
+                  readOnly
+                  aria-label="Selected star rating"
+                  className="sr-only"
+                />
               </div>
 
+              {/* REVIEW TEXT */}
+
               <div>
-                <div className="mb-1 flex justify-between">
+                <div className="mb-2 flex items-center justify-between gap-3">
                   <label
                     htmlFor="review-text"
-                    className="text-[11px] text-gray-300"
+                    className="text-xs font-medium text-gray-300"
                   >
-                    Your review *
+                    Your thoughts *
                   </label>
 
-                  <span className="text-[9px] text-gray-600">
+                  <span className="text-[10px] text-gray-600">
                     {form.text.length}/500
                   </span>
                 </div>
 
                 <textarea
                   id="review-text"
-                  rows={3}
+                  rows={5}
                   required
                   minLength={10}
                   maxLength={500}
                   value={form.text}
                   onChange={(event) =>
-                    setForm({
-                      ...form,
+                    setForm((current) => ({
+                      ...current,
                       text: event.target.value,
-                    })
+                    }))
                   }
-                  placeholder="Share your thoughts..."
-                  className="w-full resize-y rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-xs leading-5 text-white outline-none placeholder:text-gray-600 focus:border-[#39ff88]/50"
+                  placeholder="Share your thoughts about my portfolio, projects, or work..."
+                  className="
+                    w-full resize-y rounded-xl border border-white/10
+                    bg-black/30 px-4 py-3 text-sm leading-6 text-white
+                    outline-none transition
+                    placeholder:text-gray-600
+                    focus:border-[#39ff88]/50
+                  "
                 />
+
+                <p className="mt-2 text-[10px] text-gray-600">
+                  Minimum 10 characters and maximum 500 characters.
+                </p>
               </div>
 
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-[9px] text-gray-600">
-                  You can hide or delete your own review.
+              {/* SUBMIT */}
+
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-[11px] leading-5 text-gray-500">
+                  Reviews are saved in the online database.
                 </p>
 
                 <button
                   type="submit"
-                  className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#39ff88] px-4 py-2 text-[11px] font-bold text-black transition hover:bg-[#70ffa8]"
+                  disabled={submitting}
+                  className="
+                    inline-flex items-center justify-center gap-2
+                    rounded-xl bg-[#39ff88] px-5 py-3
+                    text-xs font-bold text-black transition
+                    hover:bg-[#70ffa8]
+                    disabled:cursor-not-allowed disabled:opacity-50
+                  "
                 >
-                  <Send size={12} />
-                  Publish Review
+                  <Send size={14} />
+                  {submitting ? "Publishing..." : "Publish Review"}
                 </button>
               </div>
             </form>
           </motion.div>
         )}
+      </AnimatePresence>
 
-        {/* OWN HIDDEN REVIEWS */}
+      {/* STATUS */}
 
-        {myHiddenReviews.length > 0 && (
-          <div className="mt-4 rounded-lg border border-white/10 bg-[#111113]/75 p-3">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div>
-                <h3 className="text-xs font-semibold text-white">
-                  Your hidden reviews
-                </h3>
-
-                <p className="mt-1 text-[10px] text-gray-500">
-                  Only reviews belonging to this browser are listed here.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() =>
-                  setShowMyHiddenReviews((current) => !current)
-                }
-                className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-2 text-[10px] text-gray-300 transition hover:border-[#39ff88]/30 hover:text-[#39ff88]"
-              >
-                {showMyHiddenReviews ? (
-                  <>
-                    <EyeOff size={12} />
-                    Hide My Hidden Reviews
-                  </>
-                ) : (
-                  <>
-                    <Eye size={12} />
-                    Manage Hidden Reviews
-                  </>
-                )}
-              </button>
-            </div>
-
-            {showMyHiddenReviews && (
-              <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
-                {myHiddenReviews.map((review) => (
-                  <TestimonialCard
-                    key={review.id}
-                    testimonial={review}
-                    isOwner={true}
-                    onToggleHidden={handleToggleHidden}
-                    onDelete={handleDelete}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* STATUS MESSAGE */}
-
+      <AnimatePresence>
         {message && (
-          <div
+          <motion.div
+            initial={{ opacity: 0, y: -10, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.98 }}
+            transition={{ duration: 0.3 }}
             role="status"
             aria-live="polite"
-            className="mt-3 flex items-start gap-2 rounded-lg border border-[#39ff88]/15 bg-[#39ff88]/[0.04] p-2.5 text-[11px] leading-5 text-gray-300"
+            className={`mt-5 rounded-xl border p-3 text-xs ${
+              messageType === "error"
+                ? "border-red-500/20 bg-red-500/5 text-red-300"
+                : "border-[#39ff88]/20 bg-[#39ff88]/5 text-[#39ff88]"
+            }`}
           >
-            <CheckCircle2
-              size={13}
-              className="mt-0.5 shrink-0 text-[#39ff88]"
-            />
-            <p>{message}</p>
-          </div>
+            {message}
+          </motion.div>
         )}
+      </AnimatePresence>
 
-        {/* RATING BREAKDOWN */}
+        {/* REVIEW LIST */}
 
-        <div className="mt-3 rounded-lg border border-white/[0.08] bg-[#111113]/75 p-3">
-          <h3 className="mb-3 text-[11px] font-semibold text-white">
-            Rating Breakdown
-          </h3>
+        <div className="mt-10 flex items-center justify-between gap-3 sm:mt-12">
+          <div>
+            <h3 className="text-lg font-semibold text-white">
+              Community Reviews
+            </h3>
 
-          <div className="grid grid-cols-1 gap-x-5 gap-y-2 sm:grid-cols-2">
-            {ratingDistribution.map((item) => (
-              <div
-                key={item.rating}
-                className="flex items-center gap-2"
-              >
-                <span className="flex w-7 items-center gap-1 text-[9px] text-gray-400">
-                  {item.rating}
-                  <Star
-                    size={9}
-                    fill="currentColor"
-                    className="text-[#39ff88]"
-                  />
-                </span>
-
-                <div className="h-1 flex-1 overflow-hidden rounded-full bg-white/[0.06]">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    whileInView={{
-                      width: `${item.percentage}%`,
-                    }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5 }}
-                    className="h-full rounded-full bg-[#39ff88]"
-                  />
-                </div>
-
-                <span className="w-4 text-right text-[9px] text-gray-500">
-                  {item.count}
-                </span>
-              </div>
-            ))}
+            <p className="mt-1 text-xs text-gray-500">
+              {testimonials.length}{" "}
+              {testimonials.length === 1 ? "review" : "reviews"}
+            </p>
           </div>
         </div>
 
-        {/* PUBLIC REVIEW CARDS */}
+        {/* CARDS */}
 
-        {publicReviews.filter((review) => !review.isHidden).length > 0 ? (
-          <>
-            <motion.div
-              key={showAll ? "all-reviews" : "limited-reviews"}
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-              className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-            >
-              {visibleReviews
-                .filter((review) => !review.isHidden)
-                .map((review) => (
-                  <TestimonialCard
-                    key={review.id}
-                    testimonial={review}
-                    isOwner={review.ownerToken === ownerToken}
-                    onToggleHidden={handleToggleHidden}
-                    onDelete={handleDelete}
-                  />
-                ))}
-            </motion.div>
+        {loading ? (
+          <div className="mt-8 py-12 text-center">
+            <div className="mx-auto h-7 w-7 animate-spin rounded-full border-2 border-[#39ff88]/20 border-t-[#39ff88]" />
 
-            {hasMoreReviews && (
-              <div className="mt-4 flex justify-center">
-                <button
-                  type="button"
-                  onClick={() => setShowAll((current) => !current)}
-                  aria-expanded={showAll}
-                  className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-4 py-2 text-[11px] font-medium text-gray-300 transition hover:border-[#39ff88]/30 hover:text-[#39ff88]"
-                >
-                  {showAll ? (
-                    <>
-                      <ChevronUp size={14} />
-                      View Less
-                    </>
-                  ) : (
-                    <>
-                      <ChevronDown size={14} />
-                      View More (
-                      {
-                        publicReviews.filter(
-                          (review) => !review.isHidden
-                        ).length - INITIAL_VISIBLE_COUNT
-                      }{" "}
-                      more)
-                    </>
-                  )}
-                </button>
-              </div>
-            )}
-          </>
+            <p className="mt-4 text-sm text-gray-500">
+              Loading reviews...
+            </p>
+          </div>
+        ) : visibleReviews.length > 0 ? (
+          <motion.div
+            key={showAll ? "all-reviews" : "limited-reviews"}
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="
+              mt-5 grid grid-cols-1 gap-4
+              sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4
+            "
+          >
+            <AnimatePresence mode="popLayout">
+              {visibleReviews.map((testimonial) => (
+                <TestimonialCard
+                  key={testimonial.id}
+                  testimonial={testimonial}
+                  isOwner={
+                    (Boolean(user) && testimonial.ownerUid === user?.uid) ||
+                    (Boolean(visitorUid) && testimonial.ownerUid === visitorUid)
+                  }
+                  onDelete={handleDelete}
+                />
+              ))}
+            </AnimatePresence>
+          </motion.div>
         ) : (
-          <div className="mt-4 rounded-lg border border-dashed border-white/10 bg-[#111113]/50 px-4 py-8 text-center">
-            <MessageSquare
-              size={22}
-              className="mx-auto text-[#39ff88]"
-            />
+          <div className="mt-5 rounded-2xl border border-dashed border-white/10 bg-[#111113]/50 px-5 py-14 text-center">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-[#39ff88]/15 bg-[#39ff88]/[0.06] text-[#39ff88]">
+              <MessageSquare size={24} />
+            </div>
 
-            <h3 className="mt-3 text-xs font-semibold text-white">
-              No public reviews yet
+            <h3 className="mt-5 text-base font-semibold text-white">
+              No reviews yet
             </h3>
 
-            <p className="mt-1 text-[10px] text-gray-500">
-              Be the first to share your experience.
+            <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-gray-500">
+              Be the first to share your thoughts and help
+              others discover my portfolio.
             </p>
 
             <button
               type="button"
               onClick={() => setShowForm(true)}
-              className="mt-3 rounded-lg bg-[#39ff88] px-3 py-2 text-[10px] font-semibold text-black transition hover:bg-[#70ffa8]"
+              className="
+                mt-5 inline-flex items-center gap-2
+                rounded-xl bg-[#39ff88] px-4 py-3
+                text-xs font-bold text-black transition
+                hover:bg-[#70ffa8]
+              "
             >
-              Write a Review
+              <Plus size={14} />
+              Write the First Review
             </button>
           </div>
         )}
 
-        {/* FOOTER */}
+        {/* VIEW MORE */}
 
-        <div className="mt-5 flex flex-wrap items-center justify-center gap-2 text-center font-mono text-[9px] text-gray-600">
-          <span className="text-[#39ff88]/50">
-            {"<testimonials />"}
-          </span>
+        {!loading && hasMoreReviews && (
+          <div className="mt-8 flex justify-center">
+            <button
+              type="button"
+              onClick={() =>
+                setShowAll((current) => !current)
+              }
+              aria-expanded={showAll}
+              className="
+                rounded-xl border border-white/10
+                bg-white/[0.03] px-5 py-3
+                text-xs font-medium text-gray-300
+                transition hover:border-[#39ff88]/30
+                hover:text-[#39ff88]
+              "
+            >
+              {showAll
+                ? "View Less"
+                : `View More (${testimonials.length - INITIAL_VISIBLE_COUNT} more)`}
+            </button>
+          </div>
+        )}
 
-          <span>Learn • Build • Collaborate</span>
+        {/* DELETE CONFIRMATION MODAL CARD */}
+        <AnimatePresence>
+          {deletingId && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+              {/* BACKDROP */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.25 }}
+                onClick={() => {
+                  if (!isDeleting) setDeletingId(null);
+                }}
+                className="absolute inset-0 bg-black/50 backdrop-blur-md"
+              />
 
-          <span className="text-[#39ff88]/50">
-            {"</>"}
-          </span>
-        </div>
+              {/* GLASS CARD */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.92, y: 15 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.92, y: 15 }}
+                transition={{ type: "spring", duration: 0.4, bounce: 0.12 }}
+                className={`
+                  relative w-full max-w-md overflow-hidden rounded-3xl
+                  border p-6 sm:p-7 shadow-2xl backdrop-blur-2xl
+                  transition-colors duration-300
+                  ${
+                    isDark
+                      ? "border-white/[0.12] bg-[#0c0c0e]/80 shadow-[0_25px_80px_rgba(0,0,0,0.65)]"
+                      : "border-black/[0.1] bg-white/85 shadow-[0_25px_70px_rgba(0,0,0,0.14)]"
+                  }
+                `}
+              >
+                {/* Ambient glow effects */}
+                <div className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full bg-red-500/15 blur-3xl" />
+                <div className="pointer-events-none absolute -left-12 -bottom-12 h-32 w-32 rounded-full bg-[#39ff88]/10 blur-3xl" />
+
+                <div className="relative flex items-start gap-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-red-500/25 bg-red-500/10 text-red-400 shadow-[0_0_20px_rgba(239,68,68,0.2)]">
+                    <Trash2 size={20} />
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <h3
+                      className={`text-base font-semibold tracking-tight ${
+                        isDark ? "text-white" : "text-gray-900"
+                      }`}
+                    >
+                      Delete this review?
+                    </h3>
+
+                    <p
+                      className={`mt-1.5 text-xs leading-5 ${
+                        isDark ? "text-gray-400" : "text-gray-600"
+                      }`}
+                    >
+                      Are you sure you want to permanently remove your review? This action cannot be undone.
+                    </p>
+                  </div>
+                </div>
+
+                {/* ACTION BUTTONS */}
+                <div className="relative mt-6 flex items-center justify-end gap-3 border-t border-white/[0.08] pt-4">
+                  <button
+                    type="button"
+                    disabled={isDeleting}
+                    onClick={() => setDeletingId(null)}
+                    className="
+                      rounded-xl border border-white/10
+                      bg-white/[0.04] px-4 py-2.5
+                      text-xs font-semibold text-gray-300
+                      backdrop-blur-xl transition-all duration-300
+                      hover:border-white/20 hover:bg-white/[0.08] hover:text-white
+                      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20
+                      disabled:opacity-50
+                    "
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={isDeleting}
+                    onClick={confirmDelete}
+                    className="
+                      inline-flex items-center gap-2 rounded-xl
+                      border border-red-500/30 bg-red-500/10 px-5 py-2.5
+                      text-xs font-semibold text-red-400
+                      shadow-[0_0_20px_rgba(239,68,68,0.12)]
+                      backdrop-blur-xl transition-all duration-300
+                      hover:border-red-500/60 hover:bg-red-500/20 hover:text-red-300
+                      hover:shadow-[0_0_25px_rgba(239,68,68,0.25)]
+                      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400
+                      disabled:cursor-not-allowed disabled:opacity-50
+                    "
+                  >
+                    <Trash2 size={14} />
+                    {isDeleting ? "Deleting..." : "Delete Review"}
+                  </button>
+                </div>
+
+                {/* Signature portfolio bottom neon accent line */}
+                <div className="pointer-events-none absolute bottom-0 left-0 h-[2px] w-full bg-gradient-to-r from-transparent via-red-500/70 to-transparent shadow-[0_0_15px_rgba(239,68,68,0.6)]" />
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
       </div>
     </section>
   );

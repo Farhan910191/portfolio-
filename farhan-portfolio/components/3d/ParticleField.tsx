@@ -50,9 +50,11 @@ export default function ParticleField({
     const material =
       pointsRef.current.material as THREE.PointsMaterial;
 
+    const elapsedTime = performance.now() * 0.001;
+
     material.size =
       0.018 +
-      Math.sin(state.clock.elapsedTime * 1.5) *
+      Math.sin(elapsedTime * 1.5) *
         0.004;
   });
 
