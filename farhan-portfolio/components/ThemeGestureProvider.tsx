@@ -177,7 +177,7 @@ export default function ThemeGestureProvider() {
                   isDark
                     ? `
                       border-white/[0.08]
-                      bg-[#111113]/90
+                      bg-[#111113]/80
                       shadow-[0_20px_60px_rgba(0,0,0,0.5)]
                     `
                     : `

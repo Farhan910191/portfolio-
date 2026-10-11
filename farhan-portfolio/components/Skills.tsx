@@ -101,16 +101,13 @@ const revealVariants: Variants = {
 const cardVariants: Variants = {
   hidden: {
     opacity: 0,
-    y: 30,
-    scale: 0.98,
+    y: 20,
   },
-
   visible: {
     opacity: 1,
     y: 0,
-    scale: 1,
     transition: {
-      duration: 0.55,
+      duration: 0.45,
       ease: [0.22, 1, 0.36, 1],
     },
   },
@@ -119,14 +116,14 @@ const cardVariants: Variants = {
 const skillVariants: Variants = {
   hidden: {
     opacity: 0,
-    y: 8,
-    scale: 0.94,
+    scale: 0.9,
+    y: 7,
   },
 
   visible: {
     opacity: 1,
-    y: 0,
     scale: 1,
+    y: 0,
     transition: {
       duration: 0.3,
       ease: "easeOut",
@@ -280,14 +277,14 @@ export default function Skills() {
                   rounded-2xl
                   border
                   border-white/[0.08]
-                  bg-[#111113]/65
+                  bg-[#111113]/80
                   p-5
                   backdrop-blur-xl
                   transition-all
                   duration-300
-                  hover:-translate-y-1.5
-                  hover:border-[#39ff88]/25
-                  hover:bg-[#151518]/75
+                  hover:-translate-y-1
+                  hover:border-[#39ff88]/30
+                  hover:bg-[#151518]
                   sm:rounded-3xl
                   sm:p-6
                   lg:p-7
@@ -446,7 +443,7 @@ export default function Skills() {
                         rounded-full
                         border
                         border-white/[0.08]
-                        bg-black/30
+                        bg-black/25
                         px-3
                         py-1.5
                         text-[11px]
@@ -457,7 +454,7 @@ export default function Skills() {
                         hover:border-[#39ff88]/35
                         hover:bg-[#39ff88]/[0.08]
                         hover:text-[#39ff88]
-                        hover:shadow-[0_0_16px_rgba(57,255,136,0.07)]
+                        hover:shadow-[0_0_16px_rgba(57,255,136,0.08)]
                         sm:px-3.5
                         sm:py-2
                         sm:text-xs

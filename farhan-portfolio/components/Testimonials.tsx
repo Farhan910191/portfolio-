@@ -94,13 +94,14 @@ const containerVariants: Variants = {
 const cardVariants: Variants = {
   hidden: {
     opacity: 0,
-    y: 15,
+    y: 20,
   },
   visible: {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.35,
+      duration: 0.45,
+      ease: [0.22, 1, 0.36, 1],
     },
   },
 };
@@ -229,6 +230,7 @@ function TestimonialCard({
         overflow-hidden rounded-2xl
         border border-white/[0.08]
         bg-[#111113]/80 p-4
+        backdrop-blur-xl
         transition-all duration-300
         hover:-translate-y-1
         hover:border-[#39ff88]/30

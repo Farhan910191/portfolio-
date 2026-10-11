@@ -79,16 +79,13 @@ const headerVariants: Variants = {
 const contentVariants: Variants = {
   hidden: {
     opacity: 0,
-    y: 30,
-    scale: 0.98,
+    y: 20,
   },
-
   visible: {
     opacity: 1,
     y: 0,
-    scale: 1,
     transition: {
-      duration: 0.55,
+      duration: 0.45,
       ease: [0.22, 1, 0.36, 1],
     },
   },
@@ -282,13 +279,15 @@ export default function About() {
               rounded-2xl
               border
               border-white/[0.08]
-              bg-[#111113]/75
+              bg-[#111113]/80
               p-5
               shadow-[0_20px_70px_rgba(0,0,0,0.25)]
               backdrop-blur-2xl
               transition-all
               duration-300
-              hover:-translate-y-1.5
+              hover:-translate-y-1
+              hover:border-[#39ff88]/30
+              hover:bg-[#151518]
               sm:rounded-3xl
               sm:p-7
               md:p-8
@@ -630,14 +629,14 @@ export default function About() {
                     rounded-2xl
                     border
                     border-white/[0.08]
-                    bg-[#111113]/65
+                    bg-[#111113]/80
                     p-4
                     backdrop-blur-xl
                     transition-all
                     duration-300
-                    hover:-translate-y-1.5
+                    hover:-translate-y-1
                     hover:border-[#39ff88]/30
-                    hover:bg-[#151518]/80
+                    hover:bg-[#151518]
                     sm:p-5
                     md:p-6
                   "

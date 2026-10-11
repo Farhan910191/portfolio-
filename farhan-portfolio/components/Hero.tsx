@@ -673,7 +673,7 @@ export default function Hero() {
                 rounded-xl
                 border
                 border-white/[0.08]
-                bg-[#111113]/90
+                bg-[#111113]/80
                 px-3
                 py-2
                 shadow-[0_15px_35px_rgba(0,0,0,0.45)]
@@ -730,7 +730,7 @@ export default function Hero() {
                 rounded-xl
                 border
                 border-white/[0.08]
-                bg-[#111113]/90
+                bg-[#111113]/80
                 px-3
                 py-2
                 shadow-[0_15px_35px_rgba(0,0,0,0.45)]

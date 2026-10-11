@@ -80,7 +80,7 @@ const itemVariants: Variants = {
     y: 0,
     transition: {
       duration: 0.45,
-      ease: "easeOut",
+      ease: [0.22, 1, 0.36, 1],
     },
   },
 };
@@ -556,8 +556,8 @@ Thank you.
                 overflow-hidden
                 rounded-2xl
                 border
-                border-white/[0.07]
-                bg-[#111113]/60
+                border-white/[0.08]
+                bg-[#111113]/80
                 backdrop-blur-xl
               "
             >
@@ -928,7 +928,7 @@ Thank you.
               rounded-3xl
               border
               border-white/[0.08]
-              bg-[#111113]/65
+              bg-[#111113]/80
               p-6
               backdrop-blur-xl
               sm:p-8

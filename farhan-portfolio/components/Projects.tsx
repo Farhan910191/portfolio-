@@ -162,16 +162,40 @@ const headerVariants: Variants = {
 const cardVariants: Variants = {
   hidden: {
     opacity: 0,
-    y: 30,
-    scale: 0.98,
+    y: 20,
   },
   visible: {
     opacity: 1,
     y: 0,
-    scale: 1,
     transition: {
-      duration: 0.55,
+      duration: 0.45,
       ease: [0.22, 1, 0.36, 1],
+    },
+  },
+};
+
+const techContainerVariants: Variants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.035,
+    },
+  },
+};
+
+const technologyVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    scale: 0.9,
+    y: 7,
+  },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: {
+      duration: 0.3,
+      ease: "easeOut",
     },
   },
 };
@@ -224,12 +248,12 @@ function ProjectCard({
         border
         backdrop-blur-xl
         transition-all
-        duration-400
-        hover:-translate-y-1.5
+        duration-300
+        hover:-translate-y-1
         sm:rounded-3xl
         ${isDark
-          ? "border-white/[0.08] bg-[#121216]/40 hover:border-[#39ff88]/30 hover:bg-[#15151c]/60 shadow-[0_15px_40px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.45)]"
-          : "border-black/[0.07] bg-white/65 hover:border-[#10b981]/35 hover:bg-white/85 shadow-[0_12px_35px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_45px_rgba(16,185,129,0.08)]"
+          ? "border-white/[0.08] bg-[#111113]/80 hover:border-[#39ff88]/30 hover:bg-[#151518] shadow-[0_15px_40px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.45)]"
+          : "border-black/[0.08] bg-white/80 hover:border-[#10b981]/30 hover:bg-white/95 shadow-[0_12px_35px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_45px_rgba(16,185,129,0.08)]"
         }
       `}
       style={{
@@ -273,8 +297,8 @@ function ProjectCard({
           overflow-hidden
           border-b
           ${isDark
-            ? "border-white/[0.07] bg-[#0a0a0d]"
-            : "border-black/[0.06] bg-slate-100/80"
+            ? "border-white/[0.07] bg-[#111113]/40"
+            : "border-black/[0.06] bg-slate-100/60"
           }
         `}
       >
@@ -516,11 +540,26 @@ function ProjectCard({
             Technology
           </p>
 
-          <div className="flex min-w-0 flex-wrap gap-1.5 sm:gap-2">
+          <motion.div
+            variants={techContainerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{
+              once: true,
+              amount: 0.15,
+            }}
+            className="flex min-w-0 flex-wrap gap-1.5 sm:gap-2"
+          >
             {project.technologies.map((technology) => (
-              <span
+              <motion.span
                 key={technology}
+                variants={technologyVariants}
+                whileHover={{
+                  y: -2,
+                  scale: 1.03,
+                }}
                 className={`
+                  cursor-default
                   max-w-full
                   break-words
                   rounded-full
@@ -531,19 +570,20 @@ function ProjectCard({
                   leading-4
                   transition-all
                   duration-300
+                  hover:shadow-[0_0_16px_rgba(57,255,136,0.08)]
                   sm:px-3
                   sm:py-1.5
                   sm:text-[11px]
                   ${isDark
-                    ? "border-white/[0.08] bg-white/[0.03] text-gray-300 hover:border-[#39ff88]/30 hover:bg-[#39ff88]/10 hover:text-[#39ff88]"
-                    : "border-black/[0.07] bg-black/[0.03] text-slate-700 hover:border-[#10b981]/30 hover:bg-[#10b981]/10 hover:text-[#10b981]"
+                    ? "border-white/[0.08] bg-black/25 text-gray-400 hover:border-[#39ff88]/35 hover:bg-[#39ff88]/[0.08] hover:text-[#39ff88]"
+                    : "border-black/[0.07] bg-black/[0.03] text-slate-700 hover:border-[#10b981]/35 hover:bg-[#10b981]/[0.08] hover:text-[#10b981]"
                   }
                 `}
               >
                 {technology}
-              </span>
+              </motion.span>
             ))}
-          </div>
+          </motion.div>
         </div>
 
         {/* Key Features */}

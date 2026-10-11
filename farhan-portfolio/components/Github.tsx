@@ -108,15 +108,13 @@ const containerVariants: Variants = {
 const cardVariants: Variants = {
   hidden: {
     opacity: 0,
-    y: 30,
-    scale: 0.98,
+    y: 20,
   },
   visible: {
     opacity: 1,
     y: 0,
-    scale: 1,
     transition: {
-      duration: 0.55,
+      duration: 0.45,
       ease: [0.22, 1, 0.36, 1],
     },
   },
@@ -556,13 +554,13 @@ export default function Github() {
                   rounded-3xl
                   border
                   p-6
-                  backdrop-blur-md
+                  backdrop-blur-xl
                   transition-all
                   duration-300
                   hover:-translate-y-1
                   ${isDark
-                    ? "border-white/[0.07] bg-white/[0.03] hover:border-[#39ff88]/25 hover:bg-white/[0.05]"
-                    : "border-black/[0.06] bg-white/70 hover:border-[#10b981]/25 hover:bg-white/90 shadow-sm"
+                    ? "border-white/[0.08] bg-[#111113]/80 hover:border-[#39ff88]/30 hover:bg-[#151518]"
+                    : "border-black/[0.08] bg-white/80 hover:border-[#10b981]/30 hover:bg-white/95 shadow-sm"
                   }
                 `}
               >
@@ -672,13 +670,13 @@ export default function Github() {
                       rounded-2xl
                       border
                       p-5
-                      backdrop-blur-md
+                      backdrop-blur-xl
                       transition-all
                       duration-300
                       hover:-translate-y-1
                       ${isDark
-                        ? "border-white/[0.07] bg-white/[0.03] hover:border-[#39ff88]/30 hover:bg-white/[0.05]"
-                        : "border-black/[0.06] bg-white/70 hover:border-[#10b981]/30 hover:bg-white/90 shadow-sm"
+                        ? "border-white/[0.08] bg-[#111113]/80 hover:border-[#39ff88]/30 hover:bg-[#151518]"
+                        : "border-black/[0.08] bg-white/80 hover:border-[#10b981]/30 hover:bg-white/95 shadow-sm"
                       }
                     `}
                   >
@@ -734,10 +732,10 @@ export default function Github() {
                   rounded-2xl
                   border
                   p-6
-                  backdrop-blur-md
+                  backdrop-blur-xl
                   ${isDark
-                    ? "border-white/[0.07] bg-white/[0.03]"
-                    : "border-black/[0.06] bg-white/70 shadow-sm"
+                    ? "border-white/[0.08] bg-[#111113]/80"
+                    : "border-black/[0.08] bg-white/80 shadow-sm"
                   }
                 `}
               >
@@ -762,32 +760,36 @@ export default function Github() {
 
                 <div className="mt-5 flex flex-wrap gap-2.5">
                   {languages.map(([language, count]) => (
-                    <span
+                    <motion.span
                       key={language}
+                      whileHover={{
+                        y: -2,
+                        scale: 1.03,
+                      }}
                       className={`
                         cursor-default
                         rounded-full
                         border
-                        px-4
-                        py-2
-                        text-sm
+                        px-3.5
+                        py-1.5
+                        text-xs
                         transition-all
                         duration-300
-                        hover:-translate-y-0.5
+                        hover:shadow-[0_0_16px_rgba(57,255,136,0.08)]
                         ${isDark
-                          ? "border-white/[0.08] bg-white/[0.02] text-gray-300 hover:border-[#39ff88]/40 hover:bg-[#39ff88]/10 hover:text-[#39ff88]"
-                          : "border-black/[0.06] bg-black/[0.03] text-slate-700 hover:border-[#10b981]/40 hover:bg-[#10b981]/10 hover:text-[#10b981]"
+                          ? "border-white/[0.08] bg-black/25 text-gray-300 hover:border-[#39ff88]/35 hover:bg-[#39ff88]/[0.08] hover:text-[#39ff88]"
+                          : "border-black/[0.06] bg-black/[0.03] text-slate-700 hover:border-[#10b981]/35 hover:bg-[#10b981]/[0.08] hover:text-[#10b981]"
                         }
                       `}
                     >
                       <span className="font-medium">{language}</span>
                       <span
-                        className={`ml-2 text-xs ${isDark ? "text-gray-500" : "text-slate-400"
+                        className={`ml-2 text-[10px] ${isDark ? "text-gray-500" : "text-slate-400"
                           }`}
                       >
                         {count} {count === 1 ? "repo" : "repos"}
                       </span>
-                    </span>
+                    </motion.span>
                   ))}
                 </div>
               </motion.div>
@@ -807,10 +809,10 @@ export default function Github() {
                 rounded-2xl
                 border
                 p-6
-                backdrop-blur-md
+                backdrop-blur-xl
                 ${isDark
-                  ? "border-white/[0.07] bg-white/[0.03]"
-                  : "border-black/[0.06] bg-white/70 shadow-sm"
+                  ? "border-white/[0.08] bg-[#111113]/80"
+                  : "border-black/[0.08] bg-white/80 shadow-sm"
                 }
               `}
             >
