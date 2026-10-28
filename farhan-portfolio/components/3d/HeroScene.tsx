@@ -33,6 +33,8 @@ export default function HeroScene() {
         gl={{
           antialias: true,
           alpha: true,
+          depth: true,
+          stencil: false,
           powerPreference: "high-performance",
         }}
       >

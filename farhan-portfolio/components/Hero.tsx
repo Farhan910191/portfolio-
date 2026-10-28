@@ -5,6 +5,7 @@ import { FaGithub, FaLinkedinIn } from "react-icons/fa";
 import { motion, type Variants } from "framer-motion";
 
 import { developer } from "@/data/portfolio";
+import { useTheme } from "@/components/ThemeProvider";
 
 // ======================================================
 // ANIMATIONS
@@ -39,18 +40,18 @@ const itemVariants: Variants = {
 const profileVariants: Variants = {
   hidden: {
     opacity: 0,
-    x: 30,
-    scale: 0.97,
-    filter: "blur(6px)",
+    scale: 0.94,
+    y: 20,
+    filter: "blur(10px)",
   },
   visible: {
     opacity: 1,
-    x: 0,
     scale: 1,
-    filter: "blur(0px)",
+    y: 0,
+    filter: "none",
     transition: {
-      duration: 0.8,
-      delay: 0.15,
+      duration: 0.85,
+      delay: 0.2,
       ease: [0.16, 1, 0.3, 1],
     },
   },
@@ -60,18 +61,26 @@ const profileVariants: Variants = {
 // HERO
 // ======================================================
 
-export default function Hero() {
+interface HeroProps {
+  isReady?: boolean;
+}
+
+export default function Hero({ isReady = true }: HeroProps) {
+  const { isDark } = useTheme();
+
   return (
     <section
       id="home"
-      className="
+      className={`
         relative
         w-full
         min-w-0
         overflow-hidden
         bg-transparent
-        text-white
-      "
+        transition-colors
+        duration-300
+        ${isDark ? "text-white" : "text-gray-900"}
+      `}
     >
       {/* =================================================
           HERO INNER
@@ -111,53 +120,50 @@ export default function Hero() {
           <motion.div
             variants={containerVariants}
             initial="hidden"
-            whileInView="visible"
-            viewport={{
-              once: false,
-              amount: 0.2,
-            }}
+            animate={isReady ? "visible" : "hidden"}
             className="
               min-w-0
               lg:pr-2
               xl:pr-4
             "
           >
-            {/* STATUS */}
+            {/* STATUS BADGE */}
 
             <motion.div
               variants={itemVariants}
-              className="
+              className={`
                 mb-6
                 inline-flex
                 items-center
                 gap-2.5
                 rounded-full
                 border
-                border-[#39ff88]/20
-                bg-[#39ff88]/5
                 px-4
                 py-2
                 text-xs
                 font-medium
-                text-gray-300
                 backdrop-blur-xl
-                transition-colors
+                transition-all
                 duration-300
-                hover:border-[#39ff88]/40
                 sm:text-sm
-              "
+                ${isDark
+                  ? "border-[#39ff88]/20 bg-[#39ff88]/5 text-gray-300 hover:border-[#39ff88]/40"
+                  : "border-emerald-500/30 bg-emerald-50 text-emerald-900 shadow-sm hover:border-emerald-500/50"
+                }
+              `}
             >
-              <span
-                aria-hidden="true"
-                className="
-                  h-2
-                  w-2
-                  animate-pulse
-                  rounded-full
-                  bg-[#39ff88]
-                  shadow-[0_0_12px_#39ff88]
-                "
-              />
+              <span className="relative flex h-2 w-2">
+                <span
+                  className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${isDark ? "bg-[#39ff88]" : "bg-emerald-500"
+                    }`}
+                />
+                <span
+                  className={`relative inline-flex h-2 w-2 rounded-full ${isDark
+                      ? "bg-[#39ff88] shadow-[0_0_10px_#39ff88]"
+                      : "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"
+                    }`}
+                />
+              </span>
 
               Available for opportunities
             </motion.div>
@@ -173,17 +179,17 @@ export default function Hero() {
                 gap-3
               "
             >
-              <span className="h-px w-7 bg-[#39ff88]" />
+              <span className={`h-px w-7 ${isDark ? "bg-[#39ff88]" : "bg-emerald-600"}`} />
 
               <span
-                className="
+                className={`
                   text-[9px]
                   font-semibold
                   uppercase
                   tracking-[0.25em]
-                  text-[#39ff88]
                   sm:text-[10px]
-                "
+                  ${isDark ? "text-[#39ff88]" : "text-emerald-700"}
+                `}
               >
                 Python Full Stack Developer
               </span>
@@ -193,31 +199,31 @@ export default function Hero() {
 
             <motion.h1
               variants={itemVariants}
-              className="
+              className={`
                 max-w-4xl
                 text-[2.65rem]
                 font-black
                 leading-[0.94]
                 tracking-[-0.055em]
+                transition-colors
+                duration-300
                 sm:text-5xl
                 md:text-6xl
                 lg:text-[4.1rem]
                 xl:text-[4.85rem]
-              "
+                ${isDark ? "text-white" : "text-gray-900"}
+              `}
             >
               Building Digital
 
               <br />
 
               <span
-                className="
-                  bg-gradient-to-r
-                  from-[#39ff88]
-                  via-[#6dffad]
-                  to-[#20c968]
-                  bg-clip-text
-                  text-transparent
-                "
+                className={
+                  isDark
+                    ? "bg-gradient-to-r from-[#39ff88] via-[#6dffad] to-[#20c968] bg-clip-text text-transparent"
+                    : "bg-gradient-to-r from-emerald-600 via-teal-600 to-green-600 bg-clip-text text-transparent"
+                }
               >
                 Experiences
               </span>
@@ -231,16 +237,18 @@ export default function Hero() {
 
             <motion.p
               variants={itemVariants}
-              className="
+              className={`
                 mt-5
                 max-w-xl
                 text-sm
                 leading-6
-                text-gray-400
+                transition-colors
+                duration-300
                 sm:mt-6
                 sm:text-base
                 sm:leading-7
-              "
+                ${isDark ? "text-gray-400" : "text-gray-600"}
+              `}
             >
               {developer.description}
             </motion.p>
@@ -265,24 +273,24 @@ export default function Hero() {
                 whileTap={{
                   scale: 0.98,
                 }}
-                className="
+                className={`
                   group
                   inline-flex
                   items-center
                   gap-2
                   rounded-xl
-                  bg-[#39ff88]
                   px-5
                   py-3
                   text-xs
                   font-semibold
-                  text-black
-                  shadow-[0_0_25px_rgba(57,255,136,0.12)]
                   transition-all
                   duration-300
-                  hover:shadow-[0_0_35px_rgba(57,255,136,0.22)]
                   sm:text-sm
-                "
+                  ${isDark
+                    ? "bg-[#39ff88] text-black shadow-[0_0_25px_rgba(57,255,136,0.15)] hover:shadow-[0_0_35px_rgba(57,255,136,0.3)]"
+                    : "bg-emerald-600 text-white shadow-[0_4px_16px_rgba(16,185,129,0.35)] hover:bg-emerald-700 hover:shadow-[0_6px_22px_rgba(16,185,129,0.45)]"
+                  }
+                `}
               >
                 View My Work
 
@@ -304,27 +312,25 @@ export default function Hero() {
                 whileTap={{
                   scale: 0.98,
                 }}
-                className="
+                className={`
                   inline-flex
                   items-center
                   gap-2
                   rounded-xl
                   border
-                  border-white/[0.1]
-                  bg-[#111113]/60
                   px-5
                   py-3
                   text-xs
                   font-semibold
-                  text-white
                   backdrop-blur-xl
                   transition-all
                   duration-300
-                  hover:border-[#39ff88]/40
-                  hover:bg-[#39ff88]/[0.05]
-                  hover:text-[#39ff88]
                   sm:text-sm
-                "
+                  ${isDark
+                    ? "border-white/[0.1] bg-[#111113]/60 text-white hover:border-[#39ff88]/40 hover:bg-[#39ff88]/[0.05] hover:text-[#39ff88]"
+                    : "border-gray-200 bg-white/90 text-gray-800 shadow-sm hover:border-emerald-500 hover:bg-emerald-50/50 hover:text-emerald-700"
+                  }
+                `}
               >
                 Contact Me
               </motion.a>
@@ -342,13 +348,13 @@ export default function Hero() {
               "
             >
               <span
-                className="
+                className={`
                   font-mono
                   text-[8px]
                   uppercase
                   tracking-[0.2em]
-                  text-gray-600
-                "
+                  ${isDark ? "text-gray-600" : "text-gray-400"}
+                `}
               >
                 Find me on
               </span>
@@ -365,11 +371,10 @@ export default function Hero() {
                 whileTap={{
                   scale: 0.95,
                 }}
-                className="
-                  text-gray-500
+                className={`
                   transition-colors
-                  hover:text-[#39ff88]
-                "
+                  ${isDark ? "text-gray-500 hover:text-[#39ff88]" : "text-gray-600 hover:text-emerald-600"}
+                `}
               >
                 <FaGithub size={18} />
               </motion.a>
@@ -386,11 +391,10 @@ export default function Hero() {
                 whileTap={{
                   scale: 0.95,
                 }}
-                className="
-                  text-gray-500
+                className={`
                   transition-colors
-                  hover:text-[#39ff88]
-                "
+                  ${isDark ? "text-gray-500 hover:text-[#39ff88]" : "text-gray-600 hover:text-emerald-600"}
+                `}
               >
                 <FaLinkedinIn size={18} />
               </motion.a>
@@ -405,11 +409,10 @@ export default function Hero() {
                 whileTap={{
                   scale: 0.95,
                 }}
-                className="
-                  text-gray-500
+                className={`
                   transition-colors
-                  hover:text-[#39ff88]
-                "
+                  ${isDark ? "text-gray-500 hover:text-[#39ff88]" : "text-gray-600 hover:text-emerald-600"}
+                `}
               >
                 <Mail size={18} />
               </motion.a>
@@ -419,14 +422,14 @@ export default function Hero() {
 
             <motion.div
               variants={itemVariants}
-              className="
+              className={`
                 mt-5
                 font-mono
                 text-[9px]
-                text-gray-700
-              "
+                ${isDark ? "text-gray-700" : "text-gray-400"}
+              `}
             >
-              <span className="text-[#39ff88]/50">
+              <span className={isDark ? "text-[#39ff88]/50" : "text-emerald-600/70"}>
                 {"<developer />"}
               </span>
 
@@ -439,282 +442,280 @@ export default function Hero() {
           </motion.div>
 
           {/* =================================================
-              RIGHT PROFILE
+              RIGHT PROFILE (CARDLESS & PULSING SYSTEM)
           ================================================== */}
 
           <motion.div
             variants={profileVariants}
             initial="hidden"
-            whileInView="visible"
-            viewport={{
-              once: false,
-              amount: 0.15,
-            }}
+            animate={isReady ? "visible" : "hidden"}
             className="
               relative
               mx-auto
+              flex
               w-full
-              max-w-[360px]
-              sm:max-w-[390px]
-              lg:max-w-[370px]
-              xl:max-w-[410px]
+              max-w-[420px]
+              items-center
+              justify-center
+              pt-4
+              pb-6
+              sm:max-w-[460px]
+              lg:max-w-[480px]
+              xl:max-w-[520px]
             "
           >
-            {/* STATIC GLOW */}
-
-            <div
-              className="
-                pointer-events-none
-                absolute
-                inset-[12%]
-                rounded-full
-                bg-[#39ff88]/[0.05]
-                blur-[80px]
-              "
-            />
-
-            {/* PROFILE */}
-
-            <div
-              className="
-                relative
-                z-10
-                aspect-[0.88]
-                w-full
-                overflow-hidden
-                rounded-[26px]
-                border
-                border-white/[0.1]
-                bg-[#111113]/80
-                shadow-[0_25px_80px_rgba(0,0,0,0.5)]
-                backdrop-blur-xl
-              "
-            >
-              <img
-                src="/profile.jpg"
-                alt="Mohammed Farhan KK"
-                className="
-                  h-full
-                  w-full
-                  object-cover
-                  object-center
-                  grayscale-[30%]
-                "
-              />
-
-              {/* IMAGE GRADIENT */}
-
-              <div
-                className="
-                  pointer-events-none
-                  absolute
-                  inset-0
-                  bg-gradient-to-t
-                  from-black
-                  via-black/10
-                  to-transparent
-                "
-              />
-
-              {/* GREEN TINT */}
-
-              <div
-                className="
-                  pointer-events-none
-                  absolute
-                  inset-0
-                  bg-gradient-to-br
-                  from-[#39ff88]/[0.05]
-                  via-transparent
-                  to-transparent
-                "
-              />
-
-              {/* PROFILE TEXT */}
-
-              <div
-                className="
-                  absolute
-                  bottom-0
-                  left-0
-                  right-0
-                  p-5
-                "
-              >
-                <div
-                  className="
-                    flex
-                    items-end
-                    justify-between
-                    gap-3
-                  "
-                >
-                  <div className="min-w-0">
-                    <p
-                      className="
-                        font-mono
-                        text-[8px]
-                        uppercase
-                        tracking-[0.2em]
-                        text-[#39ff88]
-                      "
-                    >
-                      Python Full Stack
-                    </p>
-
-                    <h2
-                      className="
-                        mt-1.5
-                        truncate
-                        text-lg
-                        font-bold
-                      "
-                    >
-                      Mohammed Farhan KK
-                    </h2>
-                  </div>
-
-                  <div
-                    className="
-                      flex
-                      h-9
-                      w-9
-                      shrink-0
-                      items-center
-                      justify-center
-                      rounded-xl
-                      border
-                      border-[#39ff88]/20
-                      bg-black/50
-                      font-mono
-                      text-xs
-                      text-[#39ff88]
-                      backdrop-blur-md
-                    "
-                  >
-                    FK
-                  </div>
-                </div>
-              </div>
-
-              {/* CORNER ACCENTS */}
-
-              <span
-                className="
-                  absolute
-                  left-4
-                  top-4
-                  h-5
-                  w-5
-                  border-l
-                  border-t
-                  border-[#39ff88]/40
-                "
-              />
-
-              <span
-                className="
-                  absolute
-                  right-4
-                  top-4
-                  h-5
-                  w-5
-                  border-r
-                  border-t
-                  border-[#39ff88]/40
-                "
-              />
-
-              <span
-                className="
-                  absolute
-                  bottom-4
-                  left-4
-                  h-5
-                  w-5
-                  border-b
-                  border-l
-                  border-[#39ff88]/40
-                "
-              />
-
-              <span
-                className="
-                  absolute
-                  bottom-4
-                  right-4
-                  h-5
-                  w-5
-                  border-b
-                  border-r
-                  border-[#39ff88]/40
-                "
-              />
-            </div>
-
-            {/* =================================================
-                FRONTEND
-            ================================================== */}
-
             <motion.div
               animate={{
-                y: [0, -5, 0],
+                y: [0, -10, 0],
+              }}
+              transition={{
+                duration: 5,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+              className="relative z-10 flex w-full justify-center"
+            >
+              {/* Dedicated Ambient Glow Layer Behind Model */}
+              <div
+                aria-hidden="true"
+                className={`
+                  pointer-events-none
+                  absolute
+                  top-1/2
+                  left-1/2
+                  -translate-x-1/2
+                  -translate-y-1/2
+                  h-[320px]
+                  w-[260px]
+                  rounded-full
+                  blur-[70px]
+                  transition-all
+                  duration-500
+                  ${isDark
+                    ? "bg-[#39ff88]/20"
+                    : "bg-emerald-500/15"
+                  }
+                `}
+              />
+
+              {/* --------------------------------------------------------
+                  CHARACTER CONTOUR & SILHOUETTE EDGE GLOW SYSTEM
+                  (Completely masks/absorbs background-remover fringe)
+              --------------------------------------------------------- */}
+              <div
+                className="relative flex justify-center"
+                style={{
+                  WebkitMaskImage:
+                    "linear-gradient(to bottom, black 72%, transparent 98%)",
+                  maskImage:
+                    "linear-gradient(to bottom, black 72%, transparent 98%)",
+                }}
+              >
+                {/* 1. Underlying Animated Luminous Silhouette Rim Aura (Both Dark & Light Modes, Thin & Elegant) */}
+                <motion.div
+                  aria-hidden="true"
+                  animate={{
+                    opacity: isDark ? [0.45, 0.75, 0.45] : [0.55, 0.85, 0.55],
+                    filter: isDark
+                      ? [
+                          "drop-shadow(0 0 1.5px #39ff88) drop-shadow(0 0 4px rgba(57,255,136,0.5))",
+                          "drop-shadow(0 0 2px #00e5ff) drop-shadow(0 0 6px rgba(0,229,255,0.55))",
+                          "drop-shadow(0 0 1.5px #39ff88) drop-shadow(0 0 4px rgba(57,255,136,0.5))",
+                        ]
+                      : [
+                          "drop-shadow(0 0 1.5px #10b981) drop-shadow(0 0 4px rgba(16,185,129,0.7))",
+                          "drop-shadow(0 0 2px #059669) drop-shadow(0 0 5px rgba(5,150,105,0.65))",
+                          "drop-shadow(0 0 1.5px #10b981) drop-shadow(0 0 4px rgba(16,185,129,0.7))",
+                        ],
+                  }}
+                  transition={{
+                    duration: 4,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                  className="pointer-events-none absolute inset-0 z-0 flex justify-center"
+                >
+                  <img
+                    src="/profile.png"
+                    alt=""
+                    onError={(e) => {
+                      e.currentTarget.src = "/profile.jpg";
+                    }}
+                    className="
+                      mx-auto
+                      h-[370px]
+                      w-auto
+                      max-w-full
+                      object-contain
+                      sm:h-[450px]
+                      lg:h-[490px]
+                      xl:h-[530px]
+                    "
+                  />
+                </motion.div>
+
+                {/* 2. Main Profile Cutout with Precision Thin Edge Contour */}
+                <img
+                  src="/profile.png"
+                  alt="Mohammed Farhan KK"
+                  onError={(e) => {
+                    e.currentTarget.src = "/profile.jpg";
+                  }}
+                  style={{
+                    filter: isDark
+                      ? "drop-shadow(0 0 1.5px #39ff88) drop-shadow(0 0 3px rgba(57, 255, 136, 0.45)) contrast(1.01)"
+                      : "drop-shadow(0 0 1.5px #10b981) drop-shadow(0 0 3.5px rgba(16, 185, 129, 0.6)) contrast(1.01)",
+                  }}
+                  className="
+                    relative
+                    z-10
+                    mx-auto
+                    h-[370px]
+                    w-auto
+                    max-w-full
+                    object-contain
+                    transition-all
+                    duration-300
+                    sm:h-[450px]
+                    lg:h-[490px]
+                    xl:h-[530px]
+                  "
+                />
+
+                {/* 3. Subtle & Thin Flowing Laser Sweep along the Bottom Base */}
+                <div
+                  aria-hidden="true"
+                  className="
+                    pointer-events-none
+                    absolute
+                    bottom-1
+                    left-1/2
+                    z-20
+                    h-6
+                    w-full
+                    max-w-[300px]
+                    -translate-x-1/2
+                    overflow-hidden
+                    sm:bottom-2
+                    sm:max-w-[340px]
+                    lg:max-w-[380px]
+                  "
+                >
+                  <motion.div
+                    animate={{
+                      x: ["-100%", "200%"],
+                      opacity: [0, 0.8, 0],
+                    }}
+                    transition={{
+                      duration: 3.4,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                      repeatDelay: 0.8,
+                    }}
+                    className={`
+                      h-[1.5px]
+                      w-[40%]
+                      rounded-full
+                      ${isDark
+                        ? "bg-gradient-to-r from-transparent via-[#39ff88] to-transparent shadow-[0_0_10px_#39ff88]"
+                        : "bg-gradient-to-r from-transparent via-emerald-500 to-transparent shadow-[0_0_8px_rgba(16,185,129,0.6)]"
+                      }
+                    `}
+                  />
+                  <motion.div
+                    animate={{
+                      opacity: [0.15, 0.45, 0.15],
+                      scaleX: [0.85, 1.1, 0.85],
+                    }}
+                    transition={{
+                      duration: 3.6,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                    className={`
+                      absolute
+                      bottom-0
+                      left-1/2
+                      -translate-x-1/2
+                      h-2
+                      w-[70%]
+                      rounded-full
+                      blur-[6px]
+                      ${isDark
+                        ? "bg-[#39ff88]/20"
+                        : "bg-emerald-500/15"
+                      }
+                    `}
+                  />
+                </div>
+              </div>
+            </motion.div>
+
+            {/* -----------------------------------------------
+                FLOATING TECH PILLS & STATUS BADGES
+            ------------------------------------------------ */}
+
+            {/* Frontend: React Pill (Top Left) */}
+            <motion.div
+              animate={{
+                y: [0, -6, 0],
               }}
               transition={{
                 duration: 4,
                 repeat: Infinity,
                 ease: "easeInOut",
               }}
-              className="
+              className={`
                 absolute
-                -left-2
-                top-10
+                left-0
+                top-8
                 z-20
-                rounded-xl
+                rounded-2xl
                 border
-                border-white/[0.08]
-                bg-[#111113]/80
-                px-3
+                px-3.5
                 py-2
-                shadow-[0_15px_35px_rgba(0,0,0,0.45)]
                 backdrop-blur-xl
-                sm:-left-7
-                sm:top-14
+                transition-all
+                duration-300
+                sm:-left-4
+                sm:top-12
                 sm:px-4
-                sm:py-3
-              "
+                sm:py-2.5
+                ${isDark
+                  ? "border-white/[0.1] bg-[#111113]/85 shadow-[0_15px_35px_rgba(0,0,0,0.5),0_0_20px_rgba(57,255,136,0.1)] hover:border-[#39ff88]/50"
+                  : "border-gray-200 bg-white/95 shadow-[0_10px_30px_rgba(0,0,0,0.08),0_0_15px_rgba(16,185,129,0.1)] hover:border-emerald-500/50"
+                }
+              `}
             >
               <span
-                className="
+                className={`
                   font-mono
                   text-[7px]
                   uppercase
                   tracking-wider
-                  text-gray-600
-                "
+                  ${isDark ? "text-gray-400" : "text-gray-500"}
+                `}
               >
                 frontend
               </span>
 
               <p
-                className="
-                  mt-1
+                className={`
+                  mt-0.5
                   font-mono
                   text-xs
-                  text-[#39ff88]
-                "
+                  font-semibold
+                  ${isDark ? "text-[#39ff88]" : "text-emerald-600"}
+                `}
               >
                 {"<React />"}
               </p>
             </motion.div>
 
-            {/* =================================================
-                BACKEND
-            ================================================== */}
-
+            {/* Backend: Django Pill (Right Side) */}
             <motion.div
               animate={{
-                y: [0, 5, 0],
+                y: [0, 6, 0],
               }}
               transition={{
                 duration: 4.5,
@@ -722,95 +723,163 @@ export default function Hero() {
                 repeat: Infinity,
                 ease: "easeInOut",
               }}
-              className="
+              className={`
                 absolute
-                -right-2
-                bottom-20
+                right-0
+                bottom-24
                 z-20
-                rounded-xl
+                rounded-2xl
                 border
-                border-white/[0.08]
-                bg-[#111113]/80
-                px-3
+                px-3.5
                 py-2
-                shadow-[0_15px_35px_rgba(0,0,0,0.45)]
                 backdrop-blur-xl
-                sm:-right-7
+                transition-all
+                duration-300
+                sm:-right-4
                 sm:px-4
-                sm:py-3
-              "
+                sm:py-2.5
+                ${isDark
+                  ? "border-white/[0.1] bg-[#111113]/85 shadow-[0_15px_35px_rgba(0,0,0,0.5),0_0_20px_rgba(57,255,136,0.1)] hover:border-[#39ff88]/50"
+                  : "border-gray-200 bg-white/95 shadow-[0_10px_30px_rgba(0,0,0,0.08),0_0_15px_rgba(16,185,129,0.1)] hover:border-emerald-500/50"
+                }
+              `}
             >
               <span
-                className="
+                className={`
                   font-mono
                   text-[7px]
                   uppercase
                   tracking-wider
-                  text-gray-600
-                "
+                  ${isDark ? "text-gray-400" : "text-gray-500"}
+                `}
               >
                 backend
               </span>
 
               <p
-                className="
-                  mt-1
+                className={`
+                  mt-0.5
                   font-mono
                   text-xs
-                  text-white
-                "
+                  font-semibold
+                  ${isDark ? "text-white" : "text-gray-900"}
+                `}
               >
                 Django + API
               </p>
             </motion.div>
 
-            {/* =================================================
-                STATUS
-            ================================================== */}
-
+            {/* Clean Minimalist Experience Stats Pill (Apple / Vercel style) */}
             <motion.div
-              animate={{
-                y: [0, -3, 0],
-              }}
+              initial={{ y: 15, opacity: 0 }}
+              animate={{ y: [0, -4, 0], opacity: 1 }}
               transition={{
-                duration: 3.5,
-                repeat: Infinity,
-                ease: "easeInOut",
+                y: { duration: 4, repeat: Infinity, ease: "easeInOut" },
+                opacity: { duration: 0.6, delay: 0.2 },
               }}
-              className="
+              whileHover={{ scale: 1.03, y: -6 }}
+              className={`
                 absolute
-                -bottom-4
+                -bottom-2
                 left-1/2
-                z-20
+                z-30
                 flex
                 -translate-x-1/2
                 items-center
-                gap-2
+                gap-2.5
                 whitespace-nowrap
                 rounded-full
                 border
-                border-[#39ff88]/20
-                bg-[#080808]/95
-                px-3
-                py-2
-                font-mono
-                text-[8px]
-                text-gray-400
-                shadow-[0_15px_35px_rgba(0,0,0,0.5)]
+                px-4
+                py-2.5
                 backdrop-blur-xl
-              "
+                transition-all
+                duration-300
+                sm:gap-3.5
+                sm:px-5
+                sm:py-2.5
+                ${isDark
+                  ? "border-white/[0.12] bg-[#0c0c0f]/90 shadow-[0_20px_45px_rgba(0,0,0,0.7),0_0_20px_rgba(57,255,136,0.1)] hover:border-[#39ff88]/40 hover:shadow-[0_20px_45px_rgba(0,0,0,0.7),0_0_25px_rgba(57,255,136,0.2)]"
+                  : "border-gray-200 bg-white/95 shadow-[0_15px_40px_rgba(0,0,0,0.08),0_0_20px_rgba(16,185,129,0.08)] hover:border-emerald-500/40 hover:shadow-[0_15px_40px_rgba(0,0,0,0.12),0_0_25px_rgba(16,185,129,0.15)]"
+                }
+              `}
             >
-              <span
-                className="
-                  h-1.5
-                  w-1.5
-                  rounded-full
-                  bg-[#39ff88]
-                  shadow-[0_0_10px_#39ff88]
-                "
-              />
+              {/* Stat 1: Experience */}
+              <div className="flex items-center gap-1.5">
+                <span
+                  className={`
+                    font-mono
+                    text-xs
+                    font-bold
+                    sm:text-sm
+                    ${isDark ? "text-white" : "text-gray-900"}
+                  `}
+                >
+                  FRESHER
+                </span>
+              </div>
 
-              Building the future
+              {/* Divider */}
+              <span className={`h-3 w-px ${isDark ? "bg-white/15" : "bg-gray-300"}`} />
+
+              {/* Stat 2: Projects */}
+              <div className="flex items-center gap-1.5">
+                <span
+                  className={`
+                    font-mono
+                    text-xs
+                    font-bold
+                    sm:text-sm
+                    ${isDark ? "text-white" : "text-gray-900"}
+                  `}
+                >
+                  3+
+                </span>
+                <span
+                  className={`
+                    font-mono
+                    text-[9px]
+                    uppercase
+                    tracking-wider
+                    sm:text-[10px]
+                    ${isDark ? "text-gray-400" : "text-gray-500"}
+                  `}
+                >
+                  Projects
+                </span>
+              </div>
+
+              {/* Divider */}
+              <span className={`h-3 w-px ${isDark ? "bg-white/15" : "bg-gray-300"}`} />
+
+              {/* Stat 3: Status Indicator */}
+              <div className="flex items-center gap-2">
+                <span className="relative flex h-2 w-2">
+                  <span
+                    className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${isDark ? "bg-[#39ff88]" : "bg-emerald-500"
+                      }`}
+                  />
+                  <span
+                    className={`relative inline-flex h-2 w-2 rounded-full ${isDark
+                        ? "bg-[#39ff88] shadow-[0_0_8px_#39ff88]"
+                        : "bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.5)]"
+                      }`}
+                  />
+                </span>
+                <span
+                  className={`
+                    font-mono
+                    text-[9px]
+                    font-semibold
+                    uppercase
+                    tracking-wider
+                    sm:text-[10px]
+                    ${isDark ? "text-[#39ff88]" : "text-emerald-600"}
+                  `}
+                >
+                  Available
+                </span>
+              </div>
             </motion.div>
           </motion.div>
         </div>
@@ -833,7 +902,7 @@ export default function Hero() {
           duration: 0.8,
           delay: 1.3,
         }}
-        className="
+        className={`
           absolute
           bottom-5
           left-1/2
@@ -843,11 +912,10 @@ export default function Hero() {
           flex-col
           items-center
           gap-1
-          text-gray-600
           transition-colors
-          hover:text-[#39ff88]
           xl:flex
-        "
+          ${isDark ? "text-gray-600 hover:text-[#39ff88]" : "text-gray-400 hover:text-emerald-600"}
+        `}
       >
         <span
           className="

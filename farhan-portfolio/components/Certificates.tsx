@@ -9,6 +9,7 @@ import {
   Code2,
 } from "lucide-react";
 import { motion, type Variants } from "framer-motion";
+import SpotlightCard from "@/components/ui/SpotlightCard";
 
 const technologies = [
   "HTML",
@@ -231,24 +232,22 @@ export default function Certificates() {
               once: true,
               amount: 0.15,
             }}
-            className="
-              group
-              relative
-              min-w-0
-              overflow-hidden
-              rounded-2xl
-              border
-              border-white/[0.08]
-              bg-[#111113]/80
-              backdrop-blur-xl
-              transition-all
-              duration-300
-              hover:-translate-y-1
-              hover:border-[#39ff88]/30
-              hover:bg-[#151518]
-              sm:rounded-3xl
-            "
+            className="min-w-0"
           >
+            <SpotlightCard
+              className="
+                rounded-2xl
+                border
+                border-white/[0.08]
+                bg-[#111113]/80
+                backdrop-blur-xl
+                transition-all
+                duration-300
+                hover:border-[#39ff88]/30
+                hover:bg-[#151518]
+                sm:rounded-3xl
+              "
+            >
             {/* Glow */}
 
             <div
@@ -506,6 +505,7 @@ export default function Certificates() {
                 group-hover:w-full
               "
             />
+            </SpotlightCard>
           </motion.div>
 
           {/* =======================================
@@ -520,28 +520,26 @@ export default function Certificates() {
               once: true,
               amount: 0.15,
             }}
-            className="
-              group
-              relative
-              min-w-0
-              overflow-hidden
-              rounded-2xl
-              border
-              border-white/[0.08]
-              bg-[#111113]/80
-              p-5
-              backdrop-blur-xl
-              transition-all
-              duration-300
-              hover:-translate-y-1
-              hover:border-[#39ff88]/30
-              hover:bg-[#151518]
-              sm:rounded-3xl
-              sm:p-6
-              lg:p-7
-              xl:p-8
-            "
+            className="min-w-0"
           >
+            <SpotlightCard
+              className="
+                rounded-2xl
+                border
+                border-white/[0.08]
+                bg-[#111113]/80
+                p-5
+                backdrop-blur-xl
+                transition-all
+                duration-300
+                hover:border-[#39ff88]/30
+                hover:bg-[#151518]
+                sm:rounded-3xl
+                sm:p-6
+                lg:p-7
+                xl:p-8
+              "
+            >
             {/* Glow */}
 
             <div
@@ -821,6 +819,7 @@ export default function Certificates() {
                 group-hover:w-full
               "
             />
+            </SpotlightCard>
           </motion.div>
         </div>
 

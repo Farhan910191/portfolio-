@@ -192,10 +192,9 @@ export default function Navbar() {
             transition-all
             duration-500
 
-            ${
-              scrolled
-                ? isDark
-                  ? `
+            ${scrolled
+              ? isDark
+                ? `
                     rounded-2xl
                     border
                     border-white/[0.08]
@@ -212,7 +211,7 @@ export default function Navbar() {
 
                     xl:px-6
                   `
-                  : `
+                : `
                     rounded-2xl
                     border
                     border-black/[0.06]
@@ -229,7 +228,7 @@ export default function Navbar() {
 
                     xl:px-6
                   `
-                : `
+              : `
                     px-1
                     py-1.5
 
@@ -270,10 +269,9 @@ export default function Navbar() {
 
                     sm:text-3xl
 
-                    ${
-                      isDark
-                        ? "text-white group-hover:text-[#39ff88]"
-                        : "text-gray-900 group-hover:text-[#10b981]"
+                    ${isDark
+                      ? "text-white group-hover:text-[#39ff88]"
+                      : "text-gray-900 group-hover:text-[#10b981]"
                     }
                   `}
                 >
@@ -293,10 +291,9 @@ export default function Navbar() {
 
                     sm:text-3xl
 
-                    ${
-                      isDark
-                        ? "text-[#39ff88] group-hover:text-white"
-                        : "text-[#10b981] group-hover:text-gray-900"
+                    ${isDark
+                      ? "text-[#39ff88] group-hover:text-white"
+                      : "text-[#10b981] group-hover:text-gray-900"
                     }
                   `}
                 >
@@ -326,10 +323,9 @@ export default function Navbar() {
 
                   sm:-bottom-2
 
-                  ${
-                    isDark
-                      ? "bg-[#39ff88] shadow-[0_0_10px_rgba(57,255,136,0.8)]"
-                      : "bg-[#10b981] shadow-[0_0_10px_rgba(16,185,129,0.5)]"
+                  ${isDark
+                    ? "bg-[#39ff88] shadow-[0_0_10px_rgba(57,255,136,0.8)]"
+                    : "bg-[#10b981] shadow-[0_0_10px_rgba(16,185,129,0.5)]"
                   }
                 `}
               />
@@ -410,12 +406,11 @@ export default function Navbar() {
                         duration-300
                         2xl:text-[8px]
 
-                        ${
-                          active
-                            ? `text-[${accent}]`
-                            : isDark
-                              ? "text-white/20 group-hover:text-white/40"
-                              : "text-gray-400 group-hover:text-gray-600"
+                        ${active
+                          ? `text-[${accent}]`
+                          : isDark
+                            ? "text-white/20 group-hover:text-white/40"
+                            : "text-gray-400 group-hover:text-gray-600"
                         }
                       `}
                       style={active ? { color: accent } : undefined}
@@ -436,14 +431,13 @@ export default function Navbar() {
                         duration-300
                         2xl:text-xs
 
-                        ${
-                          active
-                            ? isDark
-                              ? "text-white"
-                              : "text-gray-900"
-                            : isDark
-                              ? "text-white/50 group-hover:text-white"
-                              : "text-gray-500 group-hover:text-gray-900"
+                        ${active
+                          ? isDark
+                            ? "text-white"
+                            : "text-gray-900"
+                          : isDark
+                            ? "text-white/50 group-hover:text-white"
+                            : "text-gray-500 group-hover:text-gray-900"
                         }
                       `}
                     >
@@ -510,10 +504,9 @@ export default function Navbar() {
                 px-3
                 py-2
 
-                ${
-                  isDark
-                    ? "border-white/[0.07] bg-white/[0.025]"
-                    : "border-black/[0.06] bg-black/[0.02]"
+                ${isDark
+                  ? "border-white/[0.07] bg-white/[0.025]"
+                  : "border-black/[0.06] bg-black/[0.02]"
                 }
               `}
             >
@@ -567,16 +560,15 @@ export default function Navbar() {
                 transition-all
                 duration-300
 
-                ${
-                  isDark
-                    ? `
+                ${isDark
+                  ? `
                       border-white/[0.08]
                       bg-[#111113]/80
                       text-white
                       hover:border-[#39ff88]/40
                       hover:text-[#39ff88]
                     `
-                    : `
+                  : `
                       border-gray-300
                       bg-white/80
                       text-gray-700
@@ -603,7 +595,6 @@ export default function Navbar() {
           =================================================== */}
 
           <div className="hidden shrink-0 items-center gap-2 xl:flex">
-
             <motion.button
               type="button"
               whileHover={{
@@ -630,15 +621,14 @@ export default function Navbar() {
 
                 xl:px-4
 
-                ${
-                  isDark
-                    ? `
+                ${isDark
+                  ? `
                       border-[#39ff88]/30
                       bg-[#39ff88]/[0.06]
                       hover:border-[#39ff88]/60
                       hover:bg-[#39ff88]/[0.12]
                     `
-                    : `
+                  : `
                       border-[#10b981]/30
                       bg-[#10b981]/[0.06]
                       hover:border-[#10b981]/60
@@ -678,7 +668,6 @@ export default function Navbar() {
           =================================================== */}
 
           <div className="flex items-center gap-2 lg:hidden">
-
             <button
               type="button"
               onClick={() =>
@@ -700,16 +689,15 @@ export default function Navbar() {
                 sm:h-10
                 sm:w-10
 
-                ${
-                  isDark
-                    ? `
+                ${isDark
+                  ? `
                       border-white/[0.08]
                       bg-[#111113]/80
                       text-white
                       hover:border-[#39ff88]/40
                       hover:text-[#39ff88]
                     `
-                    : `
+                  : `
                       border-gray-300
                       bg-white/80
                       text-gray-700
@@ -850,14 +838,13 @@ export default function Navbar() {
                 sm:rounded-3xl
                 sm:p-3
 
-                ${
-                  isDark
-                    ? `
+                ${isDark
+                  ? `
                       border-white/[0.08]
                       bg-[#080808]/95
                       shadow-[0_25px_80px_rgba(0,0,0,0.7)]
                     `
-                    : `
+                  : `
                       border-black/[0.06]
                       bg-white/97
                       shadow-[0_25px_80px_rgba(0,0,0,0.1)]
@@ -994,14 +981,13 @@ export default function Navbar() {
                         sm:px-4
                         sm:py-3
 
-                        ${
-                          active
-                            ? isDark
-                              ? "border border-[#39ff88]/20 bg-[#39ff88]/[0.06]"
-                              : "border border-[#10b981]/20 bg-[#10b981]/[0.06]"
-                            : isDark
-                              ? "border border-transparent hover:bg-white/[0.03]"
-                              : "border border-transparent hover:bg-black/[0.02]"
+                        ${active
+                          ? isDark
+                            ? "border border-[#39ff88]/20 bg-[#39ff88]/[0.06]"
+                            : "border border-[#10b981]/20 bg-[#10b981]/[0.06]"
+                          : isDark
+                            ? "border border-transparent hover:bg-white/[0.03]"
+                            : "border border-transparent hover:bg-black/[0.02]"
                         }
                       `}
                     >
@@ -1021,12 +1007,11 @@ export default function Navbar() {
                             text-[8px]
                             sm:text-[9px]
 
-                            ${
-                              active
-                                ? ""
-                                : isDark
-                                  ? "text-white/20"
-                                  : "text-gray-400"
+                            ${active
+                              ? ""
+                              : isDark
+                                ? "text-white/20"
+                                : "text-gray-400"
                             }
                           `}
                           style={active ? { color: accent } : undefined}
@@ -1043,14 +1028,13 @@ export default function Navbar() {
                             transition-colors
                             sm:text-sm
 
-                            ${
-                              active
-                                ? isDark
-                                  ? "text-white"
-                                  : "text-gray-900"
-                                : isDark
-                                  ? "text-white/55 group-hover:text-white"
-                                  : "text-gray-500 group-hover:text-gray-900"
+                            ${active
+                              ? isDark
+                                ? "text-white"
+                                : "text-gray-900"
+                              : isDark
+                                ? "text-white/55 group-hover:text-white"
+                                : "text-gray-500 group-hover:text-gray-900"
                             }
                           `}
                         >
@@ -1105,15 +1089,14 @@ export default function Navbar() {
                   sm:px-4
                   sm:py-3
 
-                  ${
-                    isDark
-                      ? `
+                  ${isDark
+                    ? `
                         border-[#39ff88]/30
                         bg-[#39ff88]/[0.06]
                         hover:border-[#39ff88]/50
                         hover:bg-[#39ff88]/[0.12]
                       `
-                      : `
+                    : `
                         border-[#10b981]/30
                         bg-[#10b981]/[0.06]
                         hover:border-[#10b981]/50

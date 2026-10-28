@@ -110,6 +110,12 @@
 
   --gradient-text-start: #ffffff;
   --gradient-text-mid: #ffffff;
+
+  /* Developer background tokens */
+  --bg-ambient-1: rgba(57, 255, 136, 0.05);
+  --bg-ambient-2: rgba(0, 229, 255, 0.035);
+  --bg-grid-line: rgba(57, 255, 136, 0.75);
+  --bg-grid-opacity: 0.11;
 }
 
 /* =========================================================
@@ -117,8 +123,8 @@
 ========================================================= */
 
 [data-theme="light"] {
-  --background: #f8f9fa;
-  --background-deep: #f0f1f3;
+  --background: #ffffff;
+  --background-deep: #ffffff;
 
   --foreground: #1a1a2e;
   --foreground-secondary: #64748b;
@@ -184,21 +190,34 @@
   /* Gradient text */
   --gradient-text-start: #1a1a2e;
   --gradient-text-mid: #1a1a2e;
+
+  /* Developer background tokens */
+  --bg-ambient-1: rgba(16, 185, 129, 0.12);
+  --bg-ambient-2: rgba(14, 165, 233, 0.07);
+  --bg-grid-line: rgba(16, 185, 129, 0.8);
+  --bg-grid-opacity: 0.22;
+}
+
+.dark-mode-vignette {
+  display: block;
+}
+
+[data-theme="light"] .dark-mode-vignette {
+  display: none !important;
 }
 
 /* =========================================================
-   GLOBAL THEME TRANSITION
+   THEME TRANSITION (Only active during toggle, not on initial load)
 ========================================================= */
 
-html,
-body,
-main,
-header,
-footer {
+html.theme-transition,
+html.theme-transition *,
+html.theme-transition *::before,
+html.theme-transition *::after {
   transition:
     background-color 400ms cubic-bezier(0.4, 0, 0.2, 1),
     border-color 400ms cubic-bezier(0.4, 0, 0.2, 1),
-    color 400ms cubic-bezier(0.4, 0, 0.2, 1);
+    color 400ms cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 /* =========================================================
@@ -1416,4 +1435,44 @@ section,
       #c4e5d1 60px,
       #dcf0e4 78px,
       #ebf7f0 96px);
+}
+
+/* =========================================================
+   BACKGROUND STARS & UI ANIMATIONS
+========================================================= */
+
+@keyframes starTwinkle {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes starShooting {
+  0% {
+    opacity: 0;
+    transform: rotate(35deg) translateX(0);
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(35deg) translateX(300px);
+  }
+}
+
+@keyframes badgeDotPulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.3);
+  }
 }

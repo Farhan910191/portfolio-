@@ -1,25 +1,18 @@
 "use client";
 
-import { Canvas, useFrame } from "@react-three/fiber";
-import { Float, Line, OrbitControls } from "@react-three/drei";
-import { useMemo, useRef, useEffect, useState } from "react";
-import * as THREE from "three";
+import { useEffect, useRef, useState, useCallback } from "react";
 
 /* =========================================================
-   THEME HOOK
+   THEME HOOK (Synchronizes with Dark & Light Mode)
 ========================================================= */
 
 function useThemeColors() {
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof document !== "undefined") {
-      return document.documentElement.getAttribute("data-theme") !== "light";
-    }
-    return true;
-  });
+  const [isDark, setIsDark] = useState(true);
 
   useEffect(() => {
     const check = () => {
-      const dark = document.documentElement.getAttribute("data-theme") !== "light";
+      const dark =
+        document.documentElement.getAttribute("data-theme") !== "light";
       setIsDark(dark);
     };
     check();
@@ -31,451 +24,438 @@ function useThemeColors() {
     return () => observer.disconnect();
   }, []);
 
-  return {
-    isDark,
-  };
+  return { isDark };
 }
 
 /* =========================================================
-   FLOATING PARTICLES
+   TYPES
 ========================================================= */
 
-function ParticleField({ isDark }: { isDark: boolean }) {
-  const pointsRef = useRef<THREE.Points>(null);
-  const matRef = useRef<THREE.PointsMaterial>(null);
+interface GlowingCheckSquare {
+  col: number;
+  row: number;
+  life: number;
+  maxLife: number;
+  alpha: number;
+}
 
-  const colors = useMemo(
-    () => ({
-      dark: new THREE.Color("#39ff88"),
-      light: new THREE.Color("#059669"),
-    }),
-    []
-  );
+interface TwinkleStar {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  radius: number;
+  baseRadius: number;
+  baseAlpha: number;
+  twinkleSpeed: number;
+  twinklePhase: number;
+  isAccent: boolean;
+}
 
-  const particles = useMemo(() => {
-    const count = 850;
-    const positions = new Float32Array(count * 3);
+interface PassingShootingStar {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  length: number;
+  life: number;
+  maxLife: number;
+  opacity: number;
+  width: number;
+  origin: "left" | "right" | "top-corner-left" | "top-corner-right";
+}
 
-    for (let i = 0; i < count; i++) {
-      const radius = 5 + Math.random() * 8;
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
+/* =========================================================
+   FULL-SCREEN ANIMATED CHECKERED GRID & PASSING STARS CANVAS
+========================================================= */
 
-      positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
-      positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
-      positions[i * 3 + 2] = radius * Math.cos(phi);
+function ChecksAndStarsCanvas({ isDark }: { isDark: boolean }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const animRef = useRef<number>(0);
+  const isDarkRef = useRef(isDark);
+  isDarkRef.current = isDark;
+
+  const themeProgressRef = useRef(isDark ? 1 : 0);
+  const glowingSquaresRef = useRef<GlowingCheckSquare[]>([]);
+  const fewStarsRef = useRef<TwinkleStar[]>([]);
+  const shootingStarsRef = useRef<PassingShootingStar[]>([]);
+  const mouseRef = useRef({ x: -1000, y: -1000, active: false });
+  const timeRef = useRef(0);
+
+  const checkSize = 64; // Checkered grid box size (64px)
+
+  // Initialize stars across screen
+  const initScene = useCallback((w: number, h: number) => {
+    const fewStarCount = Math.min(Math.floor((w * h) / 28000), 36);
+    const stars: TwinkleStar[] = [];
+    for (let i = 0; i < fewStarCount; i++) {
+      const isAccent = Math.random() < 0.5;
+      const baseR = 0.8 + Math.random() * 1.6;
+      stars.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        vx: (Math.random() - 0.5) * 0.18,
+        vy: -0.18 - Math.random() * 0.25,
+        baseRadius: baseR,
+        radius: baseR,
+        baseAlpha: 0.25 + Math.random() * 0.55,
+        twinkleSpeed: 0.8 + Math.random() * 1.6,
+        twinklePhase: Math.random() * Math.PI * 2,
+        isAccent,
+      });
     }
-
-    return positions;
+    fewStarsRef.current = stars;
   }, []);
 
-  useFrame((_, delta) => {
-    if (!pointsRef.current) return;
-    pointsRef.current.rotation.y += delta * 0.015;
-    pointsRef.current.rotation.x += delta * 0.004;
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d", { alpha: true });
+    if (!ctx) return;
 
-    if (matRef.current) {
-      matRef.current.color.lerp(
-        isDark ? colors.dark : colors.light,
-        0.08
-      );
-      matRef.current.opacity = THREE.MathUtils.lerp(
-        matRef.current.opacity,
-        isDark ? 0.45 : 0.7,
-        0.08
-      );
-    }
-  });
+    let width = 0;
+    let height = 0;
+
+    const handleResize = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.scale(dpr, dpr);
+      initScene(width, height);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseRef.current = {
+        x: e.clientX,
+        y: e.clientY,
+        active: true,
+      };
+
+      // Occasionally light up a check box under mouse hover
+      const col = Math.floor(e.clientX / checkSize);
+      const row = Math.floor(e.clientY / checkSize);
+      if (Math.random() < 0.35 && glowingSquaresRef.current.length < 18) {
+        const exists = glowingSquaresRef.current.some(
+          (sq) => sq.col === col && sq.row === row
+        );
+        if (!exists) {
+          glowingSquaresRef.current.push({
+            col,
+            row,
+            life: 0,
+            maxLife: 60 + Math.random() * 40,
+            alpha: 0.18 + Math.random() * 0.2,
+          });
+        }
+      }
+    };
+
+    const handleMouseLeave = () => {
+      mouseRef.current.active = false;
+    };
+
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
+    document.addEventListener("mouseleave", handleMouseLeave);
+
+    // Spontaneously light up random check boxes across full screen
+    const squareTimer = setInterval(() => {
+      if (glowingSquaresRef.current.length >= 12) return;
+      const totalCols = Math.ceil(width / checkSize);
+      const totalRows = Math.ceil(height / checkSize);
+      const col = Math.floor(Math.random() * totalCols);
+      const row = Math.floor(Math.random() * totalRows);
+
+      // Exclude area where the hero model stands on desktop screens to avoid any square frame flicker
+      const sqX = col * checkSize;
+      const sqY = row * checkSize;
+      const inHeroModelArea =
+        width >= 1024 &&
+        sqX > width * 0.52 &&
+        sqX < width * 0.92 &&
+        sqY > height * 0.08 &&
+        sqY < height * 0.85;
+
+      if (inHeroModelArea) return;
+
+      glowingSquaresRef.current.push({
+        col,
+        row,
+        life: 0,
+        maxLife: 70 + Math.random() * 50,
+        alpha: 0.12 + Math.random() * 0.16,
+      });
+    }, 900);
+
+    // Passing Shooting Star Spawner (2 Sides & Corners)
+    let passCounter = 0;
+    const spawnPassingStar = () => {
+      if (shootingStarsRef.current.length >= 3) return;
+      passCounter++;
+
+      const sideMargin = Math.max(160, width * 0.22);
+      const mode = passCounter % 4;
+
+      let startX: number;
+      let startY: number;
+      let angle: number;
+      let origin: "left" | "right" | "top-corner-left" | "top-corner-right";
+
+      if (mode === 0) {
+        startX = Math.random() * (sideMargin * 0.85);
+        startY = Math.random() * (height * 0.4);
+        angle = (32 + Math.random() * 16) * (Math.PI / 180);
+        origin = "left";
+      } else if (mode === 1) {
+        startX = width - Math.random() * (sideMargin * 0.85);
+        startY = Math.random() * (height * 0.4);
+        angle = (28 + Math.random() * 16) * (Math.PI / 180);
+        origin = "right";
+      } else if (mode === 2) {
+        startX = Math.random() * (width * 0.18);
+        startY = Math.random() * (height * 0.15);
+        angle = (36 + Math.random() * 18) * (Math.PI / 180);
+        origin = "top-corner-left";
+      } else {
+        startX = width - Math.random() * (width * 0.18);
+        startY = Math.random() * (height * 0.15);
+        angle = (144 - Math.random() * 18) * (Math.PI / 180);
+        origin = "top-corner-right";
+      }
+
+      // Faster speed: 15 to 22 px per frame
+      const speed = 15 + Math.random() * 7;
+
+      shootingStarsRef.current.push({
+        x: startX,
+        y: startY,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        length: 110 + Math.random() * 90,
+        life: 0,
+        maxLife: 28 + Math.random() * 14,
+        opacity: 0.8 + Math.random() * 0.2,
+        width: 1.6 + Math.random() * 0.8,
+        origin,
+      });
+    };
+
+    // Fast shooting star passing every 1.8 seconds
+    const shootingTimer = setInterval(spawnPassingStar, 1800);
+    const initialShootingTimer = setTimeout(spawnPassingStar, 500);
+
+    // --------------------------------------------------------
+    // RENDER LOOP
+    // --------------------------------------------------------
+    const render = () => {
+      timeRef.current += 0.016;
+      const t = timeRef.current;
+
+      // Theme interpolation
+      const targetTheme = isDarkRef.current ? 1 : 0;
+      themeProgressRef.current +=
+        (targetTheme - themeProgressRef.current) * 0.08;
+      const f = themeProgressRef.current; // 0 = Light, 1 = Dark
+
+      ctx.clearRect(0, 0, width, height);
+
+      // Colors for canvas elements (Adaptive for both Dark & Light modes)
+      const accentR = Math.round(16 + f * (57 - 16));
+      const accentG = Math.round(185 + f * (255 - 185));
+      const accentB = Math.round(129 + f * (136 - 129));
+
+      // In dark mode: white-tinted base. In light mode: deep emerald-slate for strong contrast.
+      const baseR = Math.round(15 + f * (255 - 15));
+      const baseG = Math.round(118 + f * (255 - 118));
+      const baseB = Math.round(110 + f * (255 - 110));
+
+      const mx = mouseRef.current.x;
+      const my = mouseRef.current.y;
+      const mouseActive = mouseRef.current.active;
+
+      // 1. Interactive Cursor Soft Glow over Checks
+      if (mouseActive && mx > 0 && my > 0) {
+        const spotRadius = 180;
+        const grad = ctx.createRadialGradient(mx, my, 0, mx, my, spotRadius);
+        grad.addColorStop(
+          0,
+          `rgba(${accentR}, ${accentG}, ${accentB}, ${f === 1 ? 0.16 : 0.12})`
+        );
+        grad.addColorStop(
+          0.6,
+          `rgba(${accentR}, ${accentG}, ${accentB}, ${f === 1 ? 0.035 : 0.025})`
+        );
+        grad.addColorStop(1, "transparent");
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(mx, my, spotRadius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // 2. Animated Glowing Checks Squares (Illuminating Check boxes)
+      const squares = glowingSquaresRef.current;
+      for (let i = squares.length - 1; i >= 0; i--) {
+        const sq = squares[i];
+        sq.life++;
+        const progress = sq.life / sq.maxLife;
+        if (progress >= 1) {
+          squares.splice(i, 1);
+          continue;
+        }
+
+        // Bell curve alpha pulse
+        const pulse = Math.sin(progress * Math.PI);
+        // Ensure strong contrast in both dark and light modes
+        const alpha = sq.alpha * pulse * (f === 1 ? 1.0 : 1.35);
+
+        const x = sq.col * checkSize;
+        const y = sq.row * checkSize;
+
+        // Fill check square with soft neon/emerald glow
+        ctx.fillStyle = `rgba(${accentR}, ${accentG}, ${accentB}, ${alpha * (f === 1 ? 0.45 : 0.35)})`;
+        ctx.fillRect(x + 1, y + 1, checkSize - 2, checkSize - 2);
+
+        // Highlight check box border
+        ctx.strokeStyle = `rgba(${accentR}, ${accentG}, ${accentB}, ${alpha * (f === 1 ? 0.95 : 0.85)})`;
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x + 0.5, y + 0.5, checkSize - 1, checkSize - 1);
+      }
+
+      // 3. Render Few Twinkling Stars
+      const fewStars = fewStarsRef.current;
+      for (const s of fewStars) {
+        s.x += s.vx;
+        s.y += s.vy;
+
+        if (s.y < -15) {
+          s.y = height + 15;
+          s.x = Math.random() * width;
+        }
+        if (s.x < -15) s.x = width + 15;
+        if (s.x > width + 15) s.x = -15;
+
+        // Mouse reaction
+        const dx = s.x - mx;
+        const dy = s.y - my;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 130 && dist > 0) {
+          const force = ((130 - dist) / 130) * 0.6;
+          s.x += (dx / dist) * force;
+          s.y += (dy / dist) * force;
+        }
+
+        const twinkle = Math.sin(t * s.twinkleSpeed + s.twinklePhase) * 0.5 + 0.5;
+        const currentAlpha =
+          s.baseAlpha * (0.35 + twinkle * 0.65) * (0.75 + f * 0.25);
+        s.radius = s.baseRadius * (0.85 + twinkle * 0.3);
+
+        const r = s.isAccent ? accentR : baseR;
+        const g = s.isAccent ? accentG : baseG;
+        const b = s.isAccent ? accentB : baseB;
+
+        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${currentAlpha})`;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (s.baseRadius > 1.8 && twinkle > 0.6) {
+          ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${currentAlpha * 0.22})`;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.radius * 3.2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      // 4. Render Passing Stars on 2 Sides & Corners
+      const shootingStars = shootingStarsRef.current;
+      for (let i = shootingStars.length - 1; i >= 0; i--) {
+        const ss = shootingStars[i];
+        ss.life++;
+        ss.x += ss.vx;
+        ss.y += ss.vy;
+
+        const progress = ss.life / ss.maxLife;
+        if (
+          progress >= 1 ||
+          ss.x > width + 120 ||
+          ss.x < -120 ||
+          ss.y > height + 120
+        ) {
+          shootingStars.splice(i, 1);
+          continue;
+        }
+
+        const alpha =
+          progress < 0.2
+            ? (progress / 0.2) * ss.opacity
+            : (1 - progress) * ss.opacity;
+
+        const dirMag = Math.hypot(ss.vx, ss.vy);
+        const tailX = ss.x - (ss.vx / dirMag) * ss.length;
+        const tailY = ss.y - (ss.vy / dirMag) * ss.length;
+
+        const grad = ctx.createLinearGradient(tailX, tailY, ss.x, ss.y);
+        grad.addColorStop(0, "transparent");
+        grad.addColorStop(
+          0.6,
+          `rgba(${accentR}, ${accentG}, ${accentB}, ${alpha * 0.55})`
+        );
+        grad.addColorStop(
+          1,
+          `rgba(${baseR}, ${baseG}, ${baseB}, ${alpha * 0.95})`
+        );
+
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = ss.width;
+        ctx.beginPath();
+        ctx.moveTo(tailX, tailY);
+        ctx.lineTo(ss.x, ss.y);
+        ctx.stroke();
+
+        ctx.fillStyle = `rgba(${baseR}, ${baseG}, ${baseB}, ${alpha})`;
+        ctx.beginPath();
+        ctx.arc(ss.x, ss.y, ss.width * 1.3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      animRef.current = requestAnimationFrame(render);
+    };
+
+    animRef.current = requestAnimationFrame(render);
+
+    return () => {
+      cancelAnimationFrame(animRef.current);
+      clearInterval(shootingTimer);
+      clearInterval(squareTimer);
+      clearTimeout(initialShootingTimer);
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseleave", handleMouseLeave);
+    };
+  }, [initScene]);
 
   return (
-    <points ref={pointsRef}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          args={[particles, 3]}
-        />
-      </bufferGeometry>
-
-      <pointsMaterial
-        ref={matRef}
-        color={isDark ? "#39ff88" : "#059669"}
-        size={isDark ? 0.018 : 0.024}
-        transparent
-        opacity={isDark ? 0.45 : 0.7}
-        sizeAttenuation
-        depthWrite={false}
-      />
-    </points>
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 pointer-events-none"
+      style={{
+        zIndex: 1,
+        willChange: "transform",
+      }}
+    />
   );
 }
 
 /* =========================================================
-   DEVELOPER CORE (ROTATING WIREFRAME CHECKS & CENTER LIGHT)
-========================================================= */
-
-function DeveloperCore({ isDark }: { isDark: boolean }) {
-  const coreRef = useRef<THREE.Group>(null);
-  const outerMatRef = useRef<THREE.MeshBasicMaterial>(null);
-  const innerMatRef = useRef<THREE.MeshBasicMaterial>(null);
-  const coreMatRef = useRef<THREE.MeshBasicMaterial>(null);
-  const lightRef = useRef<THREE.PointLight>(null);
-
-  const colors = useMemo(
-    () => ({
-      darkOuter: new THREE.Color("#39ff88"),
-      lightOuter: new THREE.Color("#10b981"),
-      darkInner: new THREE.Color("#20c968"),
-      lightInner: new THREE.Color("#059669"),
-      darkCore: new THREE.Color("#07140d"),
-      lightCore: new THREE.Color("#34d399"),
-      darkLight: new THREE.Color("#39ff88"),
-      lightLight: new THREE.Color("#10b981"),
-    }),
-    []
-  );
-
-  useFrame((_, delta) => {
-    if (!coreRef.current) return;
-    coreRef.current.rotation.y += delta * 0.22;
-    coreRef.current.rotation.x += delta * 0.08;
-
-    const lerpSpeed = 0.08;
-
-    if (outerMatRef.current) {
-      outerMatRef.current.color.lerp(
-        isDark ? colors.darkOuter : colors.lightOuter,
-        lerpSpeed
-      );
-      outerMatRef.current.opacity = THREE.MathUtils.lerp(
-        outerMatRef.current.opacity,
-        isDark ? 0.25 : 0.75,
-        lerpSpeed
-      );
-    }
-
-    if (innerMatRef.current) {
-      innerMatRef.current.color.lerp(
-        isDark ? colors.darkInner : colors.lightInner,
-        lerpSpeed
-      );
-      innerMatRef.current.opacity = THREE.MathUtils.lerp(
-        innerMatRef.current.opacity,
-        isDark ? 0.38 : 0.85,
-        lerpSpeed
-      );
-    }
-
-    if (coreMatRef.current) {
-      coreMatRef.current.color.lerp(
-        isDark ? colors.darkCore : colors.lightCore,
-        lerpSpeed
-      );
-      coreMatRef.current.opacity = THREE.MathUtils.lerp(
-        coreMatRef.current.opacity,
-        isDark ? 0.95 : 0.75,
-        lerpSpeed
-      );
-    }
-
-    if (lightRef.current) {
-      lightRef.current.color.lerp(
-        isDark ? colors.darkLight : colors.lightLight,
-        lerpSpeed
-      );
-      lightRef.current.intensity = THREE.MathUtils.lerp(
-        lightRef.current.intensity,
-        isDark ? 6 : 8,
-        lerpSpeed
-      );
-    }
-  });
-
-  return (
-    <group ref={coreRef}>
-      {/* Outer wireframe (checkered geometric facet lattice) */}
-      <mesh>
-        <icosahedronGeometry args={[1.65, 2]} />
-        <meshBasicMaterial
-          ref={outerMatRef}
-          color={isDark ? "#39ff88" : "#10b981"}
-          wireframe
-          transparent
-          opacity={isDark ? 0.25 : 0.75}
-        />
-      </mesh>
-
-      {/* Inner wireframe */}
-      <mesh rotation={[0.5, 0.2, 0]}>
-        <icosahedronGeometry args={[1.2, 1]} />
-        <meshBasicMaterial
-          ref={innerMatRef}
-          color={isDark ? "#20c968" : "#059669"}
-          wireframe
-          transparent
-          opacity={isDark ? 0.38 : 0.85}
-        />
-      </mesh>
-
-      {/* Glowing core sphere */}
-      <mesh>
-        <sphereGeometry args={[0.7, 32, 32]} />
-        <meshBasicMaterial
-          ref={coreMatRef}
-          color={isDark ? "#07140d" : "#34d399"}
-          transparent
-          opacity={isDark ? 0.95 : 0.75}
-        />
-      </mesh>
-
-      {/* Center light */}
-      <pointLight
-        ref={lightRef}
-        color={isDark ? "#39ff88" : "#10b981"}
-        intensity={isDark ? 6 : 8}
-        distance={6}
-      />
-    </group>
-  );
-}
-
-/* =========================================================
-   ORBIT RINGS
-========================================================= */
-
-function DeveloperOrbits({ isDark }: { isDark: boolean }) {
-  const groupRef = useRef<THREE.Group>(null);
-  const ring1Ref = useRef<THREE.MeshBasicMaterial>(null);
-  const ring2Ref = useRef<THREE.MeshBasicMaterial>(null);
-  const ring3Ref = useRef<THREE.MeshBasicMaterial>(null);
-
-  const colors = useMemo(
-    () => ({
-      darkGreen: new THREE.Color("#39ff88"),
-      lightGreen: new THREE.Color("#10b981"),
-      darkGreen2: new THREE.Color("#20c968"),
-      lightGreen2: new THREE.Color("#059669"),
-    }),
-    []
-  );
-
-  useFrame((_, delta) => {
-    if (!groupRef.current) return;
-    groupRef.current.rotation.z += delta * 0.08;
-    groupRef.current.rotation.y += delta * 0.025;
-
-    const lerpSpeed = 0.08;
-    if (ring1Ref.current) {
-      ring1Ref.current.color.lerp(
-        isDark ? colors.darkGreen : colors.lightGreen,
-        lerpSpeed
-      );
-      ring1Ref.current.opacity = THREE.MathUtils.lerp(
-        ring1Ref.current.opacity,
-        isDark ? 0.55 : 0.75,
-        lerpSpeed
-      );
-    }
-    if (ring2Ref.current) {
-      ring2Ref.current.color.lerp(
-        isDark ? colors.darkGreen2 : colors.lightGreen2,
-        lerpSpeed
-      );
-      ring2Ref.current.opacity = THREE.MathUtils.lerp(
-        ring2Ref.current.opacity,
-        isDark ? 0.3 : 0.6,
-        lerpSpeed
-      );
-    }
-    if (ring3Ref.current) {
-      ring3Ref.current.color.lerp(
-        isDark ? colors.darkGreen : colors.lightGreen,
-        lerpSpeed
-      );
-      ring3Ref.current.opacity = THREE.MathUtils.lerp(
-        ring3Ref.current.opacity,
-        isDark ? 0.18 : 0.45,
-        lerpSpeed
-      );
-    }
-  });
-
-  return (
-    <group ref={groupRef}>
-      {/* Ring 1 */}
-      <mesh rotation={[Math.PI / 2.4, 0, 0]}>
-        <torusGeometry args={[2.15, 0.012, 12, 160]} />
-        <meshBasicMaterial
-          ref={ring1Ref}
-          color={isDark ? "#39ff88" : "#10b981"}
-          transparent
-          opacity={isDark ? 0.55 : 0.75}
-        />
-      </mesh>
-
-      {/* Ring 2 */}
-      <mesh rotation={[0.8, 0.3, 0.5]}>
-        <torusGeometry args={[2.65, 0.008, 12, 160]} />
-        <meshBasicMaterial
-          ref={ring2Ref}
-          color={isDark ? "#20c968" : "#059669"}
-          transparent
-          opacity={isDark ? 0.3 : 0.6}
-        />
-      </mesh>
-
-      {/* Ring 3 */}
-      <mesh rotation={[1.2, 0.7, 0]}>
-        <torusGeometry args={[3.1, 0.006, 10, 160]} />
-        <meshBasicMaterial
-          ref={ring3Ref}
-          color={isDark ? "#39ff88" : "#10b981"}
-          transparent
-          opacity={isDark ? 0.18 : 0.45}
-        />
-      </mesh>
-    </group>
-  );
-}
-
-/* =========================================================
-   FLOATING NODES
-========================================================= */
-
-function FloatingNodes({ isDark }: { isDark: boolean }) {
-  const matRef = useRef<THREE.MeshBasicMaterial>(null);
-
-  const colors = useMemo(
-    () => ({
-      dark: new THREE.Color("#39ff88"),
-      light: new THREE.Color("#10b981"),
-    }),
-    []
-  );
-
-  useFrame(() => {
-    if (matRef.current) {
-      matRef.current.color.lerp(
-        isDark ? colors.dark : colors.light,
-        0.08
-      );
-      matRef.current.opacity = THREE.MathUtils.lerp(
-        matRef.current.opacity,
-        isDark ? 0.8 : 0.9,
-        0.08
-      );
-    }
-  });
-
-  const nodes = useMemo(
-    () => [
-      [-2.8, 1.7, 0],
-      [2.7, 1.2, -1],
-      [-2.5, -1.8, -0.5],
-      [2.6, -1.5, 0],
-      [0.5, 2.8, -1],
-      [-0.8, -2.8, 0],
-    ],
-    []
-  );
-
-  return (
-    <>
-      {nodes.map((position, index) => (
-        <Float
-          key={index}
-          speed={1 + index * 0.12}
-          rotationIntensity={0.4}
-          floatIntensity={0.7}
-        >
-          <mesh position={position as [number, number, number]}>
-            <sphereGeometry args={[0.045, 16, 16]} />
-            <meshBasicMaterial
-              ref={matRef}
-              color={isDark ? "#39ff88" : "#10b981"}
-              transparent
-              opacity={isDark ? 0.8 : 0.9}
-            />
-          </mesh>
-        </Float>
-      ))}
-    </>
-  );
-}
-
-/* =========================================================
-   CONNECTION LINES
-========================================================= */
-
-function ConnectionLines({ isDark }: { isDark: boolean }) {
-  const lines = [
-    [
-      [-2.8, 1.7, 0],
-      [-1.1, 0.7, 0],
-      [0, 0, 0],
-    ],
-    [
-      [2.7, 1.2, -1],
-      [1.2, 0.6, -0.4],
-      [0, 0, 0],
-    ],
-    [
-      [-2.5, -1.8, -0.5],
-      [-1.2, -0.7, -0.2],
-      [0, 0, 0],
-    ],
-    [
-      [2.6, -1.5, 0],
-      [1.2, -0.6, 0],
-      [0, 0, 0],
-    ],
-  ];
-
-  return (
-    <>
-      {lines.map((points, index) => (
-        <Line
-          key={index}
-          points={points as [number, number, number][]}
-          color={isDark ? "#39ff88" : "#10b981"}
-          transparent
-          opacity={isDark ? 0.12 : 0.35}
-          lineWidth={0.8}
-        />
-      ))}
-    </>
-  );
-}
-
-/* =========================================================
-   SCENE
-========================================================= */
-
-function DeveloperScene({ isDark }: { isDark: boolean }) {
-  return (
-    <>
-      <ambientLight intensity={isDark ? 0.25 : 0.65} />
-
-      <ParticleField isDark={isDark} />
-
-      <Float
-        speed={0.6}
-        rotationIntensity={0.15}
-        floatIntensity={0.3}
-      >
-        <DeveloperCore isDark={isDark} />
-      </Float>
-
-      <DeveloperOrbits isDark={isDark} />
-
-      <FloatingNodes isDark={isDark} />
-
-      <ConnectionLines isDark={isDark} />
-    </>
-  );
-}
-
-/* =========================================================
-   MAIN BACKGROUND
+   MAIN DEVELOPER BACKGROUND COMPONENT
+   (Full-screen Checks Grid + Passing Stars)
 ========================================================= */
 
 export default function DeveloperBackground() {
@@ -483,153 +463,81 @@ export default function DeveloperBackground() {
 
   return (
     <div
-      className="
-        pointer-events-none
-        fixed
-        inset-0
-        z-0
-        overflow-hidden
-        transition-colors
-        duration-500
-      "
-      style={{ backgroundColor: isDark ? "#050505" : "#f2f7f4" }}
+      className="fixed inset-0 pointer-events-none overflow-hidden"
+      style={{ zIndex: 0 }}
+      aria-hidden="true"
     >
-      {/* Green atmospheric glow */}
+      {/* 1. Base Background Theme Tone (Instantly matches active theme, zero black flash) */}
       <div
-        className="
-          absolute
-          left-1/2
-          top-1/2
-          h-[750px]
-          w-[750px]
-          -translate-x-1/2
-          -translate-y-1/2
-          rounded-full
-          blur-[140px]
-          transition-all
-          duration-500
-        "
+        className="absolute inset-0"
         style={{
-          backgroundColor: isDark
-            ? "rgba(57, 255, 136, 0.05)"
-            : "rgba(16, 185, 129, 0.16)",
+          backgroundColor: "var(--background-deep)",
         }}
       />
 
-      {/* Top developer code */}
+      {/* 2. Soft Atmospheric Ambient Green Glows */}
       <div
-        className="
-          absolute
-          left-[6%]
-          top-[18%]
-          hidden
-          font-mono
-          text-[11px]
-          leading-6
-          transition-colors
-          duration-500
-          lg:block
-        "
+        className="absolute rounded-full transition-all duration-700 ease-in-out pointer-events-none"
         style={{
-          color: isDark
-            ? "rgba(57, 255, 136, 0.12)"
-            : "rgba(16, 185, 129, 0.35)",
-        }}
-      >
-        <div>const developer = {"{"}</div>
-        <div className="pl-4">name: &quot;Farhan&quot;,</div>
-        <div className="pl-4">role: &quot;Full Stack&quot;,</div>
-        <div className="pl-4">stack: [&quot;Python&quot;, &quot;React&quot;],</div>
-        <div>{"}"}</div>
-      </div>
-
-      {/* Right code */}
-      <div
-        className="
-          absolute
-          right-[6%]
-          top-[26%]
-          hidden
-          font-mono
-          text-[11px]
-          leading-6
-          transition-colors
-          duration-500
-          lg:block
-        "
-        style={{
-          color: isDark
-            ? "rgba(57, 255, 136, 0.12)"
-            : "rgba(16, 185, 129, 0.35)",
-        }}
-      >
-        <div>function buildProject() {"{"}</div>
-        <div className="pl-4">return {"{"}</div>
-        <div className="pl-8">clean: true,</div>
-        <div className="pl-8">fast: true,</div>
-        <div className="pl-8">scalable: true</div>
-        <div className="pl-4">{"}"}</div>
-        <div>{"}"}</div>
-      </div>
-
-      {/* Canvas (keeps mounted across theme changes for seamless fluid rotation) */}
-      <Canvas
-        camera={{
-          position: [0, 0, 9],
-          fov: 45,
-        }}
-        dpr={[1, 1.5]}
-        gl={{
-          antialias: true,
-          alpha: true,
-          powerPreference: "high-performance",
-        }}
-      >
-        <DeveloperScene isDark={isDark} />
-
-        {/* Very subtle camera movement */}
-        <OrbitControls
-          enableZoom={false}
-          enablePan={false}
-          enableRotate={false}
-          autoRotate={false}
-        />
-      </Canvas>
-
-      {/* Dark / Light readability overlays */}
-      <div
-        className="absolute inset-0 transition-all duration-500"
-        style={{
-          background: isDark
-            ? "radial-gradient(circle at center, transparent 0%, #050505 75%)"
-            : "radial-gradient(circle at center, transparent 25%, rgba(242,247,244,0.45) 65%, #f2f7f4 88%)",
+          width: "750px",
+          height: "750px",
+          top: "5%",
+          left: "25%",
+          transform: "translateX(-50%)",
+          filter: "blur(150px)",
+          backgroundColor: "var(--bg-ambient-1)",
+          animation: "ambientFloat 24s ease-in-out infinite",
         }}
       />
 
       <div
-        className="absolute inset-0 transition-all duration-500"
+        className="absolute rounded-full transition-all duration-700 ease-in-out pointer-events-none"
         style={{
-          background: isDark
-            ? "linear-gradient(to bottom, rgba(5,5,5,0.2), transparent, #050505)"
-            : "linear-gradient(to bottom, rgba(242,247,244,0.15), transparent 30%, transparent 70%, #f2f7f4)",
+          width: "600px",
+          height: "600px",
+          bottom: "5%",
+          right: "5%",
+          filter: "blur(130px)",
+          backgroundColor: "var(--bg-ambient-2)",
+          animation: "ambientFloat 28s ease-in-out infinite reverse 4s",
         }}
       />
 
-      {/* Developer checkered grid ("kallikal" / small boxes) */}
+      {/* 3. FULL-SCREEN DEVELOPER CHECKERED GRID ("CHECKS" TYPE) */}
       <div
         className="
           absolute
           inset-0
           transition-all
           duration-500
-          [background-size:60px_60px]
-          sm:[background-size:80px_80px]
+          pointer-events-none
         "
         style={{
-          opacity: isDark ? 0.09 : 0.28,
-          backgroundImage: isDark
-            ? "linear-gradient(rgba(57,255,136,0.7) 1px,transparent 1px),linear-gradient(90deg,rgba(57,255,136,0.7) 1px,transparent 1px)"
-            : "linear-gradient(rgba(16,185,129,0.75) 1px,transparent 1px),linear-gradient(90deg,rgba(16,185,129,0.75) 1px,transparent 1px)",
+          opacity: "var(--bg-grid-opacity)",
+          backgroundSize: "64px 64px",
+          backgroundImage:
+            "linear-gradient(var(--bg-grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--bg-grid-line) 1px, transparent 1px)",
+        }}
+      />
+
+      {/* 4. Canvas with Animated Glowing Checks & Passing Stars */}
+      <ChecksAndStarsCanvas isDark={isDark} />
+
+      {/* 5. Vignette depth overlay ensuring center content is 100% crisp (Dark mode only via CSS) */}
+      <div
+        className="absolute inset-0 pointer-events-none dark-mode-vignette"
+        style={{
+          background:
+            "radial-gradient(ellipse at center, transparent 40%, rgba(6, 8, 9, 0.35) 80%, #060809 100%)",
+        }}
+      />
+
+      {/* 6. Soft vertical edge gradients (Dark mode only via CSS) */}
+      <div
+        className="absolute inset-0 pointer-events-none dark-mode-vignette"
+        style={{
+          background:
+            "linear-gradient(to bottom, rgba(6, 8, 9, 0.4) 0%, transparent 12%, transparent 88%, #060809 100%)",
         }}
       />
     </div>

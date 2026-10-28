@@ -49,8 +49,10 @@ export default function FloatingObject({
             color="#606c38"
             metalness={0.65}
             roughness={0.18}
-            transmission={0.25}
-            thickness={1.2}
+            transparent={true}
+            opacity={0.88}
+            depthWrite={true}
+            depthTest={true}
             clearcoat={1}
             clearcoatRoughness={0.12}
           />
@@ -66,6 +68,8 @@ export default function FloatingObject({
             roughness={0.12}
             emissive="#bc6c25"
             emissiveIntensity={0.18}
+            depthWrite={true}
+            depthTest={true}
             clearcoat={1}
           />
         </mesh>

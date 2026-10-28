@@ -9,6 +9,7 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import { motion, type Variants } from "framer-motion";
+import SpotlightCard from "@/components/ui/SpotlightCard";
 
 // ======================================================
 // SKILL DATA
@@ -101,14 +102,16 @@ const revealVariants: Variants = {
 const cardVariants: Variants = {
   hidden: {
     opacity: 0,
-    y: 20,
+    y: 30,
+    filter: "blur(8px)",
   },
   visible: {
     opacity: 1,
     y: 0,
+    filter: "blur(0px)",
     transition: {
-      duration: 0.45,
-      ease: [0.22, 1, 0.36, 1],
+      duration: 0.65,
+      ease: [0.16, 1, 0.3, 1],
     },
   },
 };
@@ -266,30 +269,28 @@ export default function Skills() {
             const Icon = group.icon;
 
             return (
-              <motion.article
+              <motion.div
                 key={group.title}
                 variants={cardVariants}
-                className="
-                  group
-                  relative
-                  min-w-0
-                  overflow-hidden
-                  rounded-2xl
-                  border
-                  border-white/[0.08]
-                  bg-[#111113]/80
-                  p-5
-                  backdrop-blur-xl
-                  transition-all
-                  duration-300
-                  hover:-translate-y-1
-                  hover:border-[#39ff88]/30
-                  hover:bg-[#151518]
-                  sm:rounded-3xl
-                  sm:p-6
-                  lg:p-7
-                "
+                className="min-w-0"
               >
+                <SpotlightCard
+                  className="
+                    rounded-2xl
+                    border
+                    border-white/[0.08]
+                    bg-[#111113]/80
+                    p-5
+                    backdrop-blur-xl
+                    transition-all
+                    duration-300
+                    hover:border-[#39ff88]/30
+                    hover:bg-[#151518]
+                    sm:rounded-3xl
+                    sm:p-6
+                    lg:p-7
+                  "
+                >
                 {/* =================================================
                     CARD GLOW
                 ================================================== */}
@@ -435,8 +436,8 @@ export default function Skills() {
                       key={skill}
                       variants={skillVariants}
                       whileHover={{
-                        y: -2,
-                        scale: 1.03,
+                        y: -3,
+                        scale: 1.06,
                       }}
                       className="
                         cursor-default
@@ -516,7 +517,8 @@ export default function Skills() {
                     group-hover:w-full
                   "
                 />
-              </motion.article>
+                </SpotlightCard>
+              </motion.div>
             );
           })}
         </motion.div>

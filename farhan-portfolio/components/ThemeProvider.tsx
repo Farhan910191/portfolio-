@@ -48,7 +48,15 @@ export function ThemeProvider({
 }: {
   children: ReactNode;
 }) {
-  const [theme, setTheme] = useState<Theme>("dark");
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof window !== "undefined") {
+      const docTheme = document.documentElement.getAttribute("data-theme") as Theme | null;
+      if (docTheme === "light" || docTheme === "dark") return docTheme;
+      const saved = localStorage.getItem("portfolio-theme") as Theme | null;
+      if (saved === "light" || saved === "dark") return saved;
+    }
+    return "dark";
+  });
   const [mounted, setMounted] = useState(false);
 
   // Load saved theme on mount
@@ -58,6 +66,8 @@ export function ThemeProvider({
     if (saved === "light" || saved === "dark") {
       setTheme(saved);
       document.documentElement.setAttribute("data-theme", saved);
+    } else {
+      document.documentElement.setAttribute("data-theme", "dark");
     }
 
     setMounted(true);
@@ -68,11 +78,17 @@ export function ThemeProvider({
     if (!mounted) return;
 
     document.documentElement.setAttribute("data-theme", theme);
+    document.documentElement.style.backgroundColor =
+      theme === "light" ? "#f2f7f4" : "#060809";
     localStorage.setItem("portfolio-theme", theme);
   }, [theme, mounted]);
 
   const toggleTheme = useCallback(() => {
+    document.documentElement.classList.add("theme-transition");
     setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+    setTimeout(() => {
+      document.documentElement.classList.remove("theme-transition");
+    }, 450);
   }, []);
 
   const isDark = theme === "dark";

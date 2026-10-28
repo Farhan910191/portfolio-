@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import DeveloperBackground from "@/components/effects/DeveloperBackground";
+import WelcomeScreen from "@/components/ui/WelcomeScreen";
 
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
@@ -19,6 +20,7 @@ import Footer from "@/components/Footer";
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(true);
 
   useEffect(() => {
     setMounted(true);
@@ -33,15 +35,22 @@ export default function Home() {
   }
 
   return (
-    <main className="relative min-h-screen bg-[var(--background-deep)] text-[var(--foreground)]">
-      {/* ONLY PAGE-WIDE BACKGROUND */}
+    <>
+      {/* 1. SEAMLESS UNIFIED PORTFOLIO BACKGROUND (Checkered Grid + Passing Stars) */}
       <DeveloperBackground />
 
-      {/* CONTENT */}
-      <div className="relative z-10">
-        <Navbar />
+      {/* 2. CINEMATIC WELCOME SCREEN OVERLAY */}
+      {showWelcome && (
+        <WelcomeScreen onComplete={() => setShowWelcome(false)} />
+      )}
 
-        <Hero />
+      {/* 3. MAIN PORTFOLIO CONTENT */}
+      <main className="relative min-h-screen text-[var(--foreground)]">
+        {/* CONTENT */}
+        <div className="relative z-10">
+          <Navbar />
+
+          <Hero isReady={!showWelcome} />
 
         <About />
 
@@ -66,5 +75,6 @@ export default function Home() {
         <Footer />
       </div>
     </main>
+    </>
   );
 }

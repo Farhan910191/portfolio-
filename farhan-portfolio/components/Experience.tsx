@@ -7,6 +7,7 @@ import {
   Code2,
 } from "lucide-react";
 import { motion, type Variants } from "framer-motion";
+import SpotlightCard from "@/components/ui/SpotlightCard";
 
 // ======================================================
 // EXPERIENCE DATA
@@ -57,14 +58,16 @@ const containerVariants: Variants = {
 const cardVariants: Variants = {
   hidden: {
     opacity: 0,
-    y: 20,
+    y: 30,
+    filter: "blur(8px)",
   },
   visible: {
     opacity: 1,
     y: 0,
+    filter: "blur(0px)",
     transition: {
-      duration: 0.45,
-      ease: [0.22, 1, 0.36, 1],
+      duration: 0.65,
+      ease: [0.16, 1, 0.3, 1],
     },
   },
 };
@@ -350,7 +353,7 @@ export default function Experience() {
                 EXPERIENCE CARD
             ================================================== */}
 
-            <motion.article
+            <motion.div
               variants={cardVariants}
               initial="hidden"
               whileInView="visible"
@@ -358,28 +361,26 @@ export default function Experience() {
                 once: true,
                 amount: 0.15,
               }}
-              className="
-                group
-                relative
-                min-w-0
-                overflow-hidden
-                rounded-2xl
-                border
-                border-white/[0.08]
-                bg-[#111113]/80
-                p-5
-                backdrop-blur-xl
-                transition-all
-                duration-300
-                hover:-translate-y-1
-                hover:border-[#39ff88]/30
-                hover:bg-[#151518]
-                sm:rounded-3xl
-                sm:p-7
-                lg:p-8
-                xl:p-9
-              "
+              className="min-w-0"
             >
+              <SpotlightCard
+                className="
+                  rounded-2xl
+                  border
+                  border-white/[0.08]
+                  bg-[#111113]/80
+                  p-5
+                  backdrop-blur-xl
+                  transition-all
+                  duration-300
+                  hover:border-[#39ff88]/30
+                  hover:bg-[#151518]
+                  sm:rounded-3xl
+                  sm:p-7
+                  lg:p-8
+                  xl:p-9
+                "
+              >
               {/* =================================================
                   CARD GLOW
               ================================================== */}
@@ -795,7 +796,8 @@ export default function Experience() {
                   group-hover:w-full
                 "
               />
-            </motion.article>
+              </SpotlightCard>
+            </motion.div>
           </div>
         </div>
 

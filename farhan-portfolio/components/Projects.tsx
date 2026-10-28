@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, MouseEvent } from "react";
 import {
   ArrowUpRight,
   ExternalLink,
@@ -147,14 +148,16 @@ const projects = [
 const headerVariants: Variants = {
   hidden: {
     opacity: 0,
-    y: 25,
+    y: 30,
+    filter: "blur(6px)",
   },
   visible: {
     opacity: 1,
     y: 0,
+    filter: "blur(0px)",
     transition: {
-      duration: 0.55,
-      ease: [0.22, 1, 0.36, 1],
+      duration: 0.65,
+      ease: [0.16, 1, 0.3, 1],
     },
   },
 };
@@ -162,14 +165,16 @@ const headerVariants: Variants = {
 const cardVariants: Variants = {
   hidden: {
     opacity: 0,
-    y: 20,
+    y: 30,
+    filter: "blur(8px)",
   },
   visible: {
     opacity: 1,
     y: 0,
+    filter: "blur(0px)",
     transition: {
-      duration: 0.45,
-      ease: [0.22, 1, 0.36, 1],
+      duration: 0.65,
+      ease: [0.16, 1, 0.3, 1],
     },
   },
 };
@@ -226,6 +231,13 @@ function ProjectCard({
   index: number;
 }) {
   const { isDark } = useTheme();
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleMouseMove = (e: MouseEvent<HTMLElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+  };
 
   return (
     <motion.article
@@ -236,6 +248,11 @@ function ProjectCard({
         once: true,
         amount: 0.15,
       }}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      whileHover={{ y: -6 }}
+      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
       className={`
         group
         relative
@@ -249,10 +266,9 @@ function ProjectCard({
         backdrop-blur-xl
         transition-all
         duration-300
-        hover:-translate-y-1
         sm:rounded-3xl
         ${isDark
-          ? "border-white/[0.08] bg-[#111113]/80 hover:border-[#39ff88]/30 hover:bg-[#151518] shadow-[0_15px_40px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.45)]"
+          ? "border-white/[0.08] bg-[#111113]/80 hover:border-[#39ff88]/30 hover:bg-[#151518] shadow-[0_15px_40px_rgba(0,0,0,0.3)] hover:shadow-[0_25px_60px_rgba(0,0,0,0.5)]"
           : "border-black/[0.08] bg-white/80 hover:border-[#10b981]/30 hover:bg-white/95 shadow-[0_12px_35px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_45px_rgba(16,185,129,0.08)]"
         }
       `}
@@ -261,6 +277,33 @@ function ProjectCard({
         willChange: "transform",
       }}
     >
+      {/* Dynamic Mouse-Following Spotlight Fill */}
+      <div
+        className="pointer-events-none absolute -inset-px rounded-[inherit] transition-opacity duration-300 z-10"
+        style={{
+          opacity: isHovered ? 1 : 0,
+          background: `radial-gradient(450px circle at ${mousePos.x}px ${mousePos.y}px, ${
+            isDark ? "rgba(57, 255, 136, 0.12)" : "rgba(16, 185, 129, 0.08)"
+          }, transparent 70%)`,
+        }}
+      />
+
+      {/* Dynamic Mouse-Following Glowing Border Follow */}
+      <div
+        className="pointer-events-none absolute -inset-px rounded-[inherit] transition-opacity duration-300 z-20"
+        style={{
+          opacity: isHovered ? 1 : 0,
+          background: `radial-gradient(280px circle at ${mousePos.x}px ${mousePos.y}px, ${
+            isDark ? "rgba(57, 255, 136, 0.45)" : "rgba(16, 185, 129, 0.4)"
+          }, transparent 70%)`,
+          mask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+          WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+          maskComposite: "exclude",
+          WebkitMaskComposite: "xor",
+          padding: "1px",
+        }}
+      />
+
       {/* ==================================================
           CARD BACKGROUND AMBIENT GLOW
       =================================================== */}
